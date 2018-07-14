@@ -24,7 +24,8 @@ const defaultXsd2JsonSchemaOptions = {
     xsdBaseDir: '.',
     outputDir: '.',
     baseId: 'http://www.xsd2jsonschema.org/defaultBaseId',
-    mask: undefined
+    mask: undefined,
+    visitor:new DefaultConversionVisitor()
 }
 
 /**
@@ -160,7 +161,12 @@ class Xsd2JsonSchema {
 
     processSchemas(uris) {
         uris.forEach(function(uri, index, array) {
-            this.processSchema(uri);
+            if(uri.startsWith(this.xsdBaseDir)){
+                this.processSchema(uri);
+            }
+            else{
+                this.processSchema(path.join(this.xsdBaseDir, uri));
+            }
         }, this);
     }
 

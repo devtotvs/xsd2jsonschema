@@ -23,11 +23,12 @@ const options = {
 	mask: /_\d{4}-\d{2}-\d{2}/,
 	outputDir: "example/generated_jsonschema",
 	baseId: "http://www.xsd2jsonschema.org/schema/",
-	xsdBaseDir: "example/schema",
+	xsdBaseDir: "example\\schema",
 };
 
 const xsdFilenames = [
-		"ExampleTypes_2016-01-01.xsd"
+		//"ExampleTypes_2016-01-01.xsd"
+		"commons_1_000.xsd"
 	];
 
 const converter = new Xsd2JsonSchema(options);

@@ -32,7 +32,7 @@ const NamespaceManager_NAME = Symbol();
  * @see {@link ParsingState}
  */
 
- class BaseConverter extends Processor {
+class BaseConverter extends Processor {
 	/**
 	 * Constructs an instance of BaseConverter.
 	 * @constructor
@@ -76,7 +76,7 @@ const NamespaceManager_NAME = Symbol();
 	/**
 	 * Creates a namespaces for the given namespace name.  This method is called from the schema XML Handler.
 	 * 
-     * @see {@link NamespaceManager#createNamespace|NamespaceManager.createNamespace()}
+	 * @see {@link NamespaceManager#createNamespace|NamespaceManager.createNamespace()}
 	 */
 	initializeNamespaces(xsd) {
 		Object.keys(xsd.namespaces).forEach(function (namespace, index, array) {
@@ -319,7 +319,7 @@ const NamespaceManager_NAME = Symbol();
 					this.workingJsonSchema.allOf.push(allOfSchema);
 					this.parsingState.pushSchema(this.workingJsonSchema);
 					this.workingJsonSchema = allOfSchema;
-					if(isAnyOfChoice === true) {
+					if (isAnyOfChoice === true) {
 						// Ducktype it on there for now.  This is checked in baseSpecialCaseIdentifier.fixAnyOfChoice.
 						// It is needed because all sibling choices may not be anyOfChoices.
 						allOfSchema.isAnyOfChoice = true;
@@ -336,7 +336,7 @@ const NamespaceManager_NAME = Symbol();
 						this.parsingState.pushSchema(this.workingJsonSchema)
 					}
 					this.workingJsonSchema = optionalChoiceSchema;
-						// The optional part will be added as a special case
+					// The optional part will be added as a special case
 					this.specialCaseIdentifier.addSpecialCase(SpecialCases.OPTIONAL_CHOICE, this.workingJsonSchema, node);
 				} else {
 					// This is an needless grouping just allow to fall through and continue processing
@@ -407,6 +407,28 @@ const NamespaceManager_NAME = Symbol();
 	documentation(node, jsonSchema, xsd) {
 		// TODO: source, xml:lang
 		// Ignore this grouping and continue processing children.  The actual text will come through the text() method.
+		var state = this.parsingState.states[this.parsingState.states.length - 3];
+		switch (state.name) {
+			case XsdElements.ELEMENT:
+				var properties = this.workingJsonSchema.properties;
+				var propNames = Object.keys(properties);
+				var currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - 1]] || properties[propNames[0]]);
+
+				var propName = propNames[propNames.length - 1] || propNames[0];
+
+				currentProp.description = node.textContent;
+
+				this.addProperty(this.workingJsonSchema, propName, currentProp, null);
+
+				break;
+			case XsdElements.COMPLEX_TYPE:
+				this.workingJsonSchema.description = node.textContent;
+				break;
+		default:
+			console.log(state.name);
+		}
+
+
 		return true;
 	}
 
@@ -481,7 +503,7 @@ const NamespaceManager_NAME = Symbol();
 		if (typeAttr !== undefined) {
 			lookupName = typeAttr;
 		}
-		var propertyName = nameAttr;  // name attribute is required for local element
+		var propertyName = nameAttr; // name attribute is required for local element
 		var customType;
 		if (lookupName !== undefined) {
 			customType = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
@@ -529,7 +551,7 @@ const NamespaceManager_NAME = Symbol();
 		// An element within a model group (such as 'group') may be a reference.  References have neither
 		// a name nor a type attribute - just a ref attribute.  This is awkward when the reference elmenent
 		// is a property of an object in JSON.  With no other options to name the property ref is used.
-		var propertyName = refAttr;  // ref attribute is required for an element reference
+		var propertyName = refAttr; // ref attribute is required for an element reference
 		var customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd).get$RefToSchema();
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
 		var state = this.parsingState.getCurrentState();
@@ -674,7 +696,7 @@ const NamespaceManager_NAME = Symbol();
 		var refAttr = XsdFile.getAttrValue(node, XsdAttributes.REF);
 		// TODO: id
 
-		var propertyName = refAttr;  // ref attribute is required for group reference
+		var propertyName = refAttr; // ref attribute is required for group reference
 		var customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd).get$RefToSchema();
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
 		var state = this.parsingState.getCurrentState();
@@ -713,7 +735,7 @@ const NamespaceManager_NAME = Symbol();
 		}
 	}
 
-	import(node, jsonSchema, xsd) {
+	import (node, jsonSchema, xsd) {
 		// TODO: id, namespace, schemaLocation
 		// do nothing
 		return true;

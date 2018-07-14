@@ -93,3 +93,6 @@ test/generated_jsonschema/*
 ### build/test intermediates
 out
 coverage
+package-lock.json
+
+example/schema/*
