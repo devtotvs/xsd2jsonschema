@@ -22,13 +22,14 @@ const action = process.argv[2];
 const options = {
 	mask: /_\d{4}-\d{2}-\d{2}/,
 	outputDir: "example/generated_jsonschema",
-	baseId: "http://www.xsd2jsonschema.org/schema/",
+	baseId: "http://api.totvs.com.br/schema/",
 	xsdBaseDir: "example\\schema",
 };
 
 const xsdFilenames = [
 		//"ExampleTypes_2016-01-01.xsd"
-		"commons_1_000.xsd"
+		//"commons_1_000.xsd"
+		"CustomerVendor_2_005.xsd"
 	];
 
 const converter = new Xsd2JsonSchema(options);

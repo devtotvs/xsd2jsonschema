@@ -698,6 +698,10 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		this.properties[propertyName] = type;
 	}
 
+	addItems(item) {
+		this.items = item;
+	}
+
 	/**
 	 *  The notion of extending a base schema is implemented in JSON Schema using allOf with schemas.  The base
 	 *  type is added to the allOf array as well as a new schema.  The new schema is returned to be built out

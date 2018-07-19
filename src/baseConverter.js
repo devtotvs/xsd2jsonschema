@@ -408,28 +408,35 @@ class BaseConverter extends Processor {
 		// TODO: source, xml:lang
 		// Ignore this grouping and continue processing children.  The actual text will come through the text() method.
 		var state = this.parsingState.states[this.parsingState.states.length - 3];
+
 		switch (state.name) {
 			case XsdElements.ELEMENT:
-				var properties = this.workingJsonSchema.properties;
-				var propNames = Object.keys(properties);
-				var currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - 1]] || properties[propNames[0]]);
-
-				var propName = propNames[propNames.length - 1] || propNames[0];
-
-				currentProp.description = node.textContent;
-
-				this.addProperty(this.workingJsonSchema, propName, currentProp, null);
-
+				this.handleElementDocumentation(node);
 				break;
 			case XsdElements.COMPLEX_TYPE:
 				this.workingJsonSchema.description = node.textContent;
 				break;
-		default:
-			console.log(state.name);
+			default:
+				console.log(state.name);
 		}
 
 
 		return true;
+	}
+
+
+	handleElementDocumentation(node) {
+
+		// var properties = this.workingJsonSchema.properties;
+		// var propNames = Object.keys(properties);
+
+		// var currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - 1]] || properties[propNames[0]]);
+
+		// var propName = propNames[propNames.length - 1] || propNames[0];
+		var currentProp = this.getCurrentPropertie(1)
+		currentProp.obj.description = node.textContent;
+
+		this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
 	}
 
 	handleElementGlobal(node, jsonSchema, xsd) {
@@ -458,7 +465,8 @@ class BaseConverter extends Processor {
 	}
 
 	addProperty(targetSchema, propertyName, customType, minOccursAttr) {
-		if (minOccursAttr === undefined || minOccursAttr === XsdAttributeValues.REQUIRED || minOccursAttr > 0) {
+		/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
+		if (minOccursAttr === XsdAttributeValues.REQUIRED || minOccursAttr > 0) {
 			targetSchema.addRequired(propertyName);
 		}
 		targetSchema.setProperty(propertyName, customType);
@@ -474,15 +482,21 @@ class BaseConverter extends Processor {
 	addPropertyAsArray(targetSchema, propertyName, customType, minOccursAttr, maxOccursAttr) {
 		var arraySchema = new JsonSchemaFile();
 		arraySchema.type = jsonSchemaTypes.ARRAY;
-		var min = minOccursAttr === undefined ? undefined : minOccursAttr;
+		var min = minOccursAttr === undefined ? 0 : minOccursAttr;
 		var max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
 		arraySchema.minItems = min;
 		arraySchema.maxItems = max === XsdAttributeValues.UNBOUNDED ? undefined : max;
 		arraySchema.items = customType.get$RefToSchema();
-		var oneOfSchema = new JsonSchemaFile();
-		oneOfSchema.oneOf.push(customType.get$RefToSchema());
-		oneOfSchema.oneOf.push(arraySchema);
-		this.addProperty(targetSchema, propertyName, oneOfSchema, minOccursAttr);
+
+		if (min > 0) {
+			var oneOfSchema = new JsonSchemaFile();
+			oneOfSchema.oneOf.push(customType.get$RefToSchema());
+			oneOfSchema.oneOf.push(arraySchema);
+			this.addProperty(targetSchema, propertyName, oneOfSchema, minOccursAttr);
+		} else {
+			this.addProperty(targetSchema, propertyName, arraySchema, minOccursAttr);
+		}
+
 	}
 
 	addChoicePropertyAsArray(targetSchema, propertyName, customType, minOccursAttr, maxOccursAttr) {
@@ -505,12 +519,23 @@ class BaseConverter extends Processor {
 		}
 		var propertyName = nameAttr; // name attribute is required for local element
 		var customType;
+		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
 		if (lookupName !== undefined) {
 			customType = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
-		} else {
-			customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd);
+		} else {	
+			if (isArray) {
+				//customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd);
+				customType = new JsonSchemaFile();
+				customType.type = "array";		
+			}		
+			else{
+				customType = new JsonSchemaFile();
+				customType.type = "object";		
+			}
+					
+					
 		}
-		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
+		
 		var state = this.parsingState.getCurrentState();
 		switch (state.name) {
 			case XsdElements.CHOICE:
@@ -530,10 +555,40 @@ class BaseConverter extends Processor {
 				break;
 			case XsdElements.SEQUENCE:
 			case XsdElements.ALL:
+				var prop = this.getCurrentPropertie(1);
 				if (isArray) {
-					this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
+
+					
+					if(prop.name && prop.name.startsWith("ListOf")){
+						
+						this.addPropertyAsArray(this.workingJsonSchema, prop.name, customType, minOccursAttr, maxOccursAttr);
+					}
+					else{
+						this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
+					}
+					
 				} else {
-					this.addProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
+					if(prop.name && prop.name.startsWith("ListOf")){
+					//	prop.obj.items.push(customType);
+					var item = {};
+					if(Object.keys(prop.obj.items.properties).length >0){
+						item = prop.obj.items;
+					}
+					else{
+						item = new JsonSchemaFile();
+					}
+					 
+
+				//	item[propertyName] = customType;
+				
+					//this.workingJsonSchema.properties[prop.name].AddItems(propertyName,customType);
+						this.addProperty(item, propertyName, customType, minOccursAttr);
+						prop.obj.addItems(item);
+						this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr);
+					}
+					else{
+						this.addProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
+					}
 				}
 				break;
 			default:
@@ -601,7 +656,12 @@ class BaseConverter extends Processor {
 		var val = XsdFile.getValueAttr(node);
 		// TODO: id, fixed
 
-		this.workingJsonSchema.addEnum(val)
+		//this.workingJsonSchema.addEnum(val)
+		var current = this.getCurrentPropertie(1);
+
+		current.obj.addEnum(val);
+
+		this.addProperty(this.workingJsonSchema, current.name, current.obj, null);
 		return true;
 	}
 
@@ -678,7 +738,8 @@ class BaseConverter extends Processor {
 			case XsdElements.COMPLEX_TYPE:
 			case XsdElements.SEQUENCE:
 			case XsdElements.ALL:
-				if (minOccursAttr === undefined || minOccursAttr > 0) {
+				/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
+				if (minOccursAttr > 0) {
 					this.workingJsonSchema.addRequired(refName);
 				}
 				var customType = this.namespaceManager.getType(refName, jsonSchema, xsd);
@@ -889,8 +950,26 @@ class BaseConverter extends Processor {
 			this.workingJsonSchema = this.workingJsonSchema.extend(this.namespaceManager.getType(baseTypeName, jsonSchema, xsd));
 			return true;
 		} else {
-			return this.builtInTypeConverter[baseTypeName](node, this.workingJsonSchema);
+
+			var currentProp = this.getCurrentPropertie(1)
+			currentProp.obj.type = baseTypeName;
+
+
+			this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+
+			//return this.builtInTypeConverter[baseTypeName](node, this.workingJsonSchema);
+			return true;
 		}
+	}
+
+	getCurrentPropertie(level) {
+		var properties = this.workingJsonSchema.properties;
+		var propNames = Object.keys(properties);
+
+		var currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - level]] || properties[propNames[0]]);
+		var propName = propNames[propNames.length - level] || propNames[0];
+
+		return {obj: currentProp, name: propName};
 	}
 
 	schema(node, jsonSchema, xsd) {
@@ -963,6 +1042,8 @@ class BaseConverter extends Processor {
 	simpleContent(node, jsonSchema, xsd) {
 		// TODO: id
 		// Ignore this grouping and continue processing children
+		//	this.workingJsonSchema = new JsonSchemaFileV4();
+
 		return true;
 	}
 
