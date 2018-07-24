@@ -90,6 +90,14 @@ class ParsingState {
 		}
 	}
 
+	isSchemaBeforeState(){
+		if (this.states.length > 1) {
+			return this.states[this.states.length-4].name == XsdElements.SCHEMA;
+		} else  {
+			return false;
+		}
+	}
+
 	/**
 	 * @returns {Boolean} - True if the current state is 'attribute'.
 	 */
