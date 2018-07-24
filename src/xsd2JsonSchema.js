@@ -204,7 +204,7 @@ class Xsd2JsonSchema {
 		if(spacing == undefined) {
 			space = '\t';
 		}
-		const data = JSON.stringify(jsonSchema.getJsonSchema(), null, space);
+        const data = JSON.stringify(jsonSchema.getJsonSchema(), null, space);        
         const maskedFilename = (this.mask === undefined) ? jsonSchema.filename : jsonSchema.filename.replace(this.mask, '');
 		fs.writeFileSync(path.join(dir, maskedFilename), data);
 	}

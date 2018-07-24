@@ -57,5 +57,6 @@ module.exports = {
 	VALUE: 'value',
 	VERSION: 'version',
 	XPATH: 'xpath',
-	XPATH_DEFAULT_NAMESPACE: 'xpathDefaultNamespace'
+	XPATH_DEFAULT_NAMESPACE: 'xpathDefaultNamespace',
+	PRODUCT: 'product'
 }

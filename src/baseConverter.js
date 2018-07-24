@@ -7,6 +7,7 @@ const jsonSchemaTypes = require('./jsonschema/jsonSchemaTypes');
 const NamespaceManager = require('./namespaceManager');
 const JsonSchemaFile = require('./jsonschema/jsonSchemaFile');
 const BuiltInTypeConverter = require('./builtInTypeConverter');
+const XTotvs = require('./xtotvs');
 const Processor = require('./processor');
 const XsdElements = require('./xmlschema/xsdElements');
 const XsdAttributes = require('./xmlschema/xsdAttributes');
@@ -153,8 +154,22 @@ class BaseConverter extends Processor {
 	appinfo(node, jsonSchema, xsd) {
 		// TODO: source
 		// (TBD)
-		this.workingJsonSchema.description = node.toString();
-		return false;
+		
+		//var prop = this.getCurrentPropertie(this.workingJsonSchema, 1)
+		//prop.obj.xtotvs = { "name": "teste"};
+		//this.addProperty(this.workingJsonSchema,  prop.name,prop.obj, null);
+		//	this.workingJsonSchema.description = node.toString();
+		return true;
+	}
+
+	FieldDocumentation(node, jsonSchema, xsd){
+
+		var productAttr = XsdFile.getAttrValue(node, XsdAttributes.PRODUCT);
+		var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
+
+		prop.obj.xtotvs[productAttr] = new XTotvs();
+		this.addProperty(this.workingJsonSchema,  prop.name,prop.obj , null);
+		return true;
 	}
 
 	assert(node, jsonSchema, xsd) {
@@ -684,7 +699,22 @@ class BaseConverter extends Processor {
 	field(node, jsonSchema, xsd) {
 		// TODO: id, xpath, xpathDefaultNamespace
 		// (TBD)
+		
 		return true;
+	}
+	
+	//Field x-totvs
+	Field(node, jsonSchema, xsd) {
+		// TODO: id, xpath, xpathDefaultNamespace
+		// (TBD)
+
+		if(this.parsingState.inFieldDocumentation()){
+			var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
+			var products = Object.keys(prop.obj.xtotvs);
+			prop.obj.xtotvs[products[products.length - 1]].xFields = node.textContent;			
+		}
+	
+		//return true;
 	}
 
 	fractionDigits(node, jsonSchema, xsd) {
@@ -1092,7 +1122,7 @@ class BaseConverter extends Processor {
 	text(node, jsonSchema, xsd) {
 		
 		if (this.parsingState.inAppInfo()) {
-			this.workingJsonSchema.concatDescription(node.parent().name() + '=' + node.text() + ' ');
+			//this.workingJsonSchema.concatDescription(node.parent().name() + '=' + node.text() + ' ');
 		}
 		return true;
 	}

@@ -22,6 +22,7 @@ module.exports = {
 	COMPLEX_TYPE: 'complexType',
 	DEFAULT_OPEN_CONTENT: 'defaultOpenContent',
 	DOCUMENTATION: 'documentation',
+	FIELD_DOCUMENTATION: 'FieldDocumentation',
 	ELEMENT: 'element',
 	ENUMERATION: 'enumeration',
 	EXPLICIT_TIMEZONE: 'explicitTimezone',

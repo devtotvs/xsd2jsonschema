@@ -51,7 +51,8 @@ const properties = [
 	'anyOf',
 	'oneOf',
 	'not',
-	'definitions'
+	'definitions',
+	'xtotvs'
 ]
 
 /**
@@ -142,6 +143,8 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		this.anyOf = []; // 5.5.4.1 Elements of the array MUST be objects. Each object MUST be a valid JSON Schema.
 		this.oneOf = []; // 5.5.5.1 Elements of the array MUST be objects. Each object MUST be a valid JSON Schema.
 		this.not = {}; // 5.5.6.1 This object MUST be a valid JSON Schema.
+
+		this.xtotvs = {};
 
 		this.definitions = {}; // 5.5.7.1 MUST be an object. Each member value of this object MUST be a valid JSON Schema.
 
@@ -609,6 +612,11 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 				}
 			}, this);
 		}
+
+		if(!this.isEmpty(this.xtotvs)){
+			jsonSchema["x-totvs"] = this.xtotvs;
+		}
+
 		if (!this.isEmpty(this.patternProperties)) {
 			jsonSchema.patternProperties = {};
 			const propKeys = Object.keys(this.patternProperties);
@@ -645,6 +653,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 			}, this);
 		}
 
+		
 		return jsonSchema;
 	}
 
