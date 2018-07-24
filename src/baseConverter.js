@@ -1090,11 +1090,8 @@ class BaseConverter extends Processor {
 	}
 
 	text(node, jsonSchema, xsd) {
-		if (this.parsingState.inDocumentation()) {
-			return true;
-			// TODO: This should be a configurable option
-			// workingJsonSchema.description = node.text();
-		} else if (this.parsingState.inAppInfo()) {
+		
+		if (this.parsingState.inAppInfo()) {
 			this.workingJsonSchema.concatDescription(node.parent().name() + '=' + node.text() + ' ');
 		}
 		return true;
