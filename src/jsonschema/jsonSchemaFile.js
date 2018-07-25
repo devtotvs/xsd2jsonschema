@@ -144,7 +144,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		this.oneOf = []; // 5.5.5.1 Elements of the array MUST be objects. Each object MUST be a valid JSON Schema.
 		this.not = {}; // 5.5.6.1 This object MUST be a valid JSON Schema.
 
-		this.xtotvs = {};
+		this.xtotvs = [];
 
 		this.definitions = {}; // 5.5.7.1 MUST be an object. Each member value of this object MUST be a valid JSON Schema.
 

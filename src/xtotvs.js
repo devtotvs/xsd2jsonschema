@@ -1,20 +1,71 @@
+const FIELD = "field";
+const REQUIRED = "required";
+const TYPE = "type";
+const LENGHT = "length";
+const DESCRIPTION = "description";
 
-const Field = "field";
-//const outputDir_NAME = Symbol();
-//const baseId_NAME = Symbol();
-
-class XTotvs  {
+class XTotvs {
 
     constructor() {
-      
-        this.xFields = "";
+
+        this.xField = "";
+        this.xRequired = false;
+        this.xType = "";
+        this.xLength = "";
+        this.xDescription = "";
     }
-    
-    get xFields() {
-        return this[Field];
+
+    add(attr, val) {
+        this[attr] = val;
     }
-    set xFields(name) {
-        this[Field] = name;
+
+    get xField() {
+        return this[FIELD];
+    }
+    set xField(name) {
+        this[FIELD] = name;
+    }
+
+    get xRequired() {
+        return this[REQUIRED];
+    }
+    set xRequired(val) {
+        this[REQUIRED] = this.handleRequired(val);
+    }
+
+    get xType() {
+        return this[TYPE];
+    }
+    set xType(type) {
+        this[TYPE] = type;
+    }
+
+    get xLength() {
+        return this[LENGHT];
+    }
+    set xLength(len) {
+        this[LENGHT] = len;
+    }
+
+    get xDescription() {
+        return this[DESCRIPTION];
+    }
+    set xDescription(desc) {
+        this[DESCRIPTION] = desc;
+    }
+
+    handleRequired(val) {
+        if (typeof val === 'boolean') {
+            return val;
+        } else {
+            val = String(val).toLowerCase();
+
+            if (val.startsWith('s')) {
+                return true;
+            } else {
+                return false
+            }
+        }
     }
 
 }
