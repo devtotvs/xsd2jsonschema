@@ -130,6 +130,14 @@ class ParsingState {
 	inFieldDocumentation() {
 		return this.getCurrentState().name === XsdElements.FIELD_DOCUMENTATION;
 	}
+
+	inMessageDocumentation() {
+		return this.getCurrentState().name === XsdElements.MESSAGE_DOCUMENTATION;
+	}
+
+	inProductInformation() {
+		return this.getCurrentState().name === XsdElements.PRODUCT_INFORMATION;
+	}
 	/**
 	 * @returns {Boolean} - True if the current state is 'appinfo'.
 	 */

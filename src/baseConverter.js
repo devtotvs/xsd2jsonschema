@@ -7,7 +7,10 @@ const jsonSchemaTypes = require('./jsonschema/jsonSchemaTypes');
 const NamespaceManager = require('./namespaceManager');
 const JsonSchemaFile = require('./jsonschema/jsonSchemaFile');
 const BuiltInTypeConverter = require('./builtInTypeConverter');
-const XTotvs = require('./xtotvs');
+const XTotvs = require('./TotvsElements/xtotvs');
+const xTotvsMessage = require('./TotvsElements/xTotvsMessage');
+const xTotvsProductInformation = require('./TotvsElements/xTotvsProductInformation');
+const InfoTotvs = require('./TotvsElements/InfoTotvs');
 const Processor = require('./processor');
 const XsdElements = require('./xmlschema/xsdElements');
 const XsdAttributes = require('./xmlschema/xsdAttributes');
@@ -179,11 +182,6 @@ class BaseConverter extends Processor {
 			childProp.obj.xtotvs = list;
 
 			this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
-			// this.addProperty(prop.obj.items, prop.name, childProp.obj, null);
-
-			// this.addProperty(item, propertyName, customType, minOccursAttr);
-			// 				prop.obj.addItems(item);
-			// this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
 		} else {
 			list = Object.assign([], prop.obj.xtotvs);
 			list.push(obj);
@@ -191,6 +189,14 @@ class BaseConverter extends Processor {
 			this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
 		}
 
+
+		return true;
+	}
+
+	MessageDocumentation(node, jsonSchema, xsd) {
+		if (this.parsingState.isSchemaBeforeState()) {
+			jsonSchema.info = new InfoTotvs();
+		}
 
 		return true;
 	}
@@ -785,7 +791,20 @@ class BaseConverter extends Processor {
 
 	//Description x-totvs
 	Description(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "xDescription");
+		var field = "xDescription"
+
+		var state = this.parsingState.getCurrentState();
+
+		switch (state.name) {
+			case XsdElements.MESSAGE_DOCUMENTATION:
+				this.handleXMessageTotvs(node, jsonSchema, field);
+				break;
+			case XsdElements.PRODUCT_INFORMATION:
+				this.handleProductInformationItems(node, jsonSchema, field);
+				break;
+			default:
+				this.handleXTotvs(node, field);
+		}
 	}
 
 	//Length x-totvs
@@ -817,6 +836,69 @@ class BaseConverter extends Processor {
 		}
 	}
 
+	Name(node, jsonSchema, xsd) {
+		if (this.parsingState.inMessageDocumentation()) {
+			this.handleXMessageTotvs(node, jsonSchema, "xName");
+		}
+	}
+
+	Segment(node, jsonSchema, xsd) {
+		if (this.parsingState.inMessageDocumentation()) {
+			this.handleXMessageTotvs(node, jsonSchema, "xSegment");
+		}
+	}
+
+	handleXMessageTotvs(node, jsonSchema, field) {
+		if (!jsonSchema.info.xTotvs.messageDocumentation) {
+			jsonSchema.info.xTotvs["messageDocumentation"] = new xTotvsMessage();
+			jsonSchema.info.xTotvs.messageDocumentation[field] = node.textContent;
+		} else {
+			jsonSchema.info.xTotvs.messageDocumentation[field] = node.textContent;
+		}
+
+	}
+
+	ProductInformation(node, jsonSchema, xsd) {
+		var productAttr = XsdFile.getAttrValue(node, XsdAttributes.PRODUCT);
+
+		if (this.parsingState.inMessageDocumentation()) {
+
+			if (!jsonSchema.info.xTotvs.productInformation) {
+				jsonSchema.info.xTotvs["productInformation"] = [];
+			}
+			var obj = {};
+			obj[productAttr] = new xTotvsProductInformation();
+			jsonSchema.info.xTotvs.productInformation.push(obj);
+		}
+		return true;
+	}
+
+
+
+	Contact(node, jsonSchema, xsd) {
+		this.handleProductInformationItems(node, jsonSchema, "xContact");
+	}
+
+	Adapter(node, jsonSchema, xsd) {
+		this.handleProductInformationItems(node, jsonSchema, "xAdapter");
+	}
+
+	Send(node, jsonSchema, xsd){
+		return false;
+	}
+
+	Receive(node, jsonSchema, xsd){
+		return false;
+	}
+
+	handleProductInformationItems(node, jsonSchema, field) {
+		var qtd = 0;
+		qtd = jsonSchema.info.xTotvs.productInformation.length;
+
+		var productInformation = jsonSchema.info.xTotvs.productInformation[qtd - 1];
+		var product = Object.keys(productInformation)[0];
+		productInformation[product][field] = node.textContent;
+	}
 
 
 	fractionDigits(node, jsonSchema, xsd) {
