@@ -154,7 +154,7 @@ class BaseConverter extends Processor {
 	appinfo(node, jsonSchema, xsd) {
 		// TODO: source
 		// (TBD)
-		
+
 		//var prop = this.getCurrentPropertie(this.workingJsonSchema, 1)
 		//prop.obj.xtotvs = { "name": "teste"};
 		//this.addProperty(this.workingJsonSchema,  prop.name,prop.obj, null);
@@ -162,16 +162,36 @@ class BaseConverter extends Processor {
 		return true;
 	}
 
-	FieldDocumentation(node, jsonSchema, xsd){
+	FieldDocumentation(node, jsonSchema, xsd) {
 
 		var productAttr = XsdFile.getAttrValue(node, XsdAttributes.PRODUCT);
 		var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
 		var obj = {};
-		var list = Object.assign([],prop.obj.xtotvs);
 		obj[productAttr] = new XTotvs();
-		list.push(obj);
-		prop.obj.xtotvs = list;
-		this.addProperty(this.workingJsonSchema,  prop.name,prop.obj , null);
+
+		var list = [];
+		if (prop.name && prop.name.startsWith("ListOf") && Object.keys(prop.obj.items.properties).length > 0) {
+			var childProp = this.getCurrentPropertie(prop.obj.items, 1);
+
+			list = Object.assign([], childProp.obj.xtotvs);
+
+			list.push(obj);
+			childProp.obj.xtotvs = list;
+
+			this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
+			// this.addProperty(prop.obj.items, prop.name, childProp.obj, null);
+
+			// this.addProperty(item, propertyName, customType, minOccursAttr);
+			// 				prop.obj.addItems(item);
+			// this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+		} else {
+			list = Object.assign([], prop.obj.xtotvs);
+			list.push(obj);
+			prop.obj.xtotvs = list;
+			this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+		}
+
+
 		return true;
 	}
 
@@ -432,7 +452,7 @@ class BaseConverter extends Processor {
 				this.handleElementDocumentation(node);
 				break;
 			case XsdElements.COMPLEX_TYPE:
-				this.workingJsonSchema.description = node.textContent;
+				this.workingJsonSchema.description = this.handleTextDescription(node.textContent);
 				break;
 			default:
 				console.log(state.name);
@@ -445,7 +465,7 @@ class BaseConverter extends Processor {
 
 	handleElementDocumentation(node) {
 		var currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
-		currentProp.obj.description = node.textContent;
+		currentProp.obj.description = this.handleTextDescription(node.textContent);
 
 		this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
 	}
@@ -547,7 +567,7 @@ class BaseConverter extends Processor {
 		}
 
 		var state = this.parsingState.getCurrentState();
-		
+
 		switch (state.name) {
 			case XsdElements.CHOICE:
 				if (this.specialCaseIdentifier.isOptional(node.parentNode, xsd) || this.allChildrenAreOptional(node.parentNode)) {
@@ -578,16 +598,21 @@ class BaseConverter extends Processor {
 					}
 
 				} else {
-					if (prop.name && prop.name.startsWith("ListOf")  && !this.parsingState.isSchemaBeforeState()) {
-						var item = {};
-						if (Object.keys(prop.obj.items.properties).length > 0) {
-							item = prop.obj.items;
+					if (!propertyName.startsWith("ListOf") && !this.parsingState.isSchemaBeforeState()) {
+
+						if (prop.name && prop.name.startsWith("ListOf")) {
+							var item = {};
+							if (Object.keys(prop.obj.items.properties).length > 0) {
+								item = prop.obj.items;
+							} else {
+								item = new JsonSchemaFile();
+							}
+							this.addProperty(item, propertyName, customType, minOccursAttr);
+							prop.obj.addItems(item);
+							this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr);
 						} else {
-							item = new JsonSchemaFile();
+							this.addProperty(prop.obj, propertyName, customType, minOccursAttr);
 						}
-						this.addProperty(item, propertyName, customType, minOccursAttr);
-						prop.obj.addItems(item);
-						this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr);
 					} else {
 						this.addProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
 					}
@@ -658,22 +683,59 @@ class BaseConverter extends Processor {
 		var val = XsdFile.getValueAttr(node);
 		// TODO: id, fixed
 
-		//this.workingJsonSchema.addEnum(val)
 		var current = this.getCurrentPropertie(this.workingJsonSchema, 1);
 
-		if (current.name && current.name.startsWith("ListOf")) {
-			var childProp = this.getCurrentPropertie(current.obj.items, 1);
-			childProp.obj.addEnum(val);
-			this.addProperty(current.obj.items, childProp.name, childProp.obj, null);
-		} else {
-			current.obj.addEnum(val);
+		if (current.name && !this.parsingState.isSchemaBeforeState()) {
+			if (current.name.startsWith("ListOf")) {
+				var childProp = this.getCurrentPropertie(current.obj.items, 1);
 
-			this.addProperty(this.workingJsonSchema, current.name, current.obj, null);
+				this.handleEnumDescription(childProp.obj, val, node.textContent);
+				this.handleEnum(current.obj.items, val, childProp);
+			} else {
+				this.handleEnumDescription(current.obj, val, node.textContent);
+				this.handleEnum(this.workingJsonSchema, val, current);
+			}
+		} else {
+			this.handleEnumDescription(this.workingJsonSchema, val, node.textContent);
+			this.handleEnum(this.workingJsonSchema, val);
 		}
 
 
 		return true;
 	}
+
+	handleEnum(schema, value, property) {
+
+		if (property) {
+			property.obj.addEnum(value);
+			this.addProperty(schema, property.name, property.obj, null);
+		} else {
+			schema.addEnum(value);
+		}
+	}
+
+	handleEnumDescription(schema, valueEnum, descrEnum) {
+
+		if (!schema.description) {
+			schema.description = valueEnum.trim + " - " + descrEnum;
+		} else {
+
+			schema.description = schema.description + " / " + valueEnum + " - " + descrEnum;
+
+		}
+		schema.description = this.handleTextDescription(schema.description);
+	}
+
+	handleTextDescription(text) {
+
+		text = text.replace(/\n\t/g, ' ');
+		text = text.replace(/\n/g, ' ');
+		text = text.replace(/\t/g, '');
+
+		return text;
+	}
+
+
 
 	explicitTimezone(node, jsonSchema, xsd) {
 		// TODO: id, fixed, value
@@ -702,44 +764,56 @@ class BaseConverter extends Processor {
 	field(node, jsonSchema, xsd) {
 		// TODO: id, xpath, xpathDefaultNamespace
 		// (TBD)
-		
+
 		return true;
 	}
-	
+
 	//Field x-totvs
 	Field(node, jsonSchema, xsd) {
-		this.handleXTotvs(node,"xField");
+		this.handleXTotvs(node, "xField");
 	}
 
 	//Required x-totvs
 	Required(node, jsonSchema, xsd) {
-		this.handleXTotvs(node,"xRequired");
+		this.handleXTotvs(node, "xRequired");
 	}
 
 	//Type x-totvs
 	Type(node, jsonSchema, xsd) {
-		this.handleXTotvs(node,"xType");
+		this.handleXTotvs(node, "xType");
 	}
 
 	//Description x-totvs
 	Description(node, jsonSchema, xsd) {
-		this.handleXTotvs(node,"xDescription");
+		this.handleXTotvs(node, "xDescription");
 	}
 
 	//Length x-totvs
 	Length(node, jsonSchema, xsd) {
-		this.handleXTotvs(node,"xLength");
+		this.handleXTotvs(node, "xLength");
 	}
 
-	handleXTotvs(node,field){
-		if(this.parsingState.inFieldDocumentation()){
-			var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
+	handleXTotvs(node, field) {
 
-		
-			var qtd = prop.obj.xtotvs.length
-			var xtotvs = prop.obj.xtotvs[qtd-1];
+		if (this.parsingState.inFieldDocumentation()) {
+			var xtotvs = {}
+			var qtd = 0;
+			var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
+			if (prop.name && prop.name.startsWith("ListOf") && Object.keys(prop.obj.items.properties).length > 0) {
+				var childProp = this.getCurrentPropertie(prop.obj.items, 1);
+
+				qtd = childProp.obj.xtotvs.length
+
+				console.log(childProp.name + ' -- ' + qtd);
+				xtotvs = childProp.obj.xtotvs[qtd - 1];
+
+			} else {
+				qtd = prop.obj.xtotvs.length
+				xtotvs = prop.obj.xtotvs[qtd - 1];
+			}
+
 			var products = Object.keys(xtotvs);
-			xtotvs[products[products.length - 1]][field] =  node.textContent;			
+			xtotvs[products[products.length - 1]][field] = this.handleTextDescription(node.textContent);
 		}
 	}
 
@@ -930,11 +1004,16 @@ class BaseConverter extends Processor {
 
 		var currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
 
-		if (currentProp.name && currentProp.name.startsWith("ListOf")) {
-			var childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
+		if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
+			if (currentProp.name.startsWith("ListOf")) {
+				var childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
 
-			childProp.obj.maxLength = len;
-			this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
+				childProp.obj.maxLength = len;
+				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
+			} else {
+				currentProp.obj.maxLength = len;
+				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+			}
 		} else {
 			//	currentProp.obj.maxLength = len;
 			this.workingJsonSchema.maxLength = len;
@@ -1016,18 +1095,29 @@ class BaseConverter extends Processor {
 			var currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
 
 
-			if (currentProp.name && currentProp.name.startsWith("ListOf")) {
-				var childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
+			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
+				if (currentProp.name.startsWith("ListOf")) {
+					var childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
 
-				childProp.obj.type = baseTypeName;
-				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
-
+					this.handleRestrictionType(currentProp.obj.items, baseTypeName, childProp);
+				} else {
+					this.handleRestrictionType(this.workingJsonSchema, baseTypeName, currentProp);
+				}
 			} else {
-				currentProp.obj.type = baseTypeName;
-				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+				this.handleRestrictionType(this.workingJsonSchema, baseTypeName);
 			}
 
 			return true;
+		}
+	}
+
+	handleRestrictionType(schema, typeName, property) {
+
+		if (property) {
+			property.obj.type = typeName;
+			this.addProperty(schema, property.name, property.obj, null);
+		} else {
+			schema.type = typeName;
 		}
 	}
 
@@ -1148,7 +1238,7 @@ class BaseConverter extends Processor {
 	}
 
 	text(node, jsonSchema, xsd) {
-		
+
 		if (this.parsingState.inAppInfo()) {
 			//this.workingJsonSchema.concatDescription(node.parent().name() + '=' + node.text() + ' ');
 		}

@@ -60,7 +60,7 @@ class XTotvs {
         } else {
             val = String(val).toLowerCase();
 
-            if (val.startsWith('s')) {
+            if (val == 'sim') {
                 return true;
             } else {
                 return false

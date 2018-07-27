@@ -27,9 +27,9 @@ const Options_NAME = Symbol();
  * {@link http://www.w3.org/TR/xmlschema-0/#simpleTypesTable |reference table} summarizing the XML Schema built-in types.
  */
 
- class BuiltInTypeConverter {
+class BuiltInTypeConverter {
 	constructor(params) {
-		if(params != undefined && params.uri != undefined) {
+		if (params != undefined && params.uri != undefined) {
 			this.options = {
 				uri: params.uri
 			}
@@ -134,6 +134,7 @@ const Options_NAME = Symbol();
 	 */
 	float(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.NUMBER;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.FLOAT;
 		return true;
 	}
 
@@ -149,6 +150,7 @@ const Options_NAME = Symbol();
 	 */
 	double(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.NUMBER;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.DOUBLE;
 		return true;
 	}
 
@@ -197,8 +199,10 @@ const Options_NAME = Symbol();
 	 */
 	dateTime(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.STRING;
-		jsonSchema.pattern = '-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?|(24:00:00(\\.0+)?))(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?';
+		//jsonSchema.pattern = '-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T(([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\\.[0-9]+)?|(24:00:00(\\.0+)?))(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?';
 		// jsonSchema.description = 'Source:  http://www.w3.org/TR/xmlschema11-2/#dateTime'
+
+		jsonSchema.format = JSON_SCHEMA_FORMATS.DATE_TIME;
 		return true;
 	}
 
@@ -213,8 +217,10 @@ const Options_NAME = Symbol();
 	// 3.3.9 date: http://www.w3.org/TR/xmlschema11-2/#date
 	date(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.STRING;
-		jsonSchema.pattern = '-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?';
+		//jsonSchema.pattern = '-?([1-9][0-9]{3,}|0[0-9]{3})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?';
 		// jsonSchema.description = 'Source:  http://www.w3.org/TR/xmlschema11-2/#date'
+
+		jsonSchema.format = JSON_SCHEMA_FORMATS.DATE;
 		return true;
 	}
 
@@ -321,9 +327,9 @@ const Options_NAME = Symbol();
 	 * @returns {Boolean} - True.  Subclasses can return false to cancel traversal of {@link XsdFile|xsd}
 	 */
 	anyURI(node, jsonSchema, xsd) {
-		if(this.options.uri === CONSTANTS.RFC_3986) {
+		if (this.options.uri === CONSTANTS.RFC_3986) {
 			return this.anyURI_RFC3986(node, jsonSchema, xsd);
-		} 
+		}
 		if (this.options.uri === CONSTANTS.RFC_2396) {
 			return this.anyURI_RFC2396(node, jsonSchema, xsd);
 		}
@@ -448,12 +454,14 @@ const Options_NAME = Symbol();
 	// 3.4.13 integer: http://www.w3.org/TR/xmlschema11-2/#integer
 	integer(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
 		return true;
 	}
 
 	// 3.4.14 nonPositiveInteger: http://www.w3.org/TR/xmlschema11-2/#nonPositiveInteger
 	nonPositiveInteger(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
 		jsonSchema.maximum = 0;
 		return true;
 	}
@@ -461,6 +469,7 @@ const Options_NAME = Symbol();
 	// 3.4.15 negativeInteger: http://www.w3.org/TR/xmlschema11-2/#negativeInteger
 	negativeInteger(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
 		jsonSchema.maximum = 0;
 		jsonSchema.exclusiveMinimum = true;
 		return true;
@@ -469,22 +478,26 @@ const Options_NAME = Symbol();
 	// 3.4.16 long: http://www.w3.org/TR/xmlschema11-2/#long
 	long(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = -9223372036854775808;
-		jsonSchema.maximum = 9223372036854775807;
+		//jsonSchema.minium = -9223372036854775808;
+		//jsonSchema.maximum = 9223372036854775807;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.INT64;
 		return true;
 	}
 
 	// 3.4.17 int: http://www.w3.org/TR/xmlschema11-2/#int
 	int(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = -2147483648;
-		jsonSchema.maximum = 2147483647;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
+		//jsonSchema.minium = -2147483648;
+		//jsonSchema.maximum = 2147483647;
 		return true;
 	}
 
 	// 3.4.18 short: http://www.w3.org/TR/xmlschema11-2/#short
 	short(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
+
 		jsonSchema.minium = -32768;
 		jsonSchema.maximum = 32767;
 		return true;
@@ -492,9 +505,10 @@ const Options_NAME = Symbol();
 
 	// 3.4.19 byte: http://www.w3.org/TR/xmlschema11-2/#byte
 	byte(node, jsonSchema, xsd) {
-		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = -128;
-		jsonSchema.maximum = 127;
+		jsonSchema.type = JSON_SCHEMA_TYPES.STRING;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.BYTE;
+		//jsonSchema.minium = -128;
+		//jsonSchema.maximum = 127;
 		return true;
 	}
 

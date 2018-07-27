@@ -1,4 +1,3 @@
-
 'use strict';
 
 /**
@@ -9,16 +8,30 @@
  */
 
 module.exports = {
+
+	BYTE: "byte",
+
+	DOUBLE: 'double',
+
 	/**
 	 * {@link http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.3.1|main site}|
 	 * {@link https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3.1|IETF}
 	 */
+
 	DATE_TIME: 'date-time',
+
+	/**
+	 * {@link http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.3.2|main site}|
+	 * {@link https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14|RFC3339}
+	 */
+	DATE: 'date',
 	/**
 	 * {@link http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.3.2|main site}|
 	 * {@link https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3.2|IETF}
 	 */
-	EMAIL : 'email',
+	EMAIL: 'email',
+
+	FLOAT: "float",
 	/**
 	 * {@link http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.3.3|main site}|
 	 * {@link https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3.3|IETF}
@@ -28,6 +41,9 @@ module.exports = {
 	 * {@link http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.3.4|main site}|
 	 * {@link https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3.4|IETF}
 	 */
+
+	INT32: "int32",
+
 	IPV4: 'ipv4',
 	/**
 	 * {@link http://json-schema.org/latest/json-schema-validation.html#rfc.section.7.3.5|main site}|

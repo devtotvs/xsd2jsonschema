@@ -90,6 +90,16 @@ class ParsingState {
 		}
 	}
 
+	getBeforeState(){
+		if (this.states.length > 1) {
+			return this.states[this.states.length-3];
+		} else if (this.states.length === 1) {
+			throw new Error('Not \'in\' a state yet.  We are \'on\' state=\'' + this.states[0].name + '\'!');
+		} else {
+			throw new Error('There are no states!');
+		}
+	}
+
 	isSchemaBeforeState(){
 		if (this.states.length > 1) {
 			return this.states[this.states.length-4].name == XsdElements.SCHEMA;
