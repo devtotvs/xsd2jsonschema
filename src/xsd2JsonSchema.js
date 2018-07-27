@@ -124,20 +124,20 @@ class Xsd2JsonSchema {
         this[xmlSchemas_NAME] = newXmlSchemas;
     }
 
-    loadSchema(uri) {
+    loadSchema(uri,withIncludes) {
         if (this.xmlSchemas[uri] !== undefined) {
             return;
         }
         var xsd = new XsdFile({ uri: uri });
         this.xmlSchemas[xsd.baseFilename] = xsd;
-        if (xsd.hasIncludes()) {
+        if (xsd.hasIncludes() && withIncludes) {
             this.loadAllSchemas(xsd.includeUris);
         }
     }
 
-    loadAllSchemas(uris) {
+    loadAllSchemas(uris,withIncludes) {
         uris.forEach(function(uri, index, array) {
-            this.loadSchema(path.join(this.xsdBaseDir, uri));
+            this.loadSchema(path.join(this.xsdBaseDir, uri),withIncludes);
             //			this.loadSchema(uri);
         }, this);
         return this.xmlSchemas;
@@ -170,7 +170,7 @@ class Xsd2JsonSchema {
         }, this);
     }
 
-    processAllSchemas(parms) {
+    processAllSchemas(parms, withIncludes = true) {
         if (parms.xsdBaseDir != undefined) {
             this.xsdBaseDir = parms.xsdBaseDir;
         }
@@ -178,7 +178,7 @@ class Xsd2JsonSchema {
             this.visitor = parms.visitor;
         }
         this.jsonSchemas = {};
-        this.loadAllSchemas(parms.xsdFilenames);
+        this.loadAllSchemas(parms.xsdFilenames,withIncludes);
         this.processSchemas(Object.keys(this.xmlSchemas));
         return this.jsonSchemas;
     }

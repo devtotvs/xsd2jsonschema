@@ -37,7 +37,7 @@ const converter = new Xsd2JsonSchema(options);
 if (action === "convert") {
 	converter.processAllSchemas( {
 		xsdFilenames: xsdFilenames
-	});
+	}, false);
 	converter.writeFiles();
 	converter.dump();
 } else if (action === "xml-usage") {
