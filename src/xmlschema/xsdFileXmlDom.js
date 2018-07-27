@@ -92,7 +92,8 @@ class XsdFile {
 // 2	Map a prefix to the target namespace, and make the  XML Schema Namespase the default namespace.
 // 3	Map prefixes to all the namespaces.
     initilizeNamespaces() {
-		const attrs = XsdFile.getAttributes(this.schemaElement);
+        const attrs = XsdFile.getAttributes(this.schemaElement);
+        this.namespaces[''] ="";
 		Object.keys(attrs).forEach(function (key, index, array) {
             const attr = attrs[key];
             if (attr.nodeType === XsdNodeTypes.ATTRIBUTE_NODE) {
