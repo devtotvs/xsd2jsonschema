@@ -93,18 +93,9 @@ class BuiltInTypeConverter {
 	 * 
 	 * @returns {Boolean} - True.  Subclasses can return false to cancel traversal of {@link XsdFile|xsd}
 	 */
-	boolean(node, jsonSchema, xsd) {
-		var booleanSchema = new JsonSchemaFile();
-		booleanSchema.type = JSON_SCHEMA_TYPES.BOOLEAN;
-
-		var integerSchema = new JsonSchemaFile();
-		integerSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		integerSchema.maximum = 1;
-		integerSchema.minimum = 0;
-
-		jsonSchema.oneOf.push(booleanSchema);
-		jsonSchema.oneOf.push(integerSchema);
-		return true;
+	boolean(node, jsonSchema, xsd) {		
+		jsonSchema.type = JSON_SCHEMA_TYPES.BOOLEAN;
+	
 	}
 
 	// 3.3.3 decimal: http://www.w3.org/TR/xmlschema11-2/#decimal
