@@ -25,33 +25,33 @@ const defaultXsd2JsonSchemaOptions = {
     outputDir: '.',
     baseId: 'http://www.xsd2jsonschema.org/defaultBaseId',
     mask: undefined,
-    visitor:new DefaultConversionVisitor()
+    visitor: new DefaultConversionVisitor()
 }
 
 /**
  * Class prepresenting an instance of the Xsd2JsonSchema library.  This needs to be refactored to
  * remove the filesystem focus and work off URI's or possibly just strings/buffers representing the contents
  * of the XML Schema files that are being converted to JSON Schema.
- * 
+ *
  * I would like the library to be encapsulated from IO if possible.
- * 
+ *
  * The current implementation is really only usable as a cli.
- * 
+ *
  * TODO: Set defaults for all options and make the 'options' parameter optional.
- * 
+ *
  */
 
 class Xsd2JsonSchema {
-     /**
-      * 
-      * @param {Object} options - An object used to override default options.
-      * @param {string} options.xsdBaseDir - The directory from which xml schema's should be loaded.  The default value is the current directory.
-      * @param {string} options.outputDir - The destination directory for generated JSON Schema files.  The default value is the current directory.
-      * @param {string} options.baseId - The base value for the 'id' in any generated JSON Schema files.  The default value is 'http://www.xsd2jsonschema.org/defaultBaseId.
-      * @param {string} options.mask - A regular expression used to reduce generated JSON Schema filenames as needed.  The default value is 'undefined'.
-      * @param {string} options.converter - A subclass of {@link BaseConverter|BaseConverter}.  This is convenience parameter and equal to poviding the visitor parameter where options.visiter = new {@link BaseConversionVisitor|BaseConversionVisitor}(options.converter).
-      * @param {string} options.visitor - A subclass of {@link BaseConversionVisitor|BaseConversionVisitor}.
-      */
+    /**
+     *
+     * @param {Object} options - An object used to override default options.
+     * @param {string} options.xsdBaseDir - The directory from which xml schema's should be loaded.  The default value is the current directory.
+     * @param {string} options.outputDir - The destination directory for generated JSON Schema files.  The default value is the current directory.
+     * @param {string} options.baseId - The base value for the 'id' in any generated JSON Schema files.  The default value is 'http://www.xsd2jsonschema.org/defaultBaseId.
+     * @param {string} options.mask - A regular expression used to reduce generated JSON Schema filenames as needed.  The default value is 'undefined'.
+     * @param {string} options.converter - A subclass of {@link BaseConverter|BaseConverter}.  This is convenience parameter and equal to poviding the visitor parameter where options.visiter = new {@link BaseConversionVisitor|BaseConversionVisitor}(options.converter).
+     * @param {string} options.visitor - A subclass of {@link BaseConversionVisitor|BaseConversionVisitor}.
+     */
     constructor(options) {
         if (options != undefined) {
             this.xsdBaseDir = options.xsdBaseDir != undefined ? options.xsdBaseDir : defaultXsd2JsonSchemaOptions.xsdBaseDir;
@@ -124,28 +124,30 @@ class Xsd2JsonSchema {
         this[xmlSchemas_NAME] = newXmlSchemas;
     }
 
-    loadSchema(uri,withIncludes) {
+    loadSchema(uri, withIncludes) {
         if (this.xmlSchemas[uri] !== undefined) {
             return;
         }
-        var xsd = new XsdFile({ uri: uri });
+        var xsd = new XsdFile({
+            uri: uri
+        });
         this.xmlSchemas[xsd.baseFilename] = xsd;
         if (xsd.hasIncludes() && withIncludes) {
             this.loadAllSchemas(xsd.includeUris);
         }
     }
 
-    loadAllSchemas(uris,withIncludes) {
-        uris.forEach(function(uri, index, array) {
-            this.loadSchema(path.join(this.xsdBaseDir, uri),withIncludes);
+    loadAllSchemas(uris, withIncludes) {
+        uris.forEach(function (uri, index, array) {
+            this.loadSchema(path.join(this.xsdBaseDir, uri), withIncludes);
             //			this.loadSchema(uri);
         }, this);
         return this.xmlSchemas;
     }
 
-    processSchema(uri) {
+    processSchema(uri, withIncludes) {
         var xsd = this.xmlSchemas[uri];
-        if (xsd.hasIncludes()) {
+        if (xsd.hasIncludes() && withIncludes) {
             this.processSchemas(xsd.includeUris);
         }
         if (this.jsonSchemas[uri] === undefined) {
@@ -159,13 +161,12 @@ class Xsd2JsonSchema {
         }
     }
 
-    processSchemas(uris) {
-        uris.forEach(function(uri, index, array) {
-            if(uri.startsWith(this.xsdBaseDir)){
-                this.processSchema(uri);
-            }
-            else{
-                this.processSchema(path.join(this.xsdBaseDir, uri));
+    processSchemas(uris, withIncludes) {
+        uris.forEach(function (uri, index, array) {
+            if (uri.startsWith(this.xsdBaseDir)) {
+                this.processSchema(uri, withIncludes);
+            } else {
+                this.processSchema(path.join(this.xsdBaseDir, uri), withIncludes);
             }
         }, this);
     }
@@ -178,51 +179,103 @@ class Xsd2JsonSchema {
             this.visitor = parms.visitor;
         }
         this.jsonSchemas = {};
-        this.loadAllSchemas(parms.xsdFilenames,withIncludes);
-        this.processSchemas(Object.keys(this.xmlSchemas));
+        this.loadAllSchemas(parms.xsdFilenames, withIncludes);
+        this.processSchemas(Object.keys(this.xmlSchemas), withIncludes);
         return this.jsonSchemas;
     }
 
-	/**
-	 * Writes out a JsonSchemaFile to the given directory with the provided formatting option.
-	 * 
+    /**
+     * Writes out a JsonSchemaFile to the given directory with the provided formatting option.
+     *
      * @param {JsonSchemaFile} jsonSchema - The jsonSchema to be writen out to a file.
-	 * @param {String} directory - Target directory to write this JsonSchemaFile to. The default valuye is the current directory.
-	 * @param {String} spacing - Adds indentation, white space, and line break characters to the JSON file written to disk.  The 
-	 * default value is '\t'.  This is used as the last parameter to JSON.stringify().
+     * @param {String} directory - Target directory to write this JsonSchemaFile to. The default valuye is the current directory.
+     * @param {String} spacing - Adds indentation, white space, and line break characters to the JSON file written to disk.  The
+     * default value is '\t'.  This is used as the last parameter to JSON.stringify().
      * @returns {void}
-	 */
-	writeFile(jsonSchema, directory, spacing) {
-		var dir = directory;
+     */
+    writeFile(jsonSchema, directory, spacing) {
+        var dir = directory;
         var space = spacing
-        if(jsonSchema == undefined) {
+        if (jsonSchema == undefined) {
             throw new Error('The parameter jsonSchema is required');
         }
-		if(directory == undefined) {
-			dir = '.';
-		}
-		if(spacing == undefined) {
-			space = '\t';
-		}
-        const data = JSON.stringify(jsonSchema.getJsonSchema(), null, space);        
+        if (directory == undefined) {
+            dir = '.';
+        }
+        if (spacing == undefined) {
+            space = '\t';
+        };
+        const data = JSON.stringify(this.formatSchema(jsonSchema), null, space);
         const maskedFilename = (this.mask === undefined) ? jsonSchema.filename : jsonSchema.filename.replace(this.mask, '');
-		fs.writeFileSync(path.join(dir, maskedFilename), data);
-	}
+        fs.writeFileSync(path.join(dir, maskedFilename), data);
+    }
 
+    formatSchema(jsonSchema) {
+        let businessContentName= jsonSchema.filename.slice(0,jsonSchema.filename.indexOf("_"));
+        let originSchema = jsonSchema.getJsonSchema();
+        let propertiesTypes = Object.keys(originSchema.properties);
+        let destinationSchema = {
+            openapi: "3.0.1",
+            servers: [],
+            info: {},
+            paths: {},
+            components: {
+                schemas: {}
+            }
+        };
+        destinationSchema.info = originSchema.info;
+        let properties = {};
+
+        properties[businessContentName + "s"] = {
+            type: "object",
+            properties:{
+                items:{
+                    type:"array",
+                    items:{
+
+                    }
+                }
+            }
+        }
+       
+        propertiesTypes.map((x) => {
+            if(originSchema[x]){
+                if (!x.toUpperCase().startsWith("RETURN")) {
+                    switch(x.toLowerCase()){
+                        case "businesscontenttype":
+                            properties[businessContentName + "Info"] = originSchema[x];
+                            break;
+                        case "businesscontent":
+                            originSchema[x].$ref = originSchema[x].$ref.replace("BusinessContentType",businessContentName + "Info");
+                            properties[businessContentName + "s"].properties.items.items = originSchema[x];
+                            break;
+                        default:
+                            properties[x] = originSchema[x];
+                    }              
+                }
+            }            
+        });
+
+        destinationSchema.components.schemas = properties;
+
+        return destinationSchema;
+    }
     writeFiles() {
         try {
             fs.ensureDirSync(this.outputDir);
         } catch (err) {
             debug(err);
         }
-        Object.keys(this.jsonSchemas).forEach(function(uri, index, array) {
+        Object.keys(this.jsonSchemas).forEach(function (uri, index, array) {
             this.writeFile(this.jsonSchemas[uri], this.outputDir, '  ');
         }, this);
     }
 
+
+
     dump() {
         debug("\n*** XML Schemas ***");
-        Object.keys(this.xmlSchemas).forEach(function(uri, index, array) {
+        Object.keys(this.xmlSchemas).forEach(function (uri, index, array) {
             debug(index + ") " + uri);
             debug(this.xmlSchemas[uri].includeUris);
         }, this);
@@ -233,7 +286,7 @@ class Xsd2JsonSchema {
 
     dumpSchemas() {
         debug("\n*** JSON Schemas ***");
-        Object.keys(this.jsonSchemas).forEach(function(uri, index, array) {
+        Object.keys(this.jsonSchemas).forEach(function (uri, index, array) {
             debug(index + ") " + uri);
             var log = JSON.stringify(this.jsonSchemas[uri].getJsonSchema(), null, 2);
             debug(log);
