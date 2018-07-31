@@ -210,8 +210,7 @@ class Xsd2JsonSchema {
         fs.writeFileSync(path.join(dir, maskedFilename), data);
     }
 
-    formatSchema(jsonSchema) {
-        let businessContentName= jsonSchema.filename.slice(0,jsonSchema.filename.indexOf("_"));
+    formatSchema(jsonSchema) {      
         let originSchema = jsonSchema.getJsonSchema();
         let propertiesTypes = Object.keys(originSchema.properties);
         let destinationSchema = {
@@ -226,6 +225,8 @@ class Xsd2JsonSchema {
         destinationSchema.info = originSchema.info;
         let properties = {};
 
+        let businessContentName= destinationSchema.info.title;
+        
         properties[businessContentName + "s"] = {
             type: "object",
             properties:{

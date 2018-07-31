@@ -196,6 +196,10 @@ class BaseConverter extends Processor {
 	MessageDocumentation(node, jsonSchema, xsd) {
 		if (this.parsingState.isSchemaBeforeState()) {
 			jsonSchema.info = new InfoTotvs();
+		
+			let messageName= jsonSchema.filename.replace(/_/g,".").split(".");
+			jsonSchema.info.xTitle = messageName[0];
+			jsonSchema.info.xVersion = messageName[1] + "." + messageName[2];
 		}
 
 		return true;
@@ -737,6 +741,7 @@ class BaseConverter extends Processor {
 		text = text.replace(/\n\t/g, ' ');
 		text = text.replace(/\n/g, ' ');
 		text = text.replace(/\t/g, '');
+		text = text.replace(/\r/g, '');
 
 		return text;
 	}
