@@ -113,6 +113,8 @@ class BaseConverter extends Processor {
 	all(node, jsonSchema, xsd) {
 		// TODO: id, minOccurs, maxOccurs
 		// (TBD)
+
+		return true;
 	}
 
 	alternative(node, jsonSchema, xsd) {
