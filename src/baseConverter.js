@@ -175,7 +175,8 @@ class BaseConverter extends Processor {
 		obj[productAttr] = new XTotvs();
 
 		var list = [];
-		if (prop.name && prop.name.startsWith("ListOf") && Object.keys(prop.obj.items.properties).length > 0) {
+		
+		if (prop.name && prop.name.startsWith("ListOf") && prop.obj.items.properties) {
 			var childProp = this.getCurrentPropertie(prop.obj.items, 1);
 
 			list = Object.assign([], childProp.obj.xtotvs);
@@ -825,12 +826,11 @@ class BaseConverter extends Processor {
 			var xtotvs = {}
 			var qtd = 0;
 			var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
-			if (prop.name && prop.name.startsWith("ListOf") && Object.keys(prop.obj.items.properties).length > 0) {
+			if (prop.name && prop.name.startsWith("ListOf") && prop.obj.items.properties) {
 				var childProp = this.getCurrentPropertie(prop.obj.items, 1);
 
 				qtd = childProp.obj.xtotvs.length
-
-				console.log(childProp.name + ' -- ' + qtd);
+			
 				xtotvs = childProp.obj.xtotvs[qtd - 1];
 
 			} else {
@@ -1175,12 +1175,12 @@ class BaseConverter extends Processor {
 		var baseTypeName = baseType.getLocal();
 		// TODO: id, (base inheritance via allOf)
 
+	
 		if (this.builtInTypeConverter[baseTypeName] === undefined) {
 			this.parsingState.pushSchema(this.workingJsonSchema);
 			this.workingJsonSchema = this.workingJsonSchema.extend(this.namespaceManager.getType(baseTypeName, jsonSchema, xsd));
 			return true;
 		} else {
-
 			var currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
 
 
@@ -1188,20 +1188,20 @@ class BaseConverter extends Processor {
 				if (currentProp.name.startsWith("ListOf")) {
 					var childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
 
-					this.handleRestrictionType(currentProp.obj.items, baseTypeName, childProp);
+					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp,xsd);
 				} else {
-					this.handleRestrictionType(this.workingJsonSchema, baseTypeName, currentProp);
+					this.handleRestrictionType(this.workingJsonSchema, baseAttr, currentProp,xsd);
 				}
 			} else {
-				this.handleRestrictionType(this.workingJsonSchema, baseTypeName);
+				this.handleRestrictionType(this.workingJsonSchema, baseAttr,null,xsd);
 			}
 
 			return true;
 		}
 	}
 
-	handleRestrictionType(schema, typeName, property) {
-
+	handleRestrictionType(schema, typeName, property, xsd) {
+		typeName = this.namespaceManager.getType(typeName, schema, xsd).get$RefToSchema().type;
 		if (property) {
 			property.obj.type = typeName;
 			this.addProperty(schema, property.name, property.obj, null);
@@ -1211,16 +1211,20 @@ class BaseConverter extends Processor {
 	}
 
 	getCurrentPropertie(schema, level) {
-		var properties = schema.properties;
-		var propNames = Object.keys(properties);
+		let properties = schema.properties;
 
-		var currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - level]] || properties[propNames[0]]);
-		var propName = propNames[propNames.length - level] || propNames[0];
+		if(properties){
+			let propNames = Object.keys(properties);
 
-		return {
-			obj: currentProp,
-			name: propName
-		};
+			let currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - level]] || properties[propNames[0]]);
+			let propName = propNames[propNames.length - level] || propNames[0];
+	
+			return {
+				obj: currentProp,
+				name: propName
+			};
+		}
+		
 	}
 
 	schema(node, jsonSchema, xsd) {
