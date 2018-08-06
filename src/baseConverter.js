@@ -186,14 +186,30 @@ class BaseConverter extends Processor {
 
 			this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
 		} else {
-			list = Object.assign([], prop.obj.xtotvs);
-			list.push(obj);
-			prop.obj.xtotvs = list;
-			this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+			if(this.isObjectWithoutProperties(prop.obj.properties)){
+				var childProp = this.getCurrentPropertie(prop.obj, 1);
+
+				list = Object.assign([], childProp.obj.xtotvs);
+
+				list.push(obj);
+				childProp.obj.xtotvs = list;
+
+				this.addProperty(prop.obj, childProp.name, childProp.obj, null);
+			}else{
+				list = Object.assign([], prop.obj.xtotvs);
+				list.push(obj);
+				prop.obj.xtotvs = list;
+				this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+			}
+		
 		}
 
 
 		return true;
+	}
+
+	isObjectWithoutProperties(obj){
+		return Object.keys(obj).length > 0
 	}
 
 	MessageDocumentation(node, jsonSchema, xsd) {
@@ -714,7 +730,7 @@ class BaseConverter extends Processor {
 				this.handleEnumDescription(childProp.obj, val, node.textContent);
 				this.handleEnum(current.obj.items, val, childProp);
 			} else {
-				if(current.obj.properties){
+				if(this.isObjectWithoutProperties(current.obj.properties)){
 					var childProp = this.getCurrentPropertie(current.obj, 1);
 
 					this.handleEnumDescription(childProp.obj, val, node.textContent);
@@ -1118,7 +1134,7 @@ class BaseConverter extends Processor {
 				childProp.obj.maxLength = len;
 				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
 			} else {
-				if(currentProp.obj.properties){
+				if(this.isObjectWithoutProperties(currentProp.obj.properties)){
 					var childProp = this.getCurrentPropertie(currentProp.obj, 1)
 
 					childProp.obj.maxLength = len;
@@ -1216,7 +1232,7 @@ class BaseConverter extends Processor {
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp,xsd);
 				} else {
-					if(currentProp.obj.properties){
+					if(this.isObjectWithoutProperties(currentProp.obj.properties)){
 						let childProp = this.getCurrentPropertie(currentProp.obj, 1)
 
 						this.handleRestrictionType(currentProp.obj, baseAttr, childProp,xsd);
