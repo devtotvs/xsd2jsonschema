@@ -465,7 +465,12 @@ class BaseConverter extends Processor {
 				this.handleElementDocumentation(node);
 				break;
 			case XsdElements.COMPLEX_TYPE:
-				this.workingJsonSchema.description = this.handleTextDescription(node.textContent);
+				if(this.parsingState.isSchemaBeforeState()){
+					this.workingJsonSchema.description = this.handleTextDescription(node.textContent);
+				}
+				else{
+					this.handleElementDocumentation(node);
+				}				
 				break;
 			default:
 				console.log(state.name);
@@ -602,10 +607,16 @@ class BaseConverter extends Processor {
 				var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
 				if (isArray) {
 
-
 					if (prop.name && prop.name.startsWith("ListOf")) {
+						if(!this.parsingState.isSchemaBeforeState()){
+							this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
 
-						this.addPropertyAsArray(this.workingJsonSchema, prop.name, customType, minOccursAttr, maxOccursAttr);
+							//this.addPropertyAsArray(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);
+						}
+						else{
+							this.addPropertyAsArray(this.workingJsonSchema, prop.name, customType, minOccursAttr, maxOccursAttr);
+						}
+						
 					} else {
 						this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
 					}
