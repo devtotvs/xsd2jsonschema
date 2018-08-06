@@ -210,7 +210,7 @@ class Xsd2JsonSchema {
         fs.writeFileSync(path.join(dir, maskedFilename), data);
     }
 
-    formatSchema(jsonSchema) {      
+    formatSchema(jsonSchema) {
         let originSchema = jsonSchema.getJsonSchema();
         let propertiesTypes = Object.keys(originSchema.properties);
         let destinationSchema = {
@@ -222,39 +222,39 @@ class Xsd2JsonSchema {
                 schemas: {}
             }
         };
-        destinationSchema.info = originSchema.info;
+        destinationSchema.info = originSchema.info || {};
         let properties = {};
 
-        let businessContentName= destinationSchema.info.title;
-        
+        let businessContentName = destinationSchema.info.title || jsonSchema.filename.slice(0, jsonSchema.filename.indexOf("_"));
+
         properties[businessContentName + "s"] = {
             type: "object",
-            properties:{
-                items:{
-                    type:"array",
-                    items:{
+            properties: {
+                items: {
+                    type: "array",
+                    items: {
 
                     }
                 }
             }
         }
-       
+
         propertiesTypes.map((x) => {
-            if(originSchema[x]){
+            if (originSchema[x]) {
                 if (!x.toUpperCase().startsWith("RETURN")) {
-                    switch(x.toLowerCase()){
+                    switch (x.toLowerCase()) {
                         case "businesscontenttype":
                             properties[businessContentName + "Info"] = originSchema[x];
                             break;
                         case "businesscontent":
-                            originSchema[x].$ref = originSchema[x].$ref.replace("BusinessContentType",businessContentName + "Info");
+                            originSchema[x].$ref = originSchema[x].$ref.replace("BusinessContentType", businessContentName + "Info");
                             properties[businessContentName + "s"].properties.items.items = originSchema[x];
                             break;
                         default:
                             properties[x] = originSchema[x];
-                    }              
+                    }
                 }
-            }            
+            }
         });
 
         destinationSchema.components.schemas = properties;
