@@ -96,3 +96,5 @@ coverage
 package-lock.json
 
 example/schema/*
+example/schema/ExampleTypes_2016-01-01.xsd
+

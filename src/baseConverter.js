@@ -610,8 +610,6 @@ class BaseConverter extends Processor {
 					if (prop.name && prop.name.startsWith("ListOf")) {
 						if(!this.parsingState.isSchemaBeforeState()){
 							this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
-
-							//this.addPropertyAsArray(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);
 						}
 						else{
 							this.addPropertyAsArray(this.workingJsonSchema, prop.name, customType, minOccursAttr, maxOccursAttr);
@@ -716,8 +714,17 @@ class BaseConverter extends Processor {
 				this.handleEnumDescription(childProp.obj, val, node.textContent);
 				this.handleEnum(current.obj.items, val, childProp);
 			} else {
-				this.handleEnumDescription(current.obj, val, node.textContent);
-				this.handleEnum(this.workingJsonSchema, val, current);
+				if(current.obj.properties){
+					var childProp = this.getCurrentPropertie(current.obj, 1);
+
+					this.handleEnumDescription(childProp.obj, val, node.textContent);
+					this.handleEnum(current.obj, val, childProp);
+				}
+				else{
+					this.handleEnumDescription(current.obj, val, node.textContent);
+					this.handleEnum(this.workingJsonSchema, val, current);
+				}
+				
 			}
 		} else {
 			this.handleEnumDescription(this.workingJsonSchema, val, node.textContent);
@@ -1111,8 +1118,16 @@ class BaseConverter extends Processor {
 				childProp.obj.maxLength = len;
 				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
 			} else {
-				currentProp.obj.maxLength = len;
-				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+				if(currentProp.obj.properties){
+					var childProp = this.getCurrentPropertie(currentProp.obj, 1)
+
+					childProp.obj.maxLength = len;
+					this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
+				}
+				else{
+					currentProp.obj.maxLength = len;
+					this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+				}			
 			}
 		} else {
 			//	currentProp.obj.maxLength = len;
@@ -1181,9 +1196,9 @@ class BaseConverter extends Processor {
 	}
 
 	restriction(node, jsonSchema, xsd) {
-		var baseAttr = XsdFile.getAttrValue(node, XsdAttributes.BASE);
-		var baseType = new Qname(baseAttr);
-		var baseTypeName = baseType.getLocal();
+		let baseAttr = XsdFile.getAttrValue(node, XsdAttributes.BASE);
+		let baseType = new Qname(baseAttr);
+		let baseTypeName = baseType.getLocal();
 		// TODO: id, (base inheritance via allOf)
 
 	
@@ -1192,16 +1207,24 @@ class BaseConverter extends Processor {
 			this.workingJsonSchema = this.workingJsonSchema.extend(this.namespaceManager.getType(baseTypeName, jsonSchema, xsd));
 			return true;
 		} else {
-			var currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
+			let currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
 
 
 			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
 				if (currentProp.name.startsWith("ListOf")) {
-					var childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
+					let childProp = this.getCurrentPropertie(currentProp.obj.items, 1)
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp,xsd);
 				} else {
-					this.handleRestrictionType(this.workingJsonSchema, baseAttr, currentProp,xsd);
+					if(currentProp.obj.properties){
+						let childProp = this.getCurrentPropertie(currentProp.obj, 1)
+
+						this.handleRestrictionType(currentProp.obj, baseAttr, childProp,xsd);
+					}
+					else{
+						this.handleRestrictionType(this.workingJsonSchema, baseAttr, currentProp,xsd);
+					}
+					
 				}
 			} else {
 				this.handleRestrictionType(this.workingJsonSchema, baseAttr,null,xsd);
