@@ -186,7 +186,7 @@ class BaseConverter extends Processor {
 
 			this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
 		} else {
-			if(this.isObjectWithProperties(prop.obj.properties)){
+			if(prop.haveProperties){
 				var childProp = this.getCurrentPropertie(prop.obj, 1);
 
 				list = Object.assign([], childProp.obj.xtotvs);
@@ -505,10 +505,21 @@ class BaseConverter extends Processor {
 
 
 	handleElementDocumentation(node) {
-		var currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1)
-		currentProp.obj.description = this.handleTextDescription(node.textContent);
+		let currentProp = this.getCurrentPropertie(this.workingJsonSchema, 1);
 
-		this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+		if(currentProp.haveProperties){
+			let childProp = this.getCurrentPropertie(currentProp.obj, 1);
+
+			childProp.obj.description = this.handleTextDescription(node.textContent);
+
+			this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
+		}
+		else{
+			currentProp.obj.description = this.handleTextDescription(node.textContent);
+
+			this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+		}
+		
 	}
 
 	handleElementGlobal(node, jsonSchema, xsd) {
@@ -737,7 +748,7 @@ class BaseConverter extends Processor {
 				this.handleEnumDescription(childProp.obj, val, node.textContent);
 				this.handleEnum(current.obj.items, val, childProp);
 			} else {
-				if(this.isObjectWithProperties(current.obj.properties)){
+				if(current.haveProperties){
 					var childProp = this.getCurrentPropertie(current.obj, 1);
 
 					this.handleEnumDescription(childProp.obj, val, node.textContent);
@@ -1141,7 +1152,7 @@ class BaseConverter extends Processor {
 				childProp.obj.maxLength = len;
 				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
 			} else {
-				if(this.isObjectWithProperties(currentProp.obj.properties)){
+				if(currentProp.haveProperties){
 					var childProp = this.getCurrentPropertie(currentProp.obj, 1)
 
 					childProp.obj.maxLength = len;
@@ -1239,7 +1250,7 @@ class BaseConverter extends Processor {
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp,xsd);
 				} else {
-					if(this.isObjectWithProperties(currentProp.obj.properties)){
+					if(currentProp.haveProperties){
 						let childProp = this.getCurrentPropertie(currentProp.obj, 1)
 
 						this.handleRestrictionType(currentProp.obj, baseAttr, childProp,xsd);
@@ -1278,7 +1289,8 @@ class BaseConverter extends Processor {
 	
 			return {
 				obj: currentProp,
-				name: propName
+				name: propName,
+				haveProperties: this.isObjectWithProperties(currentProp.properties)
 			};
 		}
 		
