@@ -93,7 +93,7 @@ class XsdFile {
 // 3	Map prefixes to all the namespaces.
     initilizeNamespaces() {
         const attrs = XsdFile.getAttributes(this.schemaElement);
-        this.namespaces[''] ="";
+       
 		Object.keys(attrs).forEach(function (key, index, array) {
             const attr = attrs[key];
             if (attr.nodeType === XsdNodeTypes.ATTRIBUTE_NODE) {
@@ -114,6 +114,8 @@ class XsdFile {
 				}
             }
         }, this);
+
+        this.namespaces[''] =  this.namespaces[''] || ""; 
     }
 
     resolveNamespace(namespace) {
