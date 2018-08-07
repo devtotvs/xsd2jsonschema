@@ -5,6 +5,7 @@ const XsdFile = require('xsd2jsonschema').XsdFile;
 const JsonSchemaFile = require('xsd2jsonschema').JsonSchemaFile;
 const NamespaceManager = require('xsd2jsonschema').NamespaceManager;
 const JSON_SCHEMA_TYPES = require('xsd2jsonschema').JsonSchemaTypes;
+const JSON_SCHEMA_FORMATS = require("xsd2jsonschema").JsonSchemaFormats;
 
 describe('NamespaceManager Test - ', function() {
     var namespaceManager = new NamespaceManager();
@@ -53,6 +54,7 @@ describe('NamespaceManager Test - ', function() {
     it('should get the jsonschema representation of the given xml schema built in type.', function() {
         const expectedJsonSchema = new JsonSchemaFile();
         expectedJsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
+        expectedJsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
 
         namespaceManager.addNamespace('http://www.w3.org/2001/XMLSchema');
         expect(namespaceManager.getBuiltInType('integer', xsd)).toEqual(expectedJsonSchema);
@@ -72,6 +74,7 @@ describe('NamespaceManager Test - ', function() {
     it('should return the built-in type for integer', function() {
         const expectedJsonSchema = new JsonSchemaFile();
         expectedJsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
+        expectedJsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
 
         namespaceManager.addNamespace('http://www.w3.org/2001/XMLSchema');
         spyOn(xsd, 'resolveNamespace').and.returnValue('someName');
