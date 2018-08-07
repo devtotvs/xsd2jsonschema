@@ -176,7 +176,7 @@ class BaseConverter extends Processor {
 
 		var list = [];
 		
-		if (prop.name && prop.name.startsWith("ListOf") && prop.obj.items.properties) {
+		if (prop.name && prop.name.startsWith("ListOf") && this.isObjectWithProperties(prop.obj.items.properties)) {
 			var childProp = this.getCurrentPropertie(prop.obj.items, 1);
 
 			list = Object.assign([], childProp.obj.xtotvs);
@@ -186,7 +186,7 @@ class BaseConverter extends Processor {
 
 			this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
 		} else {
-			if(this.isObjectWithoutProperties(prop.obj.properties)){
+			if(this.isObjectWithProperties(prop.obj.properties)){
 				var childProp = this.getCurrentPropertie(prop.obj, 1);
 
 				list = Object.assign([], childProp.obj.xtotvs);
@@ -208,8 +208,15 @@ class BaseConverter extends Processor {
 		return true;
 	}
 
-	isObjectWithoutProperties(obj){
-		return Object.keys(obj).length > 0
+	isObjectWithProperties(obj){
+		if(obj)
+		{
+			return Object.keys(obj).length > 0;
+		}
+		else{
+			return false;
+		}
+		
 	}
 
 	MessageDocumentation(node, jsonSchema, xsd) {
@@ -730,7 +737,7 @@ class BaseConverter extends Processor {
 				this.handleEnumDescription(childProp.obj, val, node.textContent);
 				this.handleEnum(current.obj.items, val, childProp);
 			} else {
-				if(this.isObjectWithoutProperties(current.obj.properties)){
+				if(this.isObjectWithProperties(current.obj.properties)){
 					var childProp = this.getCurrentPropertie(current.obj, 1);
 
 					this.handleEnumDescription(childProp.obj, val, node.textContent);
@@ -860,7 +867,7 @@ class BaseConverter extends Processor {
 			var xtotvs = {}
 			var qtd = 0;
 			var prop = this.getCurrentPropertie(this.workingJsonSchema, 1);
-			if (prop.name && prop.name.startsWith("ListOf") && prop.obj.items.properties) {
+			if (prop.name && prop.name.startsWith("ListOf") && this.isObjectWithProperties(prop.obj.items.properties)) {
 				var childProp = this.getCurrentPropertie(prop.obj.items, 1);
 
 				qtd = childProp.obj.xtotvs.length
@@ -1134,7 +1141,7 @@ class BaseConverter extends Processor {
 				childProp.obj.maxLength = len;
 				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
 			} else {
-				if(this.isObjectWithoutProperties(currentProp.obj.properties)){
+				if(this.isObjectWithProperties(currentProp.obj.properties)){
 					var childProp = this.getCurrentPropertie(currentProp.obj, 1)
 
 					childProp.obj.maxLength = len;
@@ -1232,7 +1239,7 @@ class BaseConverter extends Processor {
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp,xsd);
 				} else {
-					if(this.isObjectWithoutProperties(currentProp.obj.properties)){
+					if(this.isObjectWithProperties(currentProp.obj.properties)){
 						let childProp = this.getCurrentPropertie(currentProp.obj, 1)
 
 						this.handleRestrictionType(currentProp.obj, baseAttr, childProp,xsd);
