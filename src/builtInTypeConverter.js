@@ -469,8 +469,6 @@ class BuiltInTypeConverter {
 	// 3.4.16 long: http://www.w3.org/TR/xmlschema11-2/#long
 	long(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		//jsonSchema.minium = -9223372036854775808;
-		//jsonSchema.maximum = 9223372036854775807;
 		jsonSchema.format = JSON_SCHEMA_FORMATS.INT64;
 		return true;
 	}
@@ -479,8 +477,6 @@ class BuiltInTypeConverter {
 	int(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
 		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
-		//jsonSchema.minium = -2147483648;
-		//jsonSchema.maximum = 2147483647;
 		return true;
 	}
 
@@ -497,9 +493,7 @@ class BuiltInTypeConverter {
 	// 3.4.19 byte: http://www.w3.org/TR/xmlschema11-2/#byte
 	byte(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.STRING;
-		jsonSchema.format = JSON_SCHEMA_FORMATS.BYTE;
-		//jsonSchema.minium = -128;
-		//jsonSchema.maximum = 127;
+		jsonSchema.format = JSON_SCHEMA_FORMATS.BYTE;	
 		return true;
 	}
 
