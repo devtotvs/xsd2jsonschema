@@ -658,7 +658,7 @@ class BaseConverter extends Processor {
 
 						if (prop.name && prop.name.startsWith("ListOf")) {
 							var item = {};
-							if (Object.keys(prop.obj.items.properties).length > 0) {
+							if (this.isObjectWithProperties(prop.obj.items.properties)) {
 								item = prop.obj.items;
 							} else {
 								item = new JsonSchemaFile();

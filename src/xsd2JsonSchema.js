@@ -241,7 +241,11 @@ class Xsd2JsonSchema {
 
         propertiesTypes.map((x) => {
             if (originSchema[x]) {
+
                 if (!x.toUpperCase().startsWith("RETURN")) {
+
+                    this.handleLisOf(originSchema[x]);
+
                     switch (x.toLowerCase()) {
                         case "businesscontenttype":
                             properties[businessContentName + "Info"] = originSchema[x];
@@ -260,6 +264,30 @@ class Xsd2JsonSchema {
         destinationSchema.components.schemas = properties;
 
         return destinationSchema;
+    }
+
+    handleLisOf(obj){
+        if(obj.properties){
+            let listOfs = Object.keys(obj.properties).filter(x =>  x.startsWith("ListOf"));
+                
+            listOfs.map(x =>{
+                if(obj.properties[x].properties){
+                    let prop =  Object.keys(obj.properties[x].properties);
+               
+                    obj.properties[x] = Object.assign( obj.properties[x], prop.map(y => obj.properties[x].properties[y] )[0]); 
+                     delete obj.properties[x].properties;
+                }
+                else{
+                    console.log(x);
+                }
+              
+            })
+        }
+        else{
+            console.log(obj);
+        }
+       
+        
     }
     writeFiles() {
         try {
