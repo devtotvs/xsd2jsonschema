@@ -138,7 +138,7 @@
 			// Action to take
 			"request": "launch",
 			// Workspace relative or absolute path to the program.
-			"program": "${workspaceRoot}/node_modules/.bin/jasmine",
+			"program": "${workspaceRoot}/node_modules/jasmine/bin/jasmine.js",
 			// Automatically stop program after launch.
 			"stopOnEntry": false,
 			// Command line arguments passed to the program.

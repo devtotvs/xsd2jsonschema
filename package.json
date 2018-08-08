@@ -35,16 +35,17 @@
     "clone": "^2.1.2",
     "debug": "^3.1.0",
     "fs-extra": "^3.0.1",
+    "jasmine-terminal-reporter": "^1.0.3",
+    "libxmljs-dom": "0.0.8",
     "urijs": "^1.19.1",
     "validator": "^9.4.1",
     "xml2js": "^0.4.19",
     "xmldom": "^0.1.27",
-    "xpath": "0.0.24",
-    "libxmljs-dom": "0.0.8"
+    "xpath": "0.0.24"
   },
   "scripts": {
     "prepare": "require-self",
-    "test": "jasmine --config=test/unit/jasmine.json",
+    "test": "jasmine --config=test/unit/jasmine.json ",
     "functionalTestJ": "jasmine test/functional/functionalTestSpec.js",
     "functionalTest": "node test/functional/allFunctionalTests.js",
     "cover": "nyc --reporter=lcov nyc npm test",
