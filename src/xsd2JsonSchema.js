@@ -235,7 +235,10 @@ class Xsd2JsonSchema {
                     items: {
 
                     }
-                }
+                },
+                hasNext: {
+                    type: "boolean"           
+                }       
             }
         }
 
