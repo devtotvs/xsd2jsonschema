@@ -92,7 +92,7 @@ describe("BaseConverter <FieldDocumentation>", function () {
         return childs;
     }
 
-    function getLastPropertie(schema) {
+    function getLastProperty(schema) {
         if (schema.properties) {
             let prop = Object.keys(schema.properties);
             prop = prop[prop.length - 1];
@@ -163,8 +163,8 @@ describe("BaseConverter <FieldDocumentation>", function () {
             tagName = enterState(node);
 
             bc[tagName](node, jsonSchema, xsd);
-            let propertie = getLastPropertie(bc.workingJsonSchema);
-            expect(propertie.xtotvs.length > 0).toBeTruthy();
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.xtotvs.length > 0).toBeTruthy();
         });
 
         it("should pass because more than 1 obj was add  in xTotvs attribute", function () {
@@ -175,8 +175,8 @@ describe("BaseConverter <FieldDocumentation>", function () {
                 bc[tagName](x, jsonSchema, xsd)
             });
 
-            let propertie = getLastPropertie(bc.workingJsonSchema);
-            expect(propertie.xtotvs.length > 1).toBeTruthy();
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.xtotvs.length > 1).toBeTruthy();
         });
 
 
@@ -198,8 +198,8 @@ describe("BaseConverter <FieldDocumentation>", function () {
         //          bc[tagName](x, jsonSchema, xsd)
         //     });
 
-        //      let propertie = getLastPropertie(bc.workingJsonSchema);
-        //      expect(propertie.xtotvs.length > 1).toBeTruthy();
+        //      let property = getLastproperty(bc.workingJsonSchema);
+        //      expect(property.xtotvs.length > 1).toBeTruthy();
         //  });
     });
 
@@ -214,8 +214,8 @@ describe("BaseConverter <FieldDocumentation>", function () {
             tagName = enterState(node);
             bc.handleXTotvs(node, "Field");
 
-            let propertie = getLastPropertie(bc.workingJsonSchema);
-            var xtotvs = propertie.xtotvs[0]["PRODUTO1"];
+            let property = getLastProperty(bc.workingJsonSchema);
+            var xtotvs = property.xtotvs[0]["PRODUTO1"];
 
             expect(xtotvs.Field).toBeTruthy();
         })
