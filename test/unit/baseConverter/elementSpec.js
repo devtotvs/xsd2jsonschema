@@ -9,6 +9,12 @@ describe("BaseConverter <Element>", function () {
     var bc;
     var xsd;
     var jsonSchema;
+
+    var customType;
+    var propertyName;
+    var minOccursAttr;
+    var maxOccursAttr;
+
     const xml = `
     <?xml version="1.0" encoding="UTF-8"?>
     <xs:schema attributeFormDefault="unqualified" 
@@ -34,6 +40,28 @@ describe("BaseConverter <Element>", function () {
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
+                <xs:element name="ListOfBankingInformation" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="BankingInformation" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="BankCode" type="xs:int" minOccurs="0">
+                                            <xs:annotation>
+                                                <xs:documentation>Código do banco</xs:documentation>											
+                                            </xs:annotation>
+                                        </xs:element>
+                                        <xs:element name="BankInternalId" type="xs:string" minOccurs="0" maxOccurs="1">
+                                            <xs:annotation>
+                                                <xs:documentation>InternalId do BankCode</xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+                                        </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+			</xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:schema>
@@ -75,12 +103,27 @@ describe("BaseConverter <Element>", function () {
     }
 
 
-    function readElement(index = 1){
+    function readElement(index = 1) {
         node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]");
-            tagName = enterState(node);
+        tagName = enterState(node);
     }
 
-    function upStates(level){
+    function readLisOf(index) {
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:complexType");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
+
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:complexType/xs:sequence");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
+
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:complexType/xs:sequence/xs:element");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
+
+    }
+
+    function upStates(level) {
         for (var i = 0; i < level; i++) {
             bc.parsingState.exitState();
         }
@@ -110,7 +153,7 @@ describe("BaseConverter <Element>", function () {
         tagName = enterState(node);
         bc[tagName](node, jsonSchema, xsd);
 
-        
+
         // bc[tagName](node, jsonSchema, xsd);
 
     });
@@ -144,10 +187,21 @@ describe("BaseConverter <Element>", function () {
 
             expect(bc.addProperty).toHaveBeenCalled();
         });
-       
+
+        it('tracks the spy for handleElementLocalinSequence method', function () {
+            readElement();
+
+            spyOn(bc, 'handleElementLocalinSequence');
+
+            bc.handleElementLocal(node, jsonSchema, xsd)
+
+            expect(bc.handleElementLocalinSequence).toHaveBeenCalled();
+        });
+
     });
 
     describe("is property", function () {
+
         it("should pass because name is the same to first element in mock", function () {
             readElement();
 
@@ -163,8 +217,10 @@ describe("BaseConverter <Element>", function () {
 
         it("should pass because was added a property", function () {
             readElement();
-            bc.handleElementLocal(node, jsonSchema, xsd);
 
+            customType = bc.namespaceManager.getType("xs:string", jsonSchema, xsd).get$RefToSchema();
+            propertyName = "Element1";
+            bc.handleElementLocalinSequence(propertyName, customType, undefined, undefined, false);
             expect(bc.workingJsonSchema.properties).toBeTruthy();
         });
 
@@ -189,19 +245,22 @@ describe("BaseConverter <Element>", function () {
         it("should pass because 1 element has been added as required", function () {
             readElement(2);
 
-            bc.handleElementLocal(node, jsonSchema, xsd);
+            customType = jsonSchemaTypes.OBJECT;
+            propertyName = "Element2";
+            minOccursAttr = 1;
 
+            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined, false);
             expect(bc.workingJsonSchema.required.length).toBeTruthy();
         });
     });
 
-    describe("is array", function (){
+    describe("is array", function () {
         it("should pass because the element is array", function () {
             readElement(3);
 
             bc.handleElementLocal(node, jsonSchema, xsd);
             let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.type == "array").toBeTruthy();
+            expect(property.type == jsonSchemaTypes.ARRAY).toBeTruthy();
         });
 
         it('tracks the spy for addPropertyAsArray method', function () {
@@ -217,7 +276,14 @@ describe("BaseConverter <Element>", function () {
         it("should pass because the element have maxItems = 3", function () {
             readElement(3);
 
-            bc.handleElementLocal(node, jsonSchema, xsd);
+            // bc.handleElementLocal(node, jsonSchema, xsd);
+
+            customType = bc.namespaceManager.getType("xs:string", jsonSchema, xsd).get$RefToSchema();
+            propertyName = "Element3";
+            minOccursAttr = 0;
+            maxOccursAttr = 3;
+            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, true);
+
             let property = getLastProperty(bc.workingJsonSchema);
             expect(property.maxItems == 3).toBeTruthy();
         });
@@ -239,7 +305,7 @@ describe("BaseConverter <Element>", function () {
         });
     });
 
-    describe("is ListOf", function (){
+    describe("is ListOf", function () {
         it("should pass because the type is array ", function () {
             readElement(5);
 
@@ -250,28 +316,110 @@ describe("BaseConverter <Element>", function () {
         });
 
         it("must pass because the type of items is the same as the child element ", function () {
-            readElement(5);
-          
+            readElement(5);          
+
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType");
-            tagName = enterState(node);         
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType/xs:sequence");
-            tagName = enterState(node);         
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
-            
-
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);         
-            bc[tagName](node, jsonSchema, xsd);        
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
 
-            bc.handleElementLocal(node, jsonSchema, xsd);
-            let customType = bc.namespaceManager.getType("CommunicationInformationType", jsonSchema, xsd).get$RefToSchema();
-            //upStates(3);
+
+            customType = bc.namespaceManager.getType("CommunicationInformationType", jsonSchema, xsd).get$RefToSchema();
+            propertyName = "CommunicationInformation";
+            minOccursAttr = 0;
+            maxOccursAttr = "unbounded";
+            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, true);
+
+
             readElement(5);
             let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.items.type == customType).toBeTruthy();
+          
+            expect(property.items.$ref == customType.$ref).toBeTruthy();
         });
+
+
+        it("must pass because add 2 lisOf ", function () {
+            readElement(5);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readLisOf(5);
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);                     
+            
+            let propNames = Object.keys(bc.workingJsonSchema.properties);
+            let property = propNames[propNames.length - 1];
+            expect(property == "ListOfBankingInformation").toBeTruthy();
+        });
+
+        // totdo Element sem type = object - no caso do LisOf, o items deve receber o type do element filho
+        it("must pass because type is object ", function () {
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readLisOf(6);
+            
+            customType = bc.namespaceManager.getType(jsonSchemaTypes.OBJECT, jsonSchema, xsd).get$RefToSchema();
+            customType.type = jsonSchemaTypes.OBJECT;
+            propertyName = "BankingInformation";
+            minOccursAttr = 0;
+            maxOccursAttr = "unbounded";
+            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, true);
+            
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.items.type == jsonSchemaTypes.OBJECT).toBeTruthy();
+        });
+
+        it("must pass because type is object ", function () {
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readLisOf(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            // node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            // tagName = enterState(node);
+            // bc[tagName](node, jsonSchema, xsd);
+
+      
+
+            customType = bc.namespaceManager.getType(jsonSchemaTypes.INTEGER, jsonSchema, xsd).get$RefToSchema();           
+            propertyName = "BankCode";
+            minOccursAttr = 0;
+            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined,false);
+            
+            let property = getLastProperty(bc.workingJsonSchema);
+            let childPropName = Object.keys(property.items.properties)[0];
+            expect(childPropName == propertyName).toBeTruthy();
+        });
+           
+
+        
     });
 });
