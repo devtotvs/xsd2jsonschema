@@ -65,5 +65,15 @@ module.exports = {
 			str += key + '=\'' + obj[key] + '\' ';
 		});
 		return str.trim();
+	},
+
+	handleText: function (text) {
+		text = text.trim();
+		text = text.replace(/\n\t/g, ' ');
+		text = text.replace(/\n/g, ' ');
+		text = text.replace(/\t/g, '');
+		text = text.replace(/\r/g, '');
+
+		return text;
 	}
 }
