@@ -485,7 +485,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 
 		// 5.5.  Validation keywords for any instance type (Type moved up here from the rest of 5.5 below for output formatting)
 		if (!this.isEmpty(this.type)) {
-			if(this.type == jsonSchemaTypes.OBJECT && this.isEmpty(this.properties)){
+			if(this.type == jsonSchemaTypes.OBJECT && this.isEmpty(this.properties) && !this.$ref){
 				jsonSchema.type = jsonSchemaTypes.STRING;
 			}
 			else{

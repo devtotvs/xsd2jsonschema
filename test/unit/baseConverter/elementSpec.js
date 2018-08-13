@@ -25,7 +25,8 @@ describe("BaseConverter <Element>", function () {
         xmlns:xs="http://www.w3.org/2001/XMLSchema">
         <xs:complexType name="Elements">
             <xs:sequence>
-                <xs:element name="Element1" type="xs:string"></xs:element>
+                <xs:element name="Element1" type="xs:string">
+                </xs:element>
                 <xs:element name="Element2" minOccurs="1"></xs:element>
                 <xs:element name="Element3" type="xs:string" maxOccurs="3"></xs:element>
                 <xs:element name="Element4" maxOccurs="unbounded"></xs:element>
@@ -61,8 +62,26 @@ describe("BaseConverter <Element>", function () {
                             </xs:element>
                         </xs:sequence>
                     </xs:complexType>
-			</xs:element>
-            </xs:sequence>
+                </xs:element>
+                <xs:element name="GovernmentalInformation" type="GovernmentalInformationType" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>CNPJ, Inscrição Estadual, Inscrição Municipal</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="ListOfGovernmentalInformation" type="GovernmentalInformationType" minOccurs="0" maxOccurs="1">
+                    <xs:annotation>
+                        <xs:documentation>CNPJ, Inscrição Estadual, Inscrição Municipal</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="BillingInformation" minOccurs="0">
+				    <xs:complexType>
+					    <xs:sequence>
+                            <xs:element name="BillingCustomerCode" type="xs:int" minOccurs="0"> </xs:element>
+                            <xs:element name="BillingCustomerCode1" type="xs:int" minOccurs="0" maxOccurs="4"> </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>            
         </xs:complexType>
     </xs:schema>
     `;
@@ -121,6 +140,28 @@ describe("BaseConverter <Element>", function () {
         tagName = enterState(node);
         bc[tagName](node, jsonSchema, xsd);
 
+    }
+
+    function readListOfAnonymous(){
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
     }
 
     function upStates(level) {
@@ -242,6 +283,15 @@ describe("BaseConverter <Element>", function () {
             expect(property.type == jsonSchemaTypes.OBJECT).toBeTruthy();
         });
 
+        it("should pass because the type is equal to the second mock element", function () {
+            readElement(7);
+            bc.handleElementLocal(node, jsonSchema, xsd);
+
+         
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.type == jsonSchemaTypes.OBJECT).toBeTruthy();
+        });
+
         it("should pass because 1 element has been added as required", function () {
             readElement(2);
 
@@ -252,6 +302,8 @@ describe("BaseConverter <Element>", function () {
             bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined, false);
             expect(bc.workingJsonSchema.required.length).toBeTruthy();
         });
+
+    
     });
 
     describe("is array", function () {
@@ -317,6 +369,7 @@ describe("BaseConverter <Element>", function () {
 
         it("must pass because the type of items is the same as the child element ", function () {
             readElement(5);          
+            bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType");
             tagName = enterState(node);
@@ -324,12 +377,7 @@ describe("BaseConverter <Element>", function () {
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType/xs:sequence");
             tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
+            bc[tagName](node, jsonSchema, xsd);       
 
             customType = bc.namespaceManager.getType("CommunicationInformationType", jsonSchema, xsd).get$RefToSchema();
             propertyName = "CommunicationInformation";
@@ -350,8 +398,9 @@ describe("BaseConverter <Element>", function () {
             bc[tagName](node, jsonSchema, xsd);
 
             readLisOf(5);
+            upStates(4);
             readElement(6);
-            bc[tagName](node, jsonSchema, xsd);                     
+            bc.handleElementLocal(node, jsonSchema, xsd);                     
             
             let propNames = Object.keys(bc.workingJsonSchema.properties);
             let property = propNames[propNames.length - 1];
@@ -376,38 +425,14 @@ describe("BaseConverter <Element>", function () {
             expect(property.items.type == jsonSchemaTypes.OBJECT).toBeTruthy();
         });
 
-        it("must pass because type is object ", function () {
+        it("must pass the name of propertie not change when read the child ", function () {
             readElement(6);
             bc[tagName](node, jsonSchema, xsd);
 
             readLisOf(6);
             bc[tagName](node, jsonSchema, xsd);
 
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-            // node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
-            // tagName = enterState(node);
-            // bc[tagName](node, jsonSchema, xsd);
-
-      
+            readListOfAnonymous();
 
             customType = bc.namespaceManager.getType(jsonSchemaTypes.INTEGER, jsonSchema, xsd).get$RefToSchema();           
             propertyName = "BankCode";
@@ -419,7 +444,111 @@ describe("BaseConverter <Element>", function () {
             expect(childPropName == propertyName).toBeTruthy();
         });
            
+        it("must pass because the property is correct ", function () {
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);
 
+            readLisOf(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readListOfAnonymous();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            upStates(10);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[7]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+          
+            let properties = Object.keys(bc.workingJsonSchema.properties);
+            let property = properties[properties.length - 1];
+            expect(property == "GovernmentalInformation").toBeTruthy();
+        });
+
+        it("must pass because the property is correct ", function () {
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readLisOf(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readListOfAnonymous();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            upStates(10);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[8]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+          
+            let properties = Object.keys(bc.workingJsonSchema.properties);
+            let property = properties[properties.length - 1];
+            expect(property == "ListOfGovernmentalInformation").toBeTruthy();
+        });
+
+        it("must pass because the property is correct ", function () {
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readLisOf(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readListOfAnonymous();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            upStates(10);
+
+            readElement(9);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc.handleElementLocal(node, jsonSchema, xsd);
+
+            let mainProperty = getLastProperty(bc.workingJsonSchema);
+           
+            let property = Object.keys(mainProperty.properties)[0];;
+            expect(property == "BillingCustomerCode").toBeTruthy();
+        });
+
+        it("must pass because the property is correct ", function () {
+            readElement(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readLisOf(6);
+            bc[tagName](node, jsonSchema, xsd);
+
+            readListOfAnonymous();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            upStates(10);
+
+            readElement(9);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType/xs:sequence/xs:element[2]");
+            tagName = enterState(node);
+            bc.handleElementLocal(node, jsonSchema, xsd);
+
+            let mainProperty = getLastProperty(bc.workingJsonSchema);
+           
+            let property = Object.keys(mainProperty.properties)[0];;
+            expect(property == "BillingCustomerCode1").toBeTruthy();
+        });
         
     });
 });
