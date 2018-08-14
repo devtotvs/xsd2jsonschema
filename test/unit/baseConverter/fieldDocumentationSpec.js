@@ -40,26 +40,60 @@ describe("BaseConverter <FieldDocumentation>", function () {
                     </xs:annotation>
                 </xs:element>
                 <xs:element name="Element2" type="xs:string">
-                <xs:annotation>
-                    <xs:documentation>Teste</xs:documentation>
-                    <xs:appinfo>
-                        <FieldDocumentation product="PRODUTO1">
-                            <Field>FIELD1</Field>
-                            <Required>Não</Required>
-                            <Type>Char</Type>
-                            <Length>7</Length>
-                            <Description>tESTE1</Description>
-                        </FieldDocumentation>
-                        <FieldDocumentation product="PRODUTO2">
-                            <Field>FIELD1</Field>
-                            <Required>Não</Required>
-                            <Type>Char</Type>
-                            <Length>7</Length>
-                            <Description>tESTE1</Description>
-                        </FieldDocumentation>
-                    </xs:appinfo>
-                </xs:annotation>
-            </xs:element>
+                    <xs:annotation>
+                        <xs:documentation>Teste</xs:documentation>
+                        <xs:appinfo>
+                            <FieldDocumentation product="PRODUTO1">
+                                <Field>FIELD1</Field>
+                                <Required>Não</Required>
+                                <Type>Char</Type>
+                                <Length>7</Length>
+                                <Description>tESTE1</Description>
+                            </FieldDocumentation>
+                            <FieldDocumentation product="PRODUTO2">
+                                <Field>FIELD1</Field>
+                                <Required>Não</Required>
+                                <Type>Char</Type>
+                                <Length>7</Length>
+                                <Description>tESTE1</Description>
+                            </FieldDocumentation>
+                        </xs:appinfo>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="ListOfBankingInformation" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="BankingInformation" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="BankCode" type="xs:int" minOccurs="0">
+                                            <xs:annotation>
+                                                <xs:documentation>Código do banco</xs:documentation>
+                                                <xs:appinfo>
+                                                    <FieldDocumentation product="DATASUL">
+                                                        <Field>emitente.cod-banco</Field>
+                                                        <Required>sim</Required>
+                                                        <Type>integer</Type>
+                                                        <Length>999</Length>
+                                                        <Description>
+                                                            Código do banco junto a FEBRABAN
+                                                        </Description>
+                                                    </FieldDocumentation>
+                                                    <FieldDocumentation product="LOGIX">
+                                                    </FieldDocumentation>
+                                                    <FieldDocumentation product="PROTHEUS">
+                                                    </FieldDocumentation>
+                                                    <FieldDocumentation product="RM">
+                                                    </FieldDocumentation>
+                                                </xs:appinfo>
+                                            </xs:annotation>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>    
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>    
             </xs:sequence>
         </xs:complexType>
     </xs:schema>
@@ -101,6 +135,10 @@ describe("BaseConverter <FieldDocumentation>", function () {
     }
 
     function readElement() {
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
+        
         node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation");
         tagName = enterState(node);
         bc[tagName](node, jsonSchema, xsd);
@@ -134,11 +172,9 @@ describe("BaseConverter <FieldDocumentation>", function () {
         tagName = enterState(node);
         bc[tagName](node, jsonSchema, xsd);
 
-        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element");
-        tagName = enterState(node);
-        bc[tagName](node, jsonSchema, xsd);
+     
 
-        readElement();
+       
     });
 
     afterEach(function () {});
@@ -146,11 +182,12 @@ describe("BaseConverter <FieldDocumentation>", function () {
     describe("in FieldDocumentation state", function () {
 
         it("should pass because this state is implemented", function () {
-
+            readElement();
             expect(bc[tagName](node, jsonSchema, xsd)).toBeTruthy();
         });
 
         it("should pass because workingJsonSchema have value", function () {
+            readElement();
             node = getFirstChildNode(node, "FieldDocumentation");
             tagName = enterState(node);
 
@@ -159,6 +196,7 @@ describe("BaseConverter <FieldDocumentation>", function () {
         });
 
         it("should pass because xTotvs was add", function () {
+            readElement();
             node = getFirstChildNode(node, "FieldDocumentation");
             tagName = enterState(node);
 
@@ -168,6 +206,7 @@ describe("BaseConverter <FieldDocumentation>", function () {
         });
 
         it("should pass because more than 1 obj was add  in xTotvs attribute", function () {
+            readElement();
             let nodes = getChildNodes(node, "FieldDocumentation");
 
             nodes.map(x => {
@@ -205,7 +244,7 @@ describe("BaseConverter <FieldDocumentation>", function () {
 
     describe("in Field state", function () {
         it("should pass because xTotvs was filled", function () {
-
+            readElement();
             node = getFirstChildNode(node, "FieldDocumentation");
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
@@ -218,8 +257,46 @@ describe("BaseConverter <FieldDocumentation>", function () {
             var xtotvs = property.xtotvs[0]["PRODUTO1"];
 
             expect(xtotvs.Field).toBeTruthy();
-        })
+        });
 
-    })
+    });
+
+    describe("in ListOf", function () {
+        it("should pass because xTotvs was filled", function () {
+            
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+            
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:appinfo");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = getFirstChildNode(node, "FieldDocumentation");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            property = getLastProperty(property.items);
+            expect(property.xtotvs.length > 0).toBeTruthy();
+
+            node = getFirstChildNode(node, "Field");
+            tagName = enterState(node);
+            bc.handleXTotvs(node, "Field");
+            
+            var xtotvs = property.xtotvs[0]["DATASUL"];
+
+            expect(xtotvs.Field).toBeTruthy();
+        });
+    });
 
 });

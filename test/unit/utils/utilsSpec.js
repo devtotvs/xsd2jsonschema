@@ -18,4 +18,12 @@ describe("Utils Test - ", function() {
         expect(Utils.getSafeNamespace(nonUrl)).toEqual(nonUrl);
     });
 
+ //handleText   
+    it("should trim spaces in text", function() {
+        expect(Utils.handleText(nonUrl)).toEqual(nonUrl);
+        expect(Utils.handleText(" teste ")).toEqual("teste");
+        expect(Utils.handleText("\r\t\t\rteste\r\t\t\r description\t\t\t\t ")).toEqual("teste description");
+        expect(Utils.handleText("\r\t\t\rteste\r\t\t\r")).toEqual("teste");
+    });
+
 })
