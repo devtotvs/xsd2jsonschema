@@ -102,7 +102,7 @@ class ParsingState {
 
 	isSchemaBeforeState(){
 		if (this.states.length > 1) {
-			return this.states[this.states.length-4].name == XsdElements.SCHEMA;
+			return !this.states[this.states.length-4] || this.states[this.states.length-4].name == XsdElements.SCHEMA;
 		} else  {
 			return false;
 		}
