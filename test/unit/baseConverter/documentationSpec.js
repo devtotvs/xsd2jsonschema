@@ -54,7 +54,17 @@ describe("BaseConverter <Documentation>", function () {
                             </xs:element>    
                         </xs:sequence>
                     </xs:complexType>
-                </xs:element>    
+                </xs:element>
+                <xs:element name="BillingInformation" minOccurs="0">
+                    <xs:annotation><xs:documentation>TEste OBj</xs:documentation></xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="BillingCustomerCode" type="xs:int" minOccurs="0">
+                                <xs:annotation><xs:documentation>Datasul:</xs:documentation></xs:annotation>
+                            </xs:element>	
+                        </xs:sequence>
+                    </xs:complexType>	
+                </xs:element>     
             </xs:sequence>
         </xs:complexType>
     </xs:schema>
@@ -134,7 +144,7 @@ describe("BaseConverter <Documentation>", function () {
 
     afterEach(function () {});
 
-    describe("in FieldDocumentation state", function () {
+    describe("in Documentation state", function () {
 
         it("should pass because this state is implemented", function () {        
             readElement();
@@ -180,6 +190,27 @@ describe("BaseConverter <Documentation>", function () {
             bc[tagName](node, jsonSchema, xsd);
 
             expect(bc[tagName](node, jsonSchema, xsd)).toBeFalsy();
+        });
+
+        it("should pass because descripiton is equal as the mock - Element -> Complextype -> Element", function () {
+            readElement(true,4);
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc.handleElementDocumentation(node);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.description).toEqual("TEste OBj");
+
+            property = getLastProperty(property);
+            expect(property.description).toEqual( "Datasul:");
         });
 
         it("should pass because descripiton is equal as the mock", function () {

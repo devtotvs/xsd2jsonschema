@@ -510,13 +510,13 @@ class BaseConverter extends Processor {
 	handleElementDocumentation(node) {
 		let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		// if (currentProp.haveProperties) {
-		// 	let childProp = this.getCurrentProperty(currentProp.obj, 1);
+		if (currentProp.haveProperties) {
+			let childProp = this.getCurrentProperty(currentProp.obj, 1);
 
-		// 	childProp.obj.description = this.handleTextDescription(node.textContent);
+			childProp.obj.description = utils.handleText(node.textContent);
 
-		// 	this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
-		// } else {
+			this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
+		} else {
 			if(currentProp.obj.type == jsonSchemaTypes.ARRAY &&  this.isObjectWithProperties(currentProp.obj.items.properties)){
 				let childProp = this.getCurrentProperty(currentProp.obj.items, 1);
 
@@ -530,7 +530,7 @@ class BaseConverter extends Processor {
 				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
 			}
 			
-		// }
+		}
 
 	}
 
