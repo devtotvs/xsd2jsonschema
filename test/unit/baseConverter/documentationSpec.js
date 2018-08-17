@@ -29,13 +29,32 @@ describe("BaseConverter <Documentation>", function () {
                     </xs:annotation>
                     <xs:simpleType>
                         <xs:restriction base="xs:string">
-                            <xs:enumeration value="Customer"><xs:annotation><xs:documentation>Cliente</xs:documentation></xs:annotation></xs:enumeration>
+                            <xs:enumeration value="Customer"><xs:annotation><xs:documentation>Cliente1</xs:documentation></xs:annotation></xs:enumeration>
                             <xs:enumeration value="Vendor"><xs:annotation><xs:documentation>Fornecedor</xs:documentation></xs:annotation></xs:enumeration>
                             <xs:enumeration value="Both"><xs:annotation><xs:documentation>Ambos</xs:documentation></xs:annotation></xs:enumeration>
                         </xs:restriction>
 				    </xs:simpleType>
                 </xs:element>
-                
+                <xs:element name="ListOfBankingInformation" minOccurs="0" maxOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="BankingInformation" maxOccurs="unbounded" minOccurs="0">                               
+                                <xs:complexType>
+                                    <xs:annotation>
+                                        <xs:documentation>testando</xs:documentation>
+                                    </xs:annotation>
+                                    <xs:sequence>
+                                        <xs:element name="BankCode" type="xs:int" minOccurs="0">
+                                            <xs:annotation>
+                                                <xs:documentation>Código do banco</xs:documentation>                                               
+                                            </xs:annotation>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>    
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>    
             </xs:sequence>
         </xs:complexType>
     </xs:schema>
@@ -76,6 +95,18 @@ describe("BaseConverter <Documentation>", function () {
         }
     }   
 
+    function readElement(annotation = true,index = 1) {
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
+
+        if(annotation){
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:annotation");
+            tagName = enterState(node);
+             bc[tagName](node, jsonSchema, xsd);
+        }
+    }
+
     beforeEach(function () {
         bc = new BaseConverter();
         xsd = new XsdFile({
@@ -99,16 +130,6 @@ describe("BaseConverter <Documentation>", function () {
         node = xsd.select1("//xs:schema/xs:complexType/xs:sequence");
         tagName = enterState(node);
         bc[tagName](node, jsonSchema, xsd);
-
-        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element");
-        tagName = enterState(node);
-        bc[tagName](node, jsonSchema, xsd);
-
-        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation");
-        tagName = enterState(node);
-        bc[tagName](node, jsonSchema, xsd);
-
-        
     });
 
     afterEach(function () {});
@@ -116,13 +137,14 @@ describe("BaseConverter <Documentation>", function () {
     describe("in FieldDocumentation state", function () {
 
         it("should pass because this state is implemented", function () {        
+            readElement();
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
             tagName = enterState(node);  
             expect(!bc[tagName](node, jsonSchema, xsd)).toBeTruthy();
         });
 
         it('tracks the spy for handleElementDocumentation method', function () {
-            
+            readElement();
             
             spyOn(bc, 'handleElementDocumentation');
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
@@ -133,6 +155,7 @@ describe("BaseConverter <Documentation>", function () {
         });
 
         it("should pass because descripiton is equal as the mock", function () {
+            readElement();
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
             tagName = enterState(node);  
 
@@ -143,6 +166,7 @@ describe("BaseConverter <Documentation>", function () {
 
         
         it("should pass because descripiton is equal as the mock", function () {
+            readElement();
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:annotation/xs:documentation");
             tagName = enterState(node);  
             bc[tagName](node, jsonSchema, xsd);
@@ -150,12 +174,82 @@ describe("BaseConverter <Documentation>", function () {
             expect(property.description  == "Test2e").toBeTruthy();
         });
 
-        it("must be false because the description in the enumeration is filled by another method", function () {
+        it("must be false because the description in the enumeration is filled by another method", function () {                      
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:simpleType/xs:restriction/xs:enumeration/xs:annotation/xs:documentation");
             tagName = enterState(node);  
             bc[tagName](node, jsonSchema, xsd);
 
             expect(bc[tagName](node, jsonSchema, xsd)).toBeFalsy();
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            readElement(false,3);
+        
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.description) .toEqual("testando");
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            readElement();
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            readElement(false,3);
+        
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+            
+            expect(Object.keys(bc.workingJsonSchema.properties).length).toEqual(2);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+
+            
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.description).toEqual("testando");
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            readElement(false,3);
+        
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+            bc[tagName](node, jsonSchema, xsd);
+
+
+            
+            let property = getLastProperty(bc.workingJsonSchema.properties["ListOfBankingInformation"].items);
+            expect(property.description).toEqual("Código do banco");
         });
        
     });

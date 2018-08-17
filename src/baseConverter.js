@@ -489,7 +489,9 @@ class BaseConverter extends Processor {
 			case XsdElements.RESTRICTION:	
 				return false;
 				break;
-		// 	case XsdElements.COMPLEX_TYPE:
+			case XsdElements.COMPLEX_TYPE:
+				return false;
+				break;
 		// 		if (this.parsingState.isSchemaBeforeState()) {
 		// 			this.workingJsonSchema.description = this.handleTextDescription(node.textContent);
 		// 		} else {
@@ -515,9 +517,19 @@ class BaseConverter extends Processor {
 
 		// 	this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
 		// } else {
-			currentProp.obj.description = utils.handleText(node.textContent);
+			if(currentProp.obj.type == jsonSchemaTypes.ARRAY &&  this.isObjectWithProperties(currentProp.obj.items.properties)){
+				let childProp = this.getCurrentProperty(currentProp.obj.items, 1);
 
-			this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+				childProp.obj.description = utils.handleText(node.textContent);
+
+				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
+			}
+			else{
+				currentProp.obj.description = utils.handleText(node.textContent);
+
+				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+			}
+			
 		// }
 
 	}

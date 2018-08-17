@@ -11,7 +11,7 @@ class XTotvs {
         this.xField = "";
         this.xRequired = false;
         this.xType = "";
-        this.xLength = "";
+        this.xLength = 0;
         this.xDescription = "";
     }
 
@@ -44,7 +44,7 @@ class XTotvs {
         return this[LENGHT];
     }
     set xLength(len) {
-        this[LENGHT] = len;
+        this[LENGHT] = parseInt(len);
     }
 
     get xDescription() {
