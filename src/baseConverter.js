@@ -765,11 +765,12 @@ class BaseConverter extends Processor {
 
 		// if (refAttr !== undefined) {
 		// 	return this.handleElementReference(node, jsonSchema, xsd);
-		// } else if (this.parsingState.isTopLevelEntity()) {
-		// 	return this.handleElementGlobal(node, jsonSchema, xsd);
-		// } else {
+		// } else 
+		if (this.parsingState.isTopLevelEntity()) {
+			return this.handleElementGlobal(node, jsonSchema, xsd);
+		} else {
 		 	return this.handleElementLocal(node, jsonSchema, xsd);
-		// }
+		}
 		
 	}
 

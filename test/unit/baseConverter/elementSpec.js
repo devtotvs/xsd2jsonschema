@@ -83,6 +83,8 @@ describe("BaseConverter <Element>", function () {
                 </xs:element>
             </xs:sequence>            
         </xs:complexType>
+        <xs:element name="BusinessContent" type="BusinessContentType" substitutionGroup="AbstractBusinessContent"/>
+
     </xs:schema>
     `;
 
@@ -142,26 +144,26 @@ describe("BaseConverter <Element>", function () {
 
     }
 
-    function readListOfAnonymous(){
+    function readListOfAnonymous() {
         node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
 
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
 
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
 
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
 
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[6]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence");
+        tagName = enterState(node);
+        bc[tagName](node, jsonSchema, xsd);
     }
 
     function upStates(level) {
@@ -287,7 +289,7 @@ describe("BaseConverter <Element>", function () {
             readElement(7);
             bc.handleElementLocal(node, jsonSchema, xsd);
 
-         
+
             let property = getLastProperty(bc.workingJsonSchema);
             expect(property.type == jsonSchemaTypes.OBJECT).toBeTruthy();
         });
@@ -303,7 +305,7 @@ describe("BaseConverter <Element>", function () {
             expect(bc.workingJsonSchema.required.length).toBeTruthy();
         });
 
-    
+
     });
 
     describe("is array", function () {
@@ -368,7 +370,7 @@ describe("BaseConverter <Element>", function () {
         });
 
         it("must pass because the type of items is the same as the child element ", function () {
-            readElement(5);          
+            readElement(5);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType");
@@ -377,7 +379,7 @@ describe("BaseConverter <Element>", function () {
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[5]/xs:complexType/xs:sequence");
             tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);       
+            bc[tagName](node, jsonSchema, xsd);
 
             customType = bc.namespaceManager.getType("CommunicationInformationType", jsonSchema, xsd).get$RefToSchema();
             propertyName = "CommunicationInformation";
@@ -388,7 +390,7 @@ describe("BaseConverter <Element>", function () {
 
             readElement(5);
             let property = getLastProperty(bc.workingJsonSchema);
-          
+
             expect(property.items.$ref == customType.$ref).toBeTruthy();
         });
 
@@ -400,8 +402,8 @@ describe("BaseConverter <Element>", function () {
             readLisOf(5);
             upStates(4);
             readElement(6);
-            bc.handleElementLocal(node, jsonSchema, xsd);                     
-            
+            bc.handleElementLocal(node, jsonSchema, xsd);
+
             let propNames = Object.keys(bc.workingJsonSchema.properties);
             let property = propNames[propNames.length - 1];
             expect(property == "ListOfBankingInformation").toBeTruthy();
@@ -413,14 +415,14 @@ describe("BaseConverter <Element>", function () {
             bc[tagName](node, jsonSchema, xsd);
 
             readLisOf(6);
-            
+
             customType = bc.namespaceManager.getType(jsonSchemaTypes.OBJECT, jsonSchema, xsd).get$RefToSchema();
             customType.type = jsonSchemaTypes.OBJECT;
             propertyName = "BankingInformation";
             minOccursAttr = 0;
             maxOccursAttr = "unbounded";
             bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, true);
-            
+
             let property = getLastProperty(bc.workingJsonSchema);
             expect(property.items.type == jsonSchemaTypes.OBJECT).toBeTruthy();
         });
@@ -434,16 +436,16 @@ describe("BaseConverter <Element>", function () {
 
             readListOfAnonymous();
 
-            customType = bc.namespaceManager.getType(jsonSchemaTypes.INTEGER, jsonSchema, xsd).get$RefToSchema();           
+            customType = bc.namespaceManager.getType(jsonSchemaTypes.INTEGER, jsonSchema, xsd).get$RefToSchema();
             propertyName = "BankCode";
             minOccursAttr = 0;
-            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined,false);
-            
+            bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined, false);
+
             let property = getLastProperty(bc.workingJsonSchema);
             let childPropName = Object.keys(property.items.properties)[0];
             expect(childPropName == propertyName).toBeTruthy();
         });
-           
+
         it("must pass because the property is correct ", function () {
             readElement(6);
             bc[tagName](node, jsonSchema, xsd);
@@ -463,7 +465,7 @@ describe("BaseConverter <Element>", function () {
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
-          
+
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
             expect(property == "GovernmentalInformation").toBeTruthy();
@@ -488,7 +490,7 @@ describe("BaseConverter <Element>", function () {
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
-          
+
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
             expect(property == "ListOfGovernmentalInformation").toBeTruthy();
@@ -517,7 +519,7 @@ describe("BaseConverter <Element>", function () {
             bc.handleElementLocal(node, jsonSchema, xsd);
 
             let mainProperty = getLastProperty(bc.workingJsonSchema);
-           
+
             let property = Object.keys(mainProperty.properties)[0];;
             expect(property == "BillingCustomerCode").toBeTruthy();
         });
@@ -545,10 +547,39 @@ describe("BaseConverter <Element>", function () {
             bc.handleElementLocal(node, jsonSchema, xsd);
 
             let mainProperty = getLastProperty(bc.workingJsonSchema);
-           
+
             let property = Object.keys(mainProperty.properties)[0];;
             expect(property == "BillingCustomerCode1").toBeTruthy();
         });
-        
+
     });
+
+    describe("is Global Element", function () {
+        it("should pass because a subschema was added", function () {
+             readElement();
+             bc[tagName](node, jsonSchema, xsd);
+            upStates(4);
+            node = xsd.select1("//xs:schema");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+            node = xsd.select1("//xs:schema/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+          
+            expect(readSubSchema(jsonSchema.subSchemas)).toEqual("BusinessContent");
+        });
+    });
+
+    function readSubSchema(subSchemas){
+        let schemaNames = Object.keys(subSchemas);
+        schemaNames = schemaNames[schemaNames.length - 1] || schemaNames[0];
+        let next = subSchemas[schemaNames].subSchemas
+        if(Object.keys(next).length > 0){
+            return  readSubSchema(next);
+        }
+        else{
+            return schemaNames;
+        }
+    }
 });
