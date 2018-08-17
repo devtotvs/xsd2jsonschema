@@ -219,27 +219,22 @@ describe("BaseConverter <FieldDocumentation>", function () {
         });
 
 
-        // it("should pass because more than 1 obj was add  in xTotvs attribute", function () {
+        it("should pass because more than 1 obj was add  in xTotvs attribute", function () {          
 
-        //     bc.parsingState.exitState();
-        //     bc.parsingState.exitState();
-        //     bc.parsingState.exitState();
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[1]");
+            tagName =  enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+            readElement();
+            let nodes = getChildNodes(node, "FieldDocumentation");
 
+            nodes.map(x => {
+                 tagName = enterState(x);
+                 bc[tagName](x, jsonSchema, xsd)
+            });
 
-        //     node = xsd.select("//xs:schema/xs:complexType/xs:sequence/xs:element")[1];
-        //     tagName =  enterState(node);
-        //     bc[tagName](node, jsonSchema, xsd);
-        //     readElement();
-        //     let nodes = getChildNodes(node, "FieldDocumentation");
-
-        //     nodes.map(x => {
-        //          tagName = enterState(x);
-        //          bc[tagName](x, jsonSchema, xsd)
-        //     });
-
-        //      let property = getLastproperty(bc.workingJsonSchema);
-        //      expect(property.xtotvs.length > 1).toBeTruthy();
-        //  });
+             let property = getLastProperty(bc.workingJsonSchema);
+             expect(property.xtotvs.length > 1).toBeTruthy();
+         });
     });
 
     describe("in Field state", function () {
@@ -254,9 +249,11 @@ describe("BaseConverter <FieldDocumentation>", function () {
             bc.handleXTotvs(node, "Field");
 
             let property = getLastProperty(bc.workingJsonSchema);
-            var xtotvs = property.xtotvs[0]["PRODUTO1"];
+          //  var xtotvs = property.xtotvs[0]["PRODUTO1"];
+          expect(property.xtotvs[0].Product).toEqual("PRODUTO1");
+            var xtotvs = property.xtotvs[0];
 
-            expect(xtotvs.Field).toBeTruthy();
+            expect(xtotvs.field).toBeTruthy();
         });
 
     });
@@ -293,9 +290,10 @@ describe("BaseConverter <FieldDocumentation>", function () {
             tagName = enterState(node);
             bc.handleXTotvs(node, "Field");
             
-            var xtotvs = property.xtotvs[0]["DATASUL"];
-
-            expect(xtotvs.Field).toBeTruthy();
+           // var xtotvs = property.xtotvs[0]["DATASUL"];
+           expect(property.xtotvs[0].product).toEqual("DATASUL");
+            var xtotvs = property.xtotvs[0];
+            expect(xtotvs.field).toBeTruthy();
         });
     });
 

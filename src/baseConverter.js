@@ -172,11 +172,11 @@ class BaseConverter extends Processor {
 
 		var productAttr = XsdFile.getAttrValue(node, XsdAttributes.PRODUCT);
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
-		var obj = {};
-		obj[productAttr] = new XTotvs();
+		var obj = new XTotvs();
+		//obj[productAttr] = new XTotvs();
 
 		var list = [];
-
+		obj.product = productAttr;
 		if (prop.name && prop.name.startsWith("ListOf") && this.isObjectWithProperties(prop.obj.items.properties)) {
 			var childProp = this.getCurrentProperty(prop.obj.items, 1);
 
@@ -865,22 +865,22 @@ class BaseConverter extends Processor {
 
 	//Field x-totvs
 	Field(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "xField");
+		this.handleXTotvs(node, "Field");
 	}
 
 	//Required x-totvs
 	Required(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "xRequired");
+		this.handleXTotvs(node, "Required");
 	}
 
 	//Type x-totvs
 	Type(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "xType");
+		this.handleXTotvs(node, "Type");
 	}
 
 	//Description x-totvs
 	Description(node, jsonSchema, xsd) {
-		var field = "xDescription"
+		var field = "Description";
 
 		var state = this.parsingState.getCurrentState();
 
@@ -898,7 +898,7 @@ class BaseConverter extends Processor {
 
 	//Length x-totvs
 	Length(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "xLength");
+		this.handleXTotvs(node, "Length");
 	}
 
 	handleXTotvs(node, field) {
@@ -919,8 +919,8 @@ class BaseConverter extends Processor {
 		xtotvs = prop.obj.xtotvs[qtd - 1];
 			}
 
-		var products = Object.keys(xtotvs);
-		xtotvs[products[products.length - 1]][field] = utils.handleText(node.textContent);
+		
+		xtotvs[field]= utils.handleText(node.textContent);
 		// }
 	}
 

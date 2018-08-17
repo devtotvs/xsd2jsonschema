@@ -1,57 +1,61 @@
-const FIELD = "field";
-const REQUIRED = "required";
-const TYPE = "type";
-const LENGHT = "length";
-const DESCRIPTION = "description";
+const xFIELD = "field";
+const xREQUIRED = "required";
+const xTYPE = "type";
+const xLENGHT = "length";
+const xDESCRIPTION = "description";
+const xPRODUCT = "product";
 
 class XTotvs {
 
     constructor() {
-
-        this.xField = "";
-        this.xRequired = false;
-        this.xType = "";
-        this.xLength = 0;
-        this.xDescription = "";
+        this.Product = "";
+        this.Field = "";
+        this.Required = false;
+        this.Type = "";
+        this.Length = "";
+        this.Description = "";
     }
 
-    add(attr, val) {
-        this[attr] = val;
+    get Product() {
+        return this[xPRODUCT];
+    }
+    set Product(name) {
+        this[xPRODUCT] = name;
     }
 
-    get xField() {
-        return this[FIELD];
+    get Field() {
+        return this[xFIELD];
     }
-    set xField(name) {
-        this[FIELD] = name;
-    }
-
-    get xRequired() {
-        return this[REQUIRED];
-    }
-    set xRequired(val) {
-        this[REQUIRED] = this.handleRequired(val);
+    set Field(name) {
+        this[xFIELD] = name;
     }
 
-    get xType() {
-        return this[TYPE];
+    get Required() {
+        return this[xREQUIRED];
     }
-    set xType(type) {
-        this[TYPE] = type;
-    }
-
-    get xLength() {
-        return this[LENGHT];
-    }
-    set xLength(len) {
-        this[LENGHT] = parseInt(len);
+    set Required(val) {
+        this[xREQUIRED] = this.handleRequired(val);
     }
 
-    get xDescription() {
-        return this[DESCRIPTION];
+    get Type() {
+        return this[xTYPE];
     }
-    set xDescription(desc) {
-        this[DESCRIPTION] = desc;
+    set Type(type) {
+        this[xTYPE] = type;
+    }
+
+    get Length() {
+        return this[xLENGHT];
+    }
+    set Length(len) {
+        this[xLENGHT] = len;
+    }
+
+    get Description() {
+        return this[xDESCRIPTION];
+    }
+    set Description(desc) {
+        this[xDESCRIPTION] = desc;
     }
 
     handleRequired(val) {
