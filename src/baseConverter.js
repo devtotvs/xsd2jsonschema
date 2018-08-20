@@ -489,15 +489,13 @@ class BaseConverter extends Processor {
 			case XsdElements.RESTRICTION:	
 				return false;
 				break;
-			case XsdElements.COMPLEX_TYPE:
-				return false;
+			case XsdElements.COMPLEX_TYPE:				
+				// if (this.parsingState.isSchemaBeforeState()) {
+					this.workingJsonSchema.description = utils.handleText(node.textContent);
+				// } else {
+				//	this.handleElementDocumentation(node);
+				// }
 				break;
-		// 		if (this.parsingState.isSchemaBeforeState()) {
-		// 			this.workingJsonSchema.description = this.handleTextDescription(node.textContent);
-		// 		} else {
-		// 			this.handleElementDocumentation(node);
-		// 		}
-		// 		break;
 			default:
 				console.log(state.name);
 		}

@@ -17,6 +17,9 @@ describe("BaseConverter <Documentation>", function () {
         xmlns="http://www.xsd2jsonschema.org/example" 
         xmlns:xs="http://www.w3.org/2001/XMLSchema">
         <xs:complexType name="Documentation">
+            <xs:annotation>
+                <xs:documentation>Documentation ComplexType</xs:documentation>
+            </xs:annotation>
             <xs:sequence>
                 <xs:element name="Element1" type="xs:string">
                     <xs:annotation>
@@ -171,8 +174,22 @@ describe("BaseConverter <Documentation>", function () {
 
             bc[tagName](node, jsonSchema, xsd);
             let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.description  == "Teste").toBeTruthy();
+            expect(property.description).toEqual("Teste");
         });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            bc.parsingState.exitState();
+            
+            node = xsd.select1("//xs:schema/xs:complexType/xs:annotation");
+            tagName = enterState(node);  
+            node = xsd.select1("//xs:schema/xs:complexType/xs:annotation/xs:documentation");
+            tagName = enterState(node);  
+
+            bc[tagName](node, jsonSchema, xsd);
+            
+            expect(bc.workingJsonSchema.description  == "Documentation ComplexType").toEqual("Documentation ComplexType");
+        });
+
 
         
         it("should pass because descripiton is equal as the mock", function () {
