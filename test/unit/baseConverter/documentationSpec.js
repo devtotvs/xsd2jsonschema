@@ -187,7 +187,7 @@ describe("BaseConverter <Documentation>", function () {
 
             bc[tagName](node, jsonSchema, xsd);
             
-            expect(bc.workingJsonSchema.description  == "Documentation ComplexType").toEqual("Documentation ComplexType");
+            expect(bc.workingJsonSchema.description).toEqual("Documentation ComplexType");
         });
 
 
