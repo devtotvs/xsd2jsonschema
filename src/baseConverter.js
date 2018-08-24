@@ -459,7 +459,13 @@ class BaseConverter extends Processor {
 			case XsdElements.SCHEMA:
 				this.workingJsonSchema = this.namespaceManager.getType(nameAttr, jsonSchema, xsd);
 				jsonSchema.addSubSchema(nameAttr, this.workingJsonSchema);
-				this.workingJsonSchema.type = jsonSchemaTypes.OBJECT;
+				if(nameAttr.startsWith(LISTOF)){
+					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
+				}
+				else{
+					this.workingJsonSchema.type = jsonSchemaTypes.OBJECT;
+				}
+				
 				break;
 			case XsdElements.REDEFINE:
 				throw new Error('complexType() needs to be impemented within redefine');
@@ -595,15 +601,16 @@ class BaseConverter extends Processor {
 
 		arraySchema.items = customType.get$RefToSchema();
 
-
-		if (min > 0) {
-			var oneOfSchema = new JsonSchemaFile();
-			oneOfSchema.oneOf.push(customType.get$RefToSchema());
-			oneOfSchema.oneOf.push(arraySchema);
-			this.addProperty(targetSchema, propertyName, oneOfSchema, minOccursAttr);
-		} else {
+		// Por definição, caso o retorno for 1 item, deve ser enviado um array de uma entidade e não uma entidade
+		//if (min > 0) {
+			//var oneOfSchema = new JsonSchemaFile();
+			//oneOfSchema.oneOf.push(customType.get$RefToSchema());
+			//oneOfSchema.oneOf.push(arraySchema);
+		//	arraySchema.MaxIte
+		//	this.addProperty(targetSchema, propertyName, oneOfSchema, minOccursAttr);
+		//} else {
 			this.addProperty(targetSchema, propertyName, arraySchema, minOccursAttr);
-		}
+	//	}
 
 	}
 
@@ -642,8 +649,8 @@ class BaseConverter extends Processor {
 		}
 
 
-		if (!customType.type) {
-			customType.type = jsonSchemaTypes.OBJECT;
+		if (!customType.type) {			
+			customType.type = jsonSchemaTypes.OBJECT;						
 		}
 
 
@@ -668,7 +675,7 @@ class BaseConverter extends Processor {
 		// 		break;
 		// 	case XsdElements.SEQUENCE:
 		// 	case XsdElements.ALL:
-		this.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray)
+		this.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray,jsonSchema)
 
 		// 		break;
 		// 	default:
@@ -677,30 +684,39 @@ class BaseConverter extends Processor {
 		return true;
 	}
 
-	handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray) {
-		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
+	handleElementLocalinSequence( propertyName, customType, minOccursAttr, maxOccursAttr, isArray,jsonSchema) {
+		let prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 		if (isArray) {
 
 			if (!this.parsingState.isSchemaBeforeState()) {
 				if (!propertyName.startsWith(LISTOF) && prop.name && prop.name.startsWith(LISTOF)) {
-					var item = {};
-					if (this.isObjectWithProperties(prop.obj.items.properties)) {
-						item = prop.obj.items;
-					} else {
-						item = new JsonSchemaFile();
-					}
+					// var item = {};
+					// if (this.isObjectWithProperties(prop.obj.items.properties)) {
+					// 	item = prop.obj.items;
+					// } else {
+					// 	item = new JsonSchemaFile();
+					// }
 					//this.addProperty(item, propertyName, customType, minOccursAttr);
 
 					prop.obj.addItems(customType.get$RefToSchema());
 					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);
 
 
-				} else {
+				} else {					
 					this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
 				}
 
 			} else {
-				this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
+
+				if(this.workingJsonSchema.type == jsonSchemaTypes.ARRAY){
+					let propSchema = this.getCurrentProperty(jsonSchema, 2);
+				
+					this.workingJsonSchema.items = customType.get$RefToSchema();
+					this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
+					
+				}else{
+					this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
+				}				
 			}
 
 		} else {
@@ -708,7 +724,7 @@ class BaseConverter extends Processor {
 			if (!this.parsingState.isSchemaBeforeState()) {
 
 				if (prop.name && prop.name.startsWith("ListOf")) {
-					var item = {};
+					let item = {};
 					if (this.isObjectWithProperties(prop.obj.items.properties)) {
 						item = prop.obj.items;
 					} else {
@@ -988,7 +1004,7 @@ class BaseConverter extends Processor {
 	}
 
 	Receive(node, jsonSchema, xsd) {
-		return true;
+		return false;
 	}
 
 	handleProductInformationItems(node, jsonSchema, field) {
