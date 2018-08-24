@@ -237,6 +237,27 @@ describe("BaseConverter <FieldDocumentation>", function () {
          });
     });
 
+    describe("in Description state", function () {
+        it("should pass because xTotvs.Description is equals mock", function () {
+            readElement();
+            node = getFirstChildNode(node, "FieldDocumentation");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = getFirstChildNode(node, "Description");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+          
+          expect(property.xtotvs[0].product).toEqual("PRODUTO1");
+            var xtotvs = property.xtotvs[0];
+
+            expect(xtotvs.description).toEqual("tESTE1");
+        });
+
+    });
+
     describe("in Field state", function () {
         it("should pass because xTotvs was filled", function () {
             readElement();

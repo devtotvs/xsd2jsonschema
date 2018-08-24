@@ -459,13 +459,12 @@ class BaseConverter extends Processor {
 			case XsdElements.SCHEMA:
 				this.workingJsonSchema = this.namespaceManager.getType(nameAttr, jsonSchema, xsd);
 				jsonSchema.addSubSchema(nameAttr, this.workingJsonSchema);
-				if(nameAttr.startsWith(LISTOF)){
+				if (nameAttr.startsWith(LISTOF)) {
 					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
-				}
-				else{
+				} else {
 					this.workingJsonSchema.type = jsonSchemaTypes.OBJECT;
 				}
-				
+
 				break;
 			case XsdElements.REDEFINE:
 				throw new Error('complexType() needs to be impemented within redefine');
@@ -603,14 +602,14 @@ class BaseConverter extends Processor {
 
 		// Por definição, caso o retorno for 1 item, deve ser enviado um array de uma entidade e não uma entidade
 		//if (min > 0) {
-			//var oneOfSchema = new JsonSchemaFile();
-			//oneOfSchema.oneOf.push(customType.get$RefToSchema());
-			//oneOfSchema.oneOf.push(arraySchema);
+		//var oneOfSchema = new JsonSchemaFile();
+		//oneOfSchema.oneOf.push(customType.get$RefToSchema());
+		//oneOfSchema.oneOf.push(arraySchema);
 		//	arraySchema.MaxIte
 		//	this.addProperty(targetSchema, propertyName, oneOfSchema, minOccursAttr);
 		//} else {
-			this.addProperty(targetSchema, propertyName, arraySchema, minOccursAttr);
-	//	}
+		this.addProperty(targetSchema, propertyName, arraySchema, minOccursAttr);
+		//	}
 
 	}
 
@@ -649,8 +648,8 @@ class BaseConverter extends Processor {
 		}
 
 
-		if (!customType.type) {			
-			customType.type = jsonSchemaTypes.OBJECT;						
+		if (!customType.type) {
+			customType.type = jsonSchemaTypes.OBJECT;
 		}
 
 
@@ -675,7 +674,7 @@ class BaseConverter extends Processor {
 		// 		break;
 		// 	case XsdElements.SEQUENCE:
 		// 	case XsdElements.ALL:
-		this.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray,jsonSchema)
+		this.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray, jsonSchema)
 
 		// 		break;
 		// 	default:
@@ -684,7 +683,7 @@ class BaseConverter extends Processor {
 		return true;
 	}
 
-	handleElementLocalinSequence( propertyName, customType, minOccursAttr, maxOccursAttr, isArray,jsonSchema) {
+	handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray, jsonSchema) {
 		let prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 		if (isArray) {
 
@@ -702,21 +701,21 @@ class BaseConverter extends Processor {
 					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);
 
 
-				} else {					
+				} else {
 					this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
 				}
 
 			} else {
 
-				if(this.workingJsonSchema.type == jsonSchemaTypes.ARRAY){
+				if (this.workingJsonSchema.type == jsonSchemaTypes.ARRAY) {
 					let propSchema = this.getCurrentProperty(jsonSchema, 2);
-				
+
 					this.workingJsonSchema.items = customType.get$RefToSchema();
 					this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
-					
-				}else{
+
+				} else {
 					this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
-				}				
+				}
 			}
 
 		} else {
@@ -919,8 +918,7 @@ class BaseConverter extends Processor {
 				this.handleProductInformationItems(node, jsonSchema, field);
 				break;
 			default:
-				//this.handleXTotvs(node, field);
-				console.log(node);
+				this.handleXTotvs(node, field);
 		}
 	}
 
@@ -1018,8 +1016,21 @@ class BaseConverter extends Processor {
 
 
 	fractionDigits(node, jsonSchema, xsd) {
-		// TODO: id, value, fixed
-		// do nothing - there is no coresponding functionality in JSON Schema
+		var val = XsdFile.getNumberValueAttr(node);
+		
+		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
+
+		if(prop.name && val){
+			val = parseFloat("1e-" + val);
+			prop.obj.multipleOf =val;
+			prop.obj.maximum = prop.obj.maximum * val;
+			prop.obj.minimum = prop.obj.minimum * val;
+
+			this.addProperty(this.workingJsonSchema, prop.name, prop.obj);
+		}
+
+		
+		
 		return true;
 	}
 
@@ -1297,7 +1308,7 @@ class BaseConverter extends Processor {
 			this.workingJsonSchema = this.workingJsonSchema.extend(this.namespaceManager.getType(baseTypeName, jsonSchema, xsd));
 			return true;
 		} else {
-			let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
+			let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
 
 			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
@@ -1463,8 +1474,21 @@ class BaseConverter extends Processor {
 	}
 
 	totalDigits(node, jsonSchema, xsd) {
-		// TODO: id, value, fixed
-		// do nothing - there is no coresponding functionality in JSON Schema
+		let valueAttr = XsdFile.getAttrValue(node, XsdAttributes.VALUE);
+
+		let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
+
+		if (currentProp.name && valueAttr) {
+			let value = ""
+			for (let i = 0; i < valueAttr; i++) {
+				value += 9;
+			}
+			value = parseFloat(value);
+			currentProp.obj.maximum = value;
+			currentProp.obj.minimum = -value;
+			this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
+		}
+
 		return true;
 	}
 
