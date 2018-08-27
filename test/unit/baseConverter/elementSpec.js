@@ -80,11 +80,15 @@ describe("BaseConverter <Element>", function () {
                             <xs:element name="BillingCustomerCode1" type="xs:int" minOccurs="0" maxOccurs="4"> </xs:element>
                         </xs:sequence>
                     </xs:complexType>
-                </xs:element>
+                </xs:element>                
             </xs:sequence>            
         </xs:complexType>
         <xs:element name="BusinessContent" type="BusinessContentType" substitutionGroup="AbstractBusinessContent"/>
-
+        <xs:complexType name="ListOfContractParcelType">
+            <xs:sequence>
+                <xs:element name="ContractParcel" type="ContractParcelType" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+	    </xs:complexType>
     </xs:schema>
     `;
 
@@ -100,20 +104,17 @@ describe("BaseConverter <Element>", function () {
         return name;
     }
 
-    // function getFirstChildNode(node, name) {
-    //     return getChildNodes(node, name)[0];
-    // }
-
-    // function getChildNodes(node, name) {
-    //     let childs = [];
-    //     for (var n = node.firstChild; n != null; n = n.nextSibling) {
-    //         if (n.nodeName == name) {
-    //             childs.push(n);
-    //         }
-    //     }
-
-    //     return childs;
-    // }
+    function readSubSchemaName(subSchemas){
+        let schemaNames = Object.keys(subSchemas);
+        schemaNames = schemaNames[schemaNames.length - 1] || schemaNames[0];
+        let next = subSchemas[schemaNames].subSchemas
+        if(Object.keys(next).length > 0){
+            return  readSubSchemaName(next);
+        }
+        else{
+            return schemaNames;
+        }
+    }   
 
     function getLastProperty(schema) {
         if (schema.properties) {
@@ -366,7 +367,7 @@ describe("BaseConverter <Element>", function () {
             bc.handleElementLocal(node, jsonSchema, xsd);
 
             let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.type == jsonSchemaTypes.ARRAY).toBeTruthy();
+            expect(property.type).toEqual(jsonSchemaTypes.ARRAY);
         });
 
         it("must pass because the type of items is the same as the child element ", function () {
@@ -427,7 +428,7 @@ describe("BaseConverter <Element>", function () {
             expect(property.items.type == jsonSchemaTypes.OBJECT).toBeTruthy();
         });
 
-        it("must pass the name of propertie not change when read the child ", function () {
+        it("must pass the name of property not change when read the child ", function () {
             readElement(6);
             bc[tagName](node, jsonSchema, xsd);
 
@@ -548,8 +549,27 @@ describe("BaseConverter <Element>", function () {
 
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
-            let property = Object.keys(mainProperty.properties)[0];;
-            expect(property == "BillingCustomerCode1").toBeTruthy();
+            let property = Object.keys(mainProperty.properties)[0];
+            expect(property).toEqual("BillingCustomerCode1");
+        });     
+
+        it("should pass because the type is array ", function () {
+            upStates(2);
+
+            node = xsd.select1("//xs:schema/xs:complexType[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element");
+            tagName = enterState(node);          
+            //bc[tagName](node, jsonSchema, xsd);
+
+            bc.handleElementLocal(node, jsonSchema, xsd);
+            
+            
+
+            let property = jsonSchema.properties["ListOfContractParcelType"];
+            expect(property.items.type).toEqual(jsonSchemaTypes.OBJECT);
         });
 
     });
@@ -567,19 +587,11 @@ describe("BaseConverter <Element>", function () {
             bc[tagName](node, jsonSchema, xsd);
 
           
-            expect(readSubSchema(jsonSchema.subSchemas)).toEqual("BusinessContent");
+            expect(readSubSchemaName(jsonSchema.subSchemas)).toEqual("BusinessContent");
         });
+
+        
     });
 
-    function readSubSchema(subSchemas){
-        let schemaNames = Object.keys(subSchemas);
-        schemaNames = schemaNames[schemaNames.length - 1] || schemaNames[0];
-        let next = subSchemas[schemaNames].subSchemas
-        if(Object.keys(next).length > 0){
-            return  readSubSchema(next);
-        }
-        else{
-            return schemaNames;
-        }
-    }
+   
 });
