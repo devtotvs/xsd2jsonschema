@@ -30,8 +30,8 @@ class xTotvsProductInformation {
     get xDescription() {
         return this[DESCRIPTION];
     }
-    set xDescription(desc) {
-        this[DESCRIPTION] = desc;
+    set xDescription(description) {
+        this[DESCRIPTION] = description;
     }
 
     get xAdapter() {

@@ -1,7 +1,7 @@
 
 
 const NAME = "name";
-const DESCRIPTION = "description";
+const NOTE = "note";
 const SEGMENT = "segment";
 
 
@@ -11,7 +11,7 @@ class XTotvsMessage {
     constructor() {
 
         this.xName = "";
-        this.xDescription = "";
+        this.xNote = "";
         this.xSegment = "";
     }
 
@@ -23,11 +23,11 @@ class XTotvsMessage {
         this[NAME] = name;
     }
 
-    get xDescription() {
-        return this[DESCRIPTION];
+    get xNote() {
+        return this[NOTE];
     }
-    set xDescription(desc) {
-        this[DESCRIPTION] = desc;
+    set xNote(note) {
+        this[NOTE] = note;
     }
 
     get xSegment() {
@@ -35,9 +35,7 @@ class XTotvsMessage {
     }
     set xSegment(val) {
         this[SEGMENT] = val;
-    }
-
-   
+    }   
 }
 
 module.exports = XTotvsMessage;

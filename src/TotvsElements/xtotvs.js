@@ -2,7 +2,7 @@ const xFIELD = "field";
 const xREQUIRED = "required";
 const xTYPE = "type";
 const xLENGHT = "length";
-const xDESCRIPTION = "description";
+const xNOTE = "note";
 const xPRODUCT = "product";
 
 class XTotvs {
@@ -13,7 +13,7 @@ class XTotvs {
         this.Required = false;
         this.Type = "";
         this.Length = "";
-        this.Description = "";
+        this.Note = "";
     }
 
     get Product() {
@@ -51,11 +51,11 @@ class XTotvs {
         this[xLENGHT] = len;
     }
 
-    get Description() {
-        return this[xDESCRIPTION];
+    get Note() {
+        return this[xNOTE];
     }
-    set Description(desc) {
-        this[xDESCRIPTION] = desc;
+    set Note(note) {
+        this[xNOTE] = note;
     }
 
     handleRequired(val) {
