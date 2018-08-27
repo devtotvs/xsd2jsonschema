@@ -1020,20 +1020,18 @@ class BaseConverter extends Processor {
 
 	fractionDigits(node, jsonSchema, xsd) {
 		var val = XsdFile.getNumberValueAttr(node);
-		
+
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if(prop.name && val){
+		if (prop.name && val) {
 			val = parseFloat("1e-" + val);
-			prop.obj.multipleOf =val;
-			prop.obj.maximum = prop.obj.maximum * val;
-			prop.obj.minimum = prop.obj.minimum * val;
+			prop.obj.multipleOf = val;
 
 			this.addProperty(this.workingJsonSchema, prop.name, prop.obj);
 		}
 
-		
-		
+
+
 		return true;
 	}
 
