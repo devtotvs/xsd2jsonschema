@@ -469,7 +469,7 @@ describe("BaseConverter <Element>", function () {
 
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
-            expect(property == "GovernmentalInformation").toBeTruthy();
+            expect(property == "governmentalInformation").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -494,7 +494,7 @@ describe("BaseConverter <Element>", function () {
 
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
-            expect(property == "ListOfGovernmentalInformation").toBeTruthy();
+            expect(property == "listOfGovernmentalInformation").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -522,7 +522,7 @@ describe("BaseConverter <Element>", function () {
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
             let property = Object.keys(mainProperty.properties)[0];;
-            expect(property == "BillingCustomerCode").toBeTruthy();
+            expect(property == "billingCustomerCode").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -550,7 +550,7 @@ describe("BaseConverter <Element>", function () {
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
             let property = Object.keys(mainProperty.properties)[0];
-            expect(property).toEqual("BillingCustomerCode1");
+            expect(property).toEqual("billingCustomerCode1");
         });     
 
         it("should pass because the type is array ", function () {
@@ -568,7 +568,7 @@ describe("BaseConverter <Element>", function () {
             
             
 
-            let property = jsonSchema.properties["ListOfContractParcelType"];
+            let property = jsonSchema.properties["listOfContractParcelType"];
             expect(property.items.type).toEqual(jsonSchemaTypes.OBJECT);
         });
 
