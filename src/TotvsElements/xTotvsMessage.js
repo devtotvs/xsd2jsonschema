@@ -1,10 +1,7 @@
-
-
 const NAME = "name";
 const NOTE = "note";
+const DESCRIPTION = "description";
 const SEGMENT = "segment";
-
-
 
 class XTotvsMessage {
 
@@ -14,7 +11,6 @@ class XTotvsMessage {
         this.xNote = "";
         this.xSegment = "";
     }
-
    
     get xName() {
         return this[NAME];
@@ -28,6 +24,13 @@ class XTotvsMessage {
     }
     set xNote(note) {
         this[NOTE] = note;
+    }
+
+    get xDescription() {
+        return this[DESCRIPTION];
+    }
+    set xDescription(description) {
+        this[DESCRIPTION] = description;
     }
 
     get xSegment() {

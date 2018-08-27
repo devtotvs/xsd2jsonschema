@@ -900,7 +900,10 @@ class BaseConverter extends Processor {
 				this.handleXMessageTotvs(node, jsonSchema, field);
 				break;
 			case XsdElements.PRODUCT_INFORMATION:
-				this.handleProductInformationItems(node, jsonSchema, field);
+				this.handleProductInformationItems(node, jsonSchema, "note");
+				break;
+			case XsdElements.FIELD_DOCUMENTATION:
+				this.handleXTotvs(node, "note");
 				break;
 			default:
 				//this.handleXTotvs(node, field);

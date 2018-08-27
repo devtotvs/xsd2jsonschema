@@ -29,7 +29,8 @@ const options = {
 const xsdFilenames = [
 		//"ExampleTypes_2016-01-01.xsd"
 		//"commons_1_000.xsd"
-		"CustomerVendor_2_005.xsd"
+		"CustomerVendor_2_005.xsd",
+		//"Financing_1_002.xsd"
 	];
 
 const converter = new Xsd2JsonSchema(options);

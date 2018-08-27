@@ -297,9 +297,9 @@ describe("BaseConverter <MessageDocumentation>", function () {
             bc[tagName](node, jsonSchema, xsd);
 
             node = getFirstChildNode(node, "Description");
-            bc.handleProductInformationItems(node, jsonSchema, "xDescription");
+            bc.handleProductInformationItems(node, jsonSchema, "xNote");
 
-            expect(jsonSchema.info.xTotvs.productInformation[0].description).toEqual("GDP Inovação");
+            expect(jsonSchema.info.xTotvs.productInformation[0].note).toEqual("GDP Inovação");
         });
 
         it("should pass because ProductInformation.Send is false", function () {

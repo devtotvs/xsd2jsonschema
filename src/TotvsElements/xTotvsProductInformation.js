@@ -1,16 +1,14 @@
 const PRODUCT = "product";
 const CONTACT = "contact";
-const DESCRIPTION = "description";
+const NOTE = "note";
 const ADAPTER = "adapter";
-
-
 
 class xTotvsProductInformation {
 
     constructor() {
         this.xProduct = "";
         this.xContact = "";
-        this.xDescription = "";
+        this.xNote = "";
         this.xAdapter = "";
     }
 
@@ -27,11 +25,11 @@ class xTotvsProductInformation {
         this[CONTACT] = contact;
     }
 
-    get xDescription() {
-        return this[DESCRIPTION];
+    get xNote() {
+        return this[NOTE];
     }
-    set xDescription(description) {
-        this[DESCRIPTION] = description;
+    set xNote(note) {
+        this[NOTE] = note;
     }
 
     get xAdapter() {
@@ -40,8 +38,6 @@ class xTotvsProductInformation {
     set xAdapter(adapter) {
         this[ADAPTER] = adapter;
     }
-
-
 }
 
 module.exports = xTotvsProductInformation;
