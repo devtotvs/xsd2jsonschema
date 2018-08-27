@@ -70,6 +70,15 @@ describe("BaseConverter <Documentation>", function () {
                 </xs:element>     
             </xs:sequence>
         </xs:complexType>
+        <xs:complexType name="ListOfGenericPricesType">
+            <xs:sequence>
+                <xs:element name="GenericPrices" type="GenericPricesType" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>Preços</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
     </xs:schema>
     `;
 
@@ -106,17 +115,17 @@ describe("BaseConverter <Documentation>", function () {
             prop = prop[prop.length - 1];
             return schema.properties[prop];
         }
-    }   
+    }
 
-    function readElement(annotation = true,index = 1) {
+    function readElement(annotation = true, index = 1) {
         node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]");
         tagName = enterState(node);
         bc[tagName](node, jsonSchema, xsd);
 
-        if(annotation){
+        if (annotation) {
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:annotation");
             tagName = enterState(node);
-             bc[tagName](node, jsonSchema, xsd);
+            bc[tagName](node, jsonSchema, xsd);
         }
     }
 
@@ -149,19 +158,19 @@ describe("BaseConverter <Documentation>", function () {
 
     describe("in Documentation state", function () {
 
-        it("should pass because this state is implemented", function () {        
+        it("should pass because this state is implemented", function () {
             readElement();
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             expect(!bc[tagName](node, jsonSchema, xsd)).toBeTruthy();
         });
 
         it('tracks the spy for handleElementDocumentation method', function () {
             readElement();
-            
+
             spyOn(bc, 'handleElementDocumentation');
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd)
 
             expect(bc.handleElementDocumentation).toHaveBeenCalled();
@@ -170,7 +179,7 @@ describe("BaseConverter <Documentation>", function () {
         it("should pass because descripiton is equal as the mock", function () {
             readElement();
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
 
             bc[tagName](node, jsonSchema, xsd);
             let property = getLastProperty(bc.workingJsonSchema);
@@ -179,129 +188,149 @@ describe("BaseConverter <Documentation>", function () {
 
         it("should pass because descripiton is equal as the mock", function () {
             bc.parsingState.exitState();
-            
+
             node = xsd.select1("//xs:schema/xs:complexType/xs:annotation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             node = xsd.select1("//xs:schema/xs:complexType/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
 
             bc[tagName](node, jsonSchema, xsd);
-            
+
             expect(bc.workingJsonSchema.description).toEqual("Documentation ComplexType");
         });
 
 
-        
+
         it("should pass because descripiton is equal as the mock", function () {
             readElement();
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
             let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.description  == "Test2e").toBeTruthy();
+            expect(property.description == "Test2e").toBeTruthy();
         });
 
-        it("must be false because the description in the enumeration is filled by another method", function () {                      
+        it("must be false because the description in the enumeration is filled by another method", function () {
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:simpleType/xs:restriction/xs:enumeration/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             expect(bc[tagName](node, jsonSchema, xsd)).toBeFalsy();
         });
 
         it("should pass because descripiton is equal as the mock - Element -> Complextype -> Element", function () {
-            readElement(true,4);
+            readElement(true, 4);
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc.handleElementDocumentation(node);
 
             let property = getLastProperty(bc.workingJsonSchema);
             expect(property.description).toEqual("TEste OBj");
 
             property = getLastProperty(property);
-            expect(property.description).toEqual( "Datasul:");
+            expect(property.description).toEqual("Datasul:");
         });
 
         it("should pass because descripiton is equal as the mock", function () {
-            readElement(false,3);
-        
+            readElement(false, 3);
+
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
-            let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.description) .toEqual("testando");
-        });
-
-        it("should pass because descripiton is equal as the mock", function () {
-            readElement();
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
-            bc[tagName](node, jsonSchema, xsd);
-
-            bc.parsingState.exitState();
-            bc.parsingState.exitState();
-            bc.parsingState.exitState();
-            readElement(false,3);
-        
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);  
-            bc[tagName](node, jsonSchema, xsd);
-            
-            expect(Object.keys(bc.workingJsonSchema.properties).length).toEqual(2);
-
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
-            bc[tagName](node, jsonSchema, xsd);
-
-
-            
             let property = getLastProperty(bc.workingJsonSchema);
             expect(property.description).toEqual("testando");
         });
 
         it("should pass because descripiton is equal as the mock", function () {
-            readElement(false,3);
-        
+            readElement();
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            readElement(false, 3);
+
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);  
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            expect(Object.keys(bc.workingJsonSchema.properties).length).toEqual(2);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.description).toEqual("testando");
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            readElement(false, 3);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             bc.parsingState.exitState();
             bc.parsingState.exitState();
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
-            tagName = enterState(node);  
+            tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
 
-            
+
             let property = getLastProperty(bc.workingJsonSchema.properties["listOfBankingInformation"].items);
             expect(property.description).toEqual("Código do banco");
         });
-       
+
+        it("should pass because descripiton is equal as the mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:complexType[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+           
+            node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element/xs:annotation/xs:documentation");
+            tagName = enterState(node);
+            bc.handleElementDocumentation(node,jsonSchema);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.description).toEqual("Preços");
+        });
+
     });
 
-   
+
 
 });

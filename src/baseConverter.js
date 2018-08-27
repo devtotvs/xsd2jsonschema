@@ -504,7 +504,7 @@ class BaseConverter extends Processor {
 
 		switch (state.name) {
 			case XsdElements.ELEMENT:
-				this.handleElementDocumentation(node);
+				this.handleElementDocumentation(node, jsonSchema);
 				break;
 			case XsdElements.RESTRICTION:
 				return false;
@@ -525,8 +525,14 @@ class BaseConverter extends Processor {
 	}
 
 
-	handleElementDocumentation(node) {
-		let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
+	handleElementDocumentation(node, jsonSchema) {
+		let currentProp;
+		if (!this.parsingState.isSchemaBeforeState()) {
+			currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
+		} else {
+			currentProp = this.getCurrentSchemaProperty(jsonSchema, 1);
+
+		}
 
 		if (currentProp.haveProperties) {
 			let childProp = this.getCurrentProperty(currentProp.obj, 1);
@@ -587,7 +593,7 @@ class BaseConverter extends Processor {
 
 	addChoiceProperty(targetSchema, propertyName, customType, minOccursAttr) {
 		propertyName = utils.lowerCaseFirstLetter(propertyName);
-		var choiceSchema = new JsonSchemaFile();		
+		var choiceSchema = new JsonSchemaFile();
 		//choiceSchema.additionalProperties = false;
 		this.addProperty(choiceSchema, propertyName, customType, minOccursAttr);
 		targetSchema.oneOf.push(choiceSchema);
@@ -1357,6 +1363,35 @@ class BaseConverter extends Processor {
 
 	getCurrentProperty(schema, level) {
 		let properties = schema.properties;
+
+		if (properties) {
+			let propNames = Object.keys(properties);
+
+			let currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - level]] || properties[propNames[0]]);
+			let propName = propNames[propNames.length - level] || propNames[0];
+
+			return {
+				obj: currentProp,
+				name: propName,
+				haveProperties: this.isObjectWithProperties(currentProp.properties)
+			};
+		}
+
+	}
+
+	readSubSchemas(subSchemas){
+        let schemaNames = Object.keys(subSchemas);
+        schemaNames = schemaNames[schemaNames.length - 1] || schemaNames[0];
+        let next = subSchemas[schemaNames].subSchemas
+        if(Object.keys(next).length > 0){
+            return  this.readSubSchemas(next);
+        }
+        else{
+            return subSchemas;
+        }
+    } 
+	getCurrentSchemaProperty(schema, level) {
+		let properties = this.readSubSchemas(schema.subSchemas);
 
 		if (properties) {
 			let propNames = Object.keys(properties);
