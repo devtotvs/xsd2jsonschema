@@ -438,7 +438,7 @@ describe("BaseConverter <Element>", function () {
             readListOfAnonymous();
 
             customType = bc.namespaceManager.getType(jsonSchemaTypes.INTEGER, jsonSchema, xsd).get$RefToSchema();
-            propertyName = "BankCode";
+            propertyName = "bankCode";
             minOccursAttr = 0;
             bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined, false);
 
