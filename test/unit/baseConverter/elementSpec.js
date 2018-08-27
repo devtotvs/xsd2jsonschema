@@ -250,7 +250,7 @@ describe("BaseConverter <Element>", function () {
             readElement();
 
             bc[tagName](node, jsonSchema, xsd);
-            expect(Object.keys(bc.workingJsonSchema.properties)[0] == "Element1").toBeTruthy();
+            expect(Object.keys(bc.workingJsonSchema.properties)[0] == "element1").toBeTruthy();
         });
 
         //must be true because could have child elements
@@ -407,7 +407,7 @@ describe("BaseConverter <Element>", function () {
 
             let propNames = Object.keys(bc.workingJsonSchema.properties);
             let property = propNames[propNames.length - 1];
-            expect(property == "ListOfBankingInformation").toBeTruthy();
+            expect(property == "listOfBankingInformation").toBeTruthy();
         });
 
         // totdo Element sem type = object - no caso do LisOf, o items deve receber o type do element filho

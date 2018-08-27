@@ -578,9 +578,9 @@ describe('JsonSchemaFile Test -', function () {
             fullJsonSchema.addAttributeProperty(optionalPropertyName);
         }).toThrow(Error('Required parameter "customType" is undefined'));
         fullJsonSchema.addAttributeProperty(optionalPropertyName, testJsonSchema);
-        expect(fullJsonSchema.getProperty('@' + optionalPropertyName)).toEqual(testJsonSchema);
-        expect(fullJsonSchema.getProperty('@' + optionalPropertyName)).toBe(testJsonSchema);
-        expect(fullJsonSchema.required.indexOf('@' + optionalPropertyName)).toEqual(-1);
+        expect(fullJsonSchema.getProperty(optionalPropertyName)).toEqual(testJsonSchema);
+        expect(fullJsonSchema.getProperty(optionalPropertyName)).toBe(testJsonSchema);
+        expect(fullJsonSchema.required.indexOf(optionalPropertyName)).toEqual(-1);
     });
 
     // addAttributeProperty
@@ -591,9 +591,9 @@ describe('JsonSchemaFile Test -', function () {
             fullJsonSchema.addAttributeProperty(requiredPropertyName);
         }).toThrow(Error('Required parameter "customType" is undefined'));
         fullJsonSchema.addAttributeProperty(requiredPropertyName, testJsonSchema, XsdAttributeValues.REQUIRED);
-        expect(fullJsonSchema.getProperty('@' + requiredPropertyName)).toEqual(testJsonSchema);
-        expect(fullJsonSchema.getProperty('@' + requiredPropertyName)).toBe(testJsonSchema);
-        expect(fullJsonSchema.required.indexOf('@' + requiredPropertyName)).toEqual(1);
+        expect(fullJsonSchema.getProperty(requiredPropertyName)).toEqual(testJsonSchema);
+        expect(fullJsonSchema.getProperty(requiredPropertyName)).toBe(testJsonSchema);
+        expect(fullJsonSchema.required.indexOf(requiredPropertyName)).toEqual(1);
     });
 
     // addRequiredAnyOfPropertyByReference

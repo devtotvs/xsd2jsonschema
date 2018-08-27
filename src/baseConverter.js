@@ -24,7 +24,7 @@ const SpecialCases = require('./specialCases');
 
 const builtInTypeConverter_NAME = Symbol();
 const NamespaceManager_NAME = Symbol();
-const LISTOF = "listOf";
+const LISTOF = "ListOf";
 
 /**
  * Class representing a collection of XML Handler methods for converting XML Schema elements to JSON Schema.  XML 
@@ -177,7 +177,7 @@ class BaseConverter extends Processor {
 
 		var list = [];
 		obj.product = productAttr;
-		if (prop.name && prop.name.startsWith(LISTOF) && this.isObjectWithProperties(prop.obj.items.properties)) {
+		if (prop.name && prop.name.toLowerCase().startsWith(LISTOF.toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
 			var childProp = this.getCurrentProperty(prop.obj.items, 1);
 
 			list = Object.assign([], childProp.obj.xtotvs);
@@ -460,7 +460,7 @@ class BaseConverter extends Processor {
 			case XsdElements.SCHEMA:
 				this.workingJsonSchema = this.namespaceManager.getType(nameAttr, jsonSchema, xsd);
 				jsonSchema.addSubSchema(nameAttr, this.workingJsonSchema);
-				if (nameAttr.startsWith(LISTOF)) {
+				if (nameAttr.toLowerCase().startsWith(LISTOF.toLowerCase())) {
 					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
 				} else {
 					this.workingJsonSchema.type = jsonSchemaTypes.OBJECT;
@@ -638,7 +638,7 @@ class BaseConverter extends Processor {
 		}
 		var propertyName = nameAttr; // name attribute is required for local element
 		var customType;
-		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED)) || propertyName.startsWith(LISTOF);
+		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED)) || propertyName.toLowerCase().startsWith((LISTOF).toLowerCase());
 		if (lookupName !== undefined) {
 			customType = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
 		} else {
@@ -693,7 +693,7 @@ class BaseConverter extends Processor {
 		if (isArray) {
 
 			if (!this.parsingState.isSchemaBeforeState()) {
-				if (!propertyName.startsWith(LISTOF) && prop.name && prop.name.startsWith(LISTOF)) {
+				if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase()) && prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					// var item = {};
 					// if (this.isObjectWithProperties(prop.obj.items.properties)) {
 					// 	item = prop.obj.items;
@@ -727,7 +727,7 @@ class BaseConverter extends Processor {
 
 			if (!this.parsingState.isSchemaBeforeState()) {
 
-				if (prop.name && prop.name.startsWith(LISTOF)) {
+				if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let item = {};
 					if (this.isObjectWithProperties(prop.obj.items.properties)) {
 						item = prop.obj.items;
@@ -811,7 +811,7 @@ class BaseConverter extends Processor {
 		var current = this.getCurrentProperty(this.workingJsonSchema, 1);
 
 		if (current.name && !this.parsingState.isSchemaBeforeState()) {
-			if (current.name.startsWith(LISTOF)) {
+			if (current.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(current.obj.items, 1);
 
 				this.handleEnumDescription(childProp.obj, val, node.textContent);
@@ -941,7 +941,7 @@ class BaseConverter extends Processor {
 		var xtotvs = {}
 		var qtd = 0;
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
-		if (prop.name && prop.name.startsWith(LISTOF) && this.isObjectWithProperties(prop.obj.items.properties)) {
+		if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
 			var childProp = this.getCurrentProperty(prop.obj.items, 1);
 
 			qtd = childProp.obj.xtotvs.length
@@ -1222,7 +1222,7 @@ class BaseConverter extends Processor {
 		var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
 
 		if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
-			if (currentProp.name.startsWith(LISTOF)) {
+			if (currentProp.name.startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 				childProp.obj.maxLength = len;
@@ -1320,7 +1320,7 @@ class BaseConverter extends Processor {
 
 
 			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
-				if (currentProp.name.startsWith(LISTOF)) {
+				if (currentProp.name.startsWith((LISTOF).toLowerCase())) {
 					let childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp, xsd);
