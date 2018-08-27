@@ -237,8 +237,8 @@ describe("BaseConverter <FieldDocumentation>", function () {
          });
     });
 
-    describe("in Description state", function () {
-        it("should pass because xTotvs.Description is equals mock", function () {
+    describe("in Note state", function () {
+        it("should pass because xTotvs.Note is equals mock", function () {
             readElement();
             node = getFirstChildNode(node, "FieldDocumentation");
             tagName = enterState(node);
@@ -253,7 +253,7 @@ describe("BaseConverter <FieldDocumentation>", function () {
           expect(property.xtotvs[0].product).toEqual("PRODUTO1");
             var xtotvs = property.xtotvs[0];
 
-            expect(xtotvs.description).toEqual("tESTE1");
+            expect(xtotvs.note).toEqual("tESTE1");
         });
 
     });
