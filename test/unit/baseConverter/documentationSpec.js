@@ -296,7 +296,7 @@ describe("BaseConverter <Documentation>", function () {
 
 
             
-            let property = getLastProperty(bc.workingJsonSchema.properties["ListOfBankingInformation"].items);
+            let property = getLastProperty(bc.workingJsonSchema.properties["listOfBankingInformation"].items);
             expect(property.description).toEqual("Código do banco");
         });
        
