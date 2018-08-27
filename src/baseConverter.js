@@ -527,7 +527,8 @@ class BaseConverter extends Processor {
 
 	handleElementDocumentation(node, jsonSchema) {
 		let currentProp;
-		if (!this.parsingState.isSchemaBeforeState()) {
+	
+		if (!this.parsingState.isSchemaBeforeState(2)) {			
 			currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 		} else {
 			currentProp = this.getCurrentSchemaProperty(jsonSchema, 1);

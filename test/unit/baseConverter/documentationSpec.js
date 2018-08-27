@@ -299,6 +299,9 @@ describe("BaseConverter <Documentation>", function () {
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element/xs:annotation");
+            tagName = enterState(node);
+
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:sequence/xs:element/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:documentation");
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
@@ -317,10 +320,16 @@ describe("BaseConverter <Documentation>", function () {
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
+            node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence");
+            tagName = enterState(node);
+
             node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element");
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
            
+            node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element/xs:annotation");
+            tagName = enterState(node);
+            
             node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element/xs:annotation/xs:documentation");
             tagName = enterState(node);
             bc.handleElementDocumentation(node,jsonSchema);
