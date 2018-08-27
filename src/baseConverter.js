@@ -935,6 +935,11 @@ class BaseConverter extends Processor {
 		this.handleXTotvs(node, "Length");
 	}
 
+	//Length x-totvs
+	Blabla(node, jsonSchema, xsd) {
+		this.handleXTotvs(node, "blabla");
+	}
+
 	handleXTotvs(node, field) {
 
 		// if (this.parsingState.inFieldDocumentation()) {

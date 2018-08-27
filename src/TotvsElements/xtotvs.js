@@ -4,6 +4,8 @@ const xTYPE = "type";
 const xLENGHT = "length";
 const xNOTE = "note";
 const xPRODUCT = "product";
+const xAVAILABLE = "available";
+const xCANUPDATE = "canUpdate";
 
 class XTotvs {
 
@@ -14,6 +16,15 @@ class XTotvs {
         this.Type = "";
         this.Length = "";
         this.Note = "";
+        this.Available = true;
+        this.CanUpdate = false;
+    }
+
+    get Available() {
+        return this[xAVAILABLE];
+    }
+    set Available(available) {
+        this[xAVAILABLE] = available;
     }
 
     get Product() {
@@ -56,6 +67,13 @@ class XTotvs {
     }
     set Note(note) {
         this[xNOTE] = note;
+    }
+
+    get CanUpdate() {
+        return this[xCANUPDATE];
+    }
+    set CanUpdate(canUpdate) {
+        this[xCANUPDATE] = canUpdate;
     }
 
     handleRequired(val) {
