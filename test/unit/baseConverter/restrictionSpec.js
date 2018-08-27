@@ -156,9 +156,8 @@ describe("BaseConverter <Restriction>", function () {
             bc[tagName](node, jsonSchema, xsd);
            
             let property = getLastProperty(bc.workingJsonSchema);
-           
-            expect(property.maximum).toEqual(99999999.99);    
-            expect(property.minimum).toEqual(-99999999.99);  
+          
+          
             expect(property.multipleOf).toEqual(0.01);   
         });
 
