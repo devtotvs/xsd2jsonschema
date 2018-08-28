@@ -187,7 +187,7 @@ class BaseConverter extends Processor {
 				childProp.obj.xtotvs = list;
 
 				this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
-				
+
 			} else {
 				if (prop.haveProperties) {
 					var childProp = this.getCurrentProperty(prop.obj, 1);
@@ -1071,9 +1071,16 @@ class BaseConverter extends Processor {
 
 		if (prop.name && val) {
 			val = parseFloat("1e-" + val);
-			prop.obj.multipleOf = val;
+			if (prop.haveProperties) {
+				let childProp = this.getCurrentProperty(prop.obj, 1);
+				childProp.obj.multipleOf = val;
+				this.addProperty(prop.obj, childProp.name, childProp.obj);
+			} else {
+				prop.obj.multipleOf = val;
+				this.addProperty(this.workingJsonSchema, prop.name, prop.obj);
+			}
 
-			this.addProperty(this.workingJsonSchema, prop.name, prop.obj);
+
 		}
 
 
@@ -1530,9 +1537,18 @@ class BaseConverter extends Processor {
 				value += 9;
 			}
 			value = parseFloat(value);
-			currentProp.obj.maximum = value;
-			currentProp.obj.minimum = -value;
-			this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
+
+			if(currentProp.haveProperties){
+				let childProp = this.getCurrentProperty(currentProp.obj, 1);
+				childProp.obj.maximum = value;
+				childProp.obj.minimum = -value;
+				this.addProperty(currentProp.obj, childProp.name, childProp.obj);
+			}else{
+				currentProp.obj.maximum = value;
+				currentProp.obj.minimum = -value;
+				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
+			}
+		
 		}
 
 		return true;

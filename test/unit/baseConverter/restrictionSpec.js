@@ -25,6 +25,20 @@ describe("BaseConverter <Restriction>", function () {
                         <xs:fractionDigits value="2"/>
                     </xs:restriction>
                 </xs:element>
+                <xs:element name="ECFTaxing" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Aliquot" minOccurs="0">				
+                                <xs:simpleType>
+                                    <xs:restriction base="xs:decimal">
+                                        <xs:totalDigits value="15"/>
+                                        <xs:fractionDigits value="2"/>
+                                    </xs:restriction>
+                                </xs:simpleType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
                
             </xs:sequence>
         </xs:complexType>
@@ -117,7 +131,7 @@ describe("BaseConverter <Restriction>", function () {
             let property = getLastProperty(bc.workingJsonSchema);
 
             expect(property.type).toEqual(jsonSchemaTypes.NUMBER);
-        });       
+        });
 
     });
 
@@ -129,13 +143,40 @@ describe("BaseConverter <Restriction>", function () {
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:restriction/xs:totalDigits");
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
-           
+
             let property = getLastProperty(bc.workingJsonSchema);
-           
+
             expect(property.maximum).toBeTruthy();
             expect(property.maximum).toEqual(9999999999);
             expect(property.minimum).toBeTruthy();
             expect(property.minimum).toEqual(-9999999999);
+        });
+
+        it("should pass because this state is implemented", function () {
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:complexType/xs:sequence/xs:element/xs:simpleType/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:complexType/xs:sequence/xs:element/xs:simpleType/xs:restriction/xs:totalDigits");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            property = getLastProperty(property);
+            expect(property.maximum).toBeTruthy();
+            expect(property.maximum).toEqual(999999999999999);
+            expect(property.minimum).toBeTruthy();
+            expect(property.minimum).toEqual(-999999999999999);
         });
 
     });
@@ -154,11 +195,11 @@ describe("BaseConverter <Restriction>", function () {
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:restriction/xs:fractionDigits");
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
-           
+
             let property = getLastProperty(bc.workingJsonSchema);
-          
-          
-            expect(property.multipleOf).toEqual(0.01);   
+
+
+            expect(property.multipleOf).toEqual(0.01);
         });
 
         it("should pass because this state is implemented", function () {
@@ -168,12 +209,39 @@ describe("BaseConverter <Restriction>", function () {
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element/xs:restriction/xs:fractionDigits");
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
-           
+
             let property = getLastProperty(bc.workingJsonSchema);
-           
-            expect(property.multipleOf).toBeTruthy();           
-            expect(property.multipleOf).toEqual(0.01);   
+
+            expect(property.multipleOf).toBeTruthy();
+            expect(property.multipleOf).toEqual(0.01);
         });
+
+        it("should pass because this state is implemented", function () {
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:complexType/xs:sequence/xs:element");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:complexType/xs:sequence/xs:element/xs:simpleType/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[2]/xs:complexType/xs:sequence/xs:element/xs:simpleType/xs:restriction/xs:fractionDigits");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            property = getLastProperty(property);
+            expect(property.multipleOf).toBeTruthy();
+            expect(property.multipleOf).toEqual(0.01);
+        });
+
+       
 
     });
 
