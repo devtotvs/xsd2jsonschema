@@ -668,9 +668,10 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 
 		if (!this.isEmpty(this.subSchemas)) {
 			const subschemaNames = Object.keys(this.subSchemas);
+			jsonSchema.definitions = {};
 			subschemaNames.forEach(function (subschemaName, index, array) {
 				try {
-					jsonSchema[subschemaName] = this.subSchemas[subschemaName].getJsonSchema();
+					jsonSchema.definitions[subschemaName] = this.subSchemas[subschemaName].getJsonSchema();
 				} catch (err) {
 					debug(err);
 					debug(this.subSchemas);
