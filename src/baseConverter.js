@@ -606,7 +606,7 @@ class BaseConverter extends Processor {
 		arraySchema.type = jsonSchemaTypes.ARRAY;
 		var min = minOccursAttr === undefined ? 0 : minOccursAttr;
 		var max;
-		if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase())) {
+		if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase())) { //Se o elemento começa com ListOf, o maxItems dele deve ser ignorado. O que interessa é o maxItems que se encontra no seu elemento filho.
 			max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
 		}		
 		arraySchema.minItems = parseInt(min);
