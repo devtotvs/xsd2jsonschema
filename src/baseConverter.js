@@ -187,21 +187,23 @@ class BaseConverter extends Processor {
 				childProp.obj.xtotvs = list;
 
 				this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
-				// } else {
-				// 	if(prop.haveProperties){
-				// 		var childProp = this.getCurrentProperty(prop.obj, 1);
-
-				// 		list = Object.assign([], childProp.obj.xtotvs);
-
-				// 		list.push(obj);
-				// 		childProp.obj.xtotvs = list;
-
-				// 		this.addProperty(prop.obj, childProp.name, childProp.obj, null);
+				
 			} else {
-				list = Object.assign([], prop.obj.xtotvs);
-				list.push(obj);
-				prop.obj.xtotvs = list;
-				this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+				if (prop.haveProperties) {
+					var childProp = this.getCurrentProperty(prop.obj, 1);
+
+					list = Object.assign([], childProp.obj.xtotvs);
+
+					list.push(obj);
+					childProp.obj.xtotvs = list;
+
+					this.addProperty(prop.obj, childProp.name, childProp.obj, null);
+				} else {
+					list = Object.assign([], prop.obj.xtotvs);
+					list.push(obj);
+					prop.obj.xtotvs = list;
+					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+				}
 			}
 		} else {
 			list = Object.assign([], this.workingJsonSchema.xtotvs);
@@ -738,7 +740,7 @@ class BaseConverter extends Processor {
 					let propSchema = this.getCurrentProperty(jsonSchema, 2);
 					this.workingJsonSchema.items = customType.get$RefToSchema();
 					if (propSchema) {
-					
+
 						this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
 					} else {
 						this.addProperty(jsonSchema, propertyName, this.workingJsonSchema, minOccursAttr, maxOccursAttr);

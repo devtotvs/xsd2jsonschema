@@ -96,6 +96,25 @@ describe("BaseConverter <FieldDocumentation>", function () {
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>    
+                <xs:element name="ECFTaxing" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Code" minOccurs="0">
+                                <xs:annotation>
+                                    <xs:appinfo>
+                                        <FieldDocumentation product="RM">
+                                            <Field>test</Field>
+                                            <Required>Nao</Required>
+                                            <Type>char</Type>
+                                            <Length>10</Length>
+                                            <Description>Código da Tributação ECF</Description>
+                                        </FieldDocumentation>
+                                    </xs:appinfo>
+                                </xs:annotation>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:schema>
@@ -223,9 +242,6 @@ describe("BaseConverter <FieldDocumentation>", function () {
 
         it("should pass because more than 1 obj was add  in xTotvs attribute", function () {          
 
-            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[1]");
-            tagName =  enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
             readElement();
             let nodes = getChildNodes(node, "FieldDocumentation");
 
@@ -237,6 +253,36 @@ describe("BaseConverter <FieldDocumentation>", function () {
              let property = getLastProperty(bc.workingJsonSchema);
              expect(property.xtotvs.length > 1).toBeTruthy();
          });
+
+         it("should pass because more than 1 obj was add  in xTotvs attribute", function () {          
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]");
+            tagName =  enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType");
+            tagName =  enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence");
+            tagName =  enterState(node);
+           
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence/xs:element");
+            tagName =  enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[4]/xs:complexType/xs:sequence/xs:element/xs:annotation/xs:appinfo");
+            tagName =  enterState(node);
+            
+            node = getFirstChildNode(node, "FieldDocumentation");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);          
+            
+
+             let property = getLastProperty(bc.workingJsonSchema);
+             property = getLastProperty(property);
+             expect(property.xtotvs.length > 0).toBeTruthy();
+         });
+
     });
 
     describe("in Note state", function () {

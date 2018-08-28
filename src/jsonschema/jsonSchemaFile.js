@@ -503,7 +503,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		if (!this.isEmpty(this.minimum)) {
 			if (isFloatingPoint) {
 				
-				jsonSchema.minimum = math.format(this.minimum * this.multipleOf, {precision: String(this.minimum).match(/\d/g).length});
+				jsonSchema.minimum = math.multiply(this.minimum, this.multipleOf); 
 				
 			} else {
 				jsonSchema.minimum = this.minimum;
@@ -515,7 +515,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		if (!this.isEmpty(this.maximum)) {
 
 			if (isFloatingPoint) {
-				jsonSchema.maximum = math.format(this.maximum * this.multipleOf, {precision: String(this.maximum).match(/\d/g).length});;
+				jsonSchema.maximum = math.multiply(this.maximum, this.multipleOf);
 			} else {
 				jsonSchema.maximum = this.maximum;
 			}
