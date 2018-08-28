@@ -708,7 +708,7 @@ class BaseConverter extends Processor {
 		let prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 		if (isArray) {
 
-			if (!this.parsingState.isSchemaBeforeState()) {
+			if (!this.parsingState.isSchemaBeforeState() && prop) {
 				if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase()) && prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					// var item = {};
 					// if (this.isObjectWithProperties(prop.obj.items.properties)) {
