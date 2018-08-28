@@ -1232,7 +1232,7 @@ class BaseConverter extends Processor {
 		var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
 
 		if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
-			if (currentProp.name.startsWith((LISTOF).toLowerCase())) {
+			if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 				childProp.obj.maxLength = len;
@@ -1330,7 +1330,7 @@ class BaseConverter extends Processor {
 
 
 			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
-				if (currentProp.name.startsWith((LISTOF).toLowerCase())) {
+				if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp, xsd);
