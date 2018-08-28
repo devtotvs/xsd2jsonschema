@@ -334,8 +334,8 @@ describe("BaseConverter <Documentation>", function () {
             tagName = enterState(node);
             bc.handleElementDocumentation(node,jsonSchema);
 
-            let property = getLastProperty(bc.workingJsonSchema);
-            expect(property.description).toEqual("Preços");
+           
+            expect(bc.workingJsonSchema.description).toEqual("Preços");
         });
 
     });
