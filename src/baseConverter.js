@@ -605,10 +605,17 @@ class BaseConverter extends Processor {
 		var arraySchema = new JsonSchemaFile();
 		arraySchema.type = jsonSchemaTypes.ARRAY;
 		var min = minOccursAttr === undefined ? 0 : minOccursAttr;
-		var max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
-		arraySchema.minItems = min;
-		arraySchema.maxItems = max === XsdAttributeValues.UNBOUNDED ? undefined : max;
-
+		var max;
+		if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase())) {
+			max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
+		}		
+		arraySchema.minItems = parseInt(min);
+		if(max === XsdAttributeValues.UNBOUNDED || max === undefined) {
+			arraySchema.maxItems = undefined
+		}
+		else {
+			arraySchema.maxItems = parseInt(max);
+		}
 		arraySchema.items = customType.get$RefToSchema();
 
 		// Por definição, caso o retorno for 1 item, deve ser enviado um array de uma entidade e não uma entidade
