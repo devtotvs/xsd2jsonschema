@@ -27,13 +27,13 @@ const NamespaceManager_NAME = Symbol();
 const LISTOF = "ListOf";
 
 /**
- * Class representing a collection of XML Handler methods for converting XML Schema elements to JSON Schema.  XML 
- * handler methods are methods used to convert an element of the corresponding name an equiviant JSON Schema 
- * representation.  Handlers all check the current state (i.e. thier parent node) to determine how to convert the 
+ * Class representing a collection of XML Handler methods for converting XML Schema elements to JSON Schema.  XML
+ * handler methods are methods used to convert an element of the corresponding name an equiviant JSON Schema
+ * representation.  Handlers all check the current state (i.e. thier parent node) to determine how to convert the
  * node at hand.  See the {@link BaseConverter#choice|choice} handler for a complex example.
- * 
+ *
  * Subclasses can override any handler method to customize the conversion as needed.
- * 
+ *
  * @see {@link ParsingState}
  */
 
@@ -80,7 +80,7 @@ class BaseConverter extends Processor {
 
 	/**
 	 * Creates a namespaces for the given namespace name.  This method is called from the schema XML Handler.
-	 * 
+	 *
 	 * @see {@link NamespaceManager#createNamespace|NamespaceManager.createNamespace()}
 	 */
 	initializeNamespaces(xsd) {
@@ -90,12 +90,12 @@ class BaseConverter extends Processor {
 	}
 
 	/**
-	 * This method is called for each node in the XML Schema file being processed.  It first processes an ID attribute if present and 
+	 * This method is called for each node in the XML Schema file being processed.  It first processes an ID attribute if present and
 	 * then calls the appropriate XML Handler method.
 	 * @param {Node} node - the current {@link https://www.w3.org/TR/2000/REC-DOM-Level-2-Core-20001113/core.html#ID-745549614 element} in xsd being converted.
 	 * @param {JsonSchemaFileV4} jsonSchema - the JSON Schema representing the current XML Schema file {@link XsdFile|xsd} being converted.
 	 * @param {XsdFile} xsd - the XML schema file currently being converted.
-	 * 
+	 *
 	 * @returns {Boolean} - handler methods can return false to cancel traversal of {@link XsdFile|xsd}.  An XML Schema handler method
 	 *  has a common footprint and a name that corresponds to one of the XML Schema element names found in {@link module:XsdElements}.
 	 *  For example, the <choice> handler method is <pre><code>choice(node, jsonSchema, xsd)</code></pre>
@@ -177,31 +177,38 @@ class BaseConverter extends Processor {
 
 		var list = [];
 		obj.product = productAttr;
-		if (prop.name && prop.name.toLowerCase().startsWith(LISTOF.toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
-			var childProp = this.getCurrentProperty(prop.obj.items, 1);
+		if (prop) {
+			if (prop.name && prop.name.toLowerCase().startsWith(LISTOF.toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
+				var childProp = this.getCurrentProperty(prop.obj.items, 1);
 
-			list = Object.assign([], childProp.obj.xtotvs);
+				list = Object.assign([], childProp.obj.xtotvs);
 
-			list.push(obj);
-			childProp.obj.xtotvs = list;
+				list.push(obj);
+				childProp.obj.xtotvs = list;
 
-			this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
-			// } else {
-			// 	if(prop.haveProperties){
-			// 		var childProp = this.getCurrentProperty(prop.obj, 1);
+				this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
+				// } else {
+				// 	if(prop.haveProperties){
+				// 		var childProp = this.getCurrentProperty(prop.obj, 1);
 
-			// 		list = Object.assign([], childProp.obj.xtotvs);
+				// 		list = Object.assign([], childProp.obj.xtotvs);
 
-			// 		list.push(obj);
-			// 		childProp.obj.xtotvs = list;
+				// 		list.push(obj);
+				// 		childProp.obj.xtotvs = list;
 
-			// 		this.addProperty(prop.obj, childProp.name, childProp.obj, null);
+				// 		this.addProperty(prop.obj, childProp.name, childProp.obj, null);
+			} else {
+				list = Object.assign([], prop.obj.xtotvs);
+				list.push(obj);
+				prop.obj.xtotvs = list;
+				this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+			}
 		} else {
-			list = Object.assign([], prop.obj.xtotvs);
+			list = Object.assign([], this.workingJsonSchema.xtotvs);
 			list.push(obj);
-			prop.obj.xtotvs = list;
-			this.addProperty(this.workingJsonSchema, prop.name, prop.obj, null);
+			this.workingJsonSchema.xtotvs = list;			
 		}
+
 
 		// }
 
@@ -256,7 +263,7 @@ class BaseConverter extends Processor {
 		return true;
 	}
 
-	/* 
+	/*
 	 * A factory method to create JSON Schemas of one of the XML Schema built-in types.
 	 *
 	 */
@@ -321,7 +328,7 @@ class BaseConverter extends Processor {
 
 	attribute(node, jsonSchema, xsd) {
 		// (TBD)
-		//dumpNode(node);	
+		//dumpNode(node);
 		if (XsdFile.isReference(node)) {
 			return this.handleAttributeReference(node, jsonSchema, xsd);
 		} else if (this.parsingState.isTopLevelEntity()) {
@@ -332,7 +339,7 @@ class BaseConverter extends Processor {
 	}
 
 	handleAttributeGroupDefinition(node, jsonSchema, xsd) {
-		// TODO id, name 
+		// TODO id, name
 		// (TBD)
 	}
 
@@ -375,7 +382,7 @@ class BaseConverter extends Processor {
 		const isAnyOfChoice = this.specialCaseIdentifier.isAnyOfChoice(node, xsd);
 		if (isAnyOfChoice === true) {
 			this.specialCaseIdentifier.addSpecialCase(SpecialCases.ANY_OF_CHOICE, this.workingJsonSchema, node);
-			// This could be optional too.  Need a test! 
+			// This could be optional too.  Need a test!
 		}
 		const isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
 		if (isArray) {
@@ -427,7 +434,7 @@ class BaseConverter extends Processor {
 					this.specialCaseIdentifier.addSpecialCase(SpecialCases.OPTIONAL_CHOICE, this.workingJsonSchema, node);
 				} else {
 					// This is an needless grouping just allow to fall through and continue processing
-					// Allow to fall through and continue processing.  
+					// Allow to fall through and continue processing.
 					// The schema should be estabished by the parent of the sequence.
 					//  (Keep an eye on this one)
 					//throw new Error('choice() needs to be implemented within sequence');
@@ -440,12 +447,12 @@ class BaseConverter extends Processor {
 	}
 
 	comment(node, jsonSchema, xsd) {
-		// do nothing - This is an XML comment (e.g. <!-- text -->) 
+		// do nothing - This is an XML comment (e.g. <!-- text -->)
 		return true;
 	}
 
 	complexContent(node, jsonSchema, xsd) {
-		// TODO: id, mixed 
+		// TODO: id, mixed
 		// Ignore this grouping and continue processing children
 		return true;
 	}
@@ -527,34 +534,36 @@ class BaseConverter extends Processor {
 
 	handleElementDocumentation(node, jsonSchema) {
 		let currentProp;
-	
-		if (!this.parsingState.isSchemaBeforeState(2)) {			
-			currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
-		} else {
-			currentProp = this.getCurrentSchemaProperty(jsonSchema, 1);
 
-		}
 
-		if (currentProp.haveProperties) {
-			let childProp = this.getCurrentProperty(currentProp.obj, 1);
+		currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-			childProp.obj.description = utils.handleText(node.textContent);
-
-			this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
-		} else {
-			if (currentProp.obj.type == jsonSchemaTypes.ARRAY && this.isObjectWithProperties(currentProp.obj.items.properties)) {
-				let childProp = this.getCurrentProperty(currentProp.obj.items, 1);
+		if (currentProp) {
+			if (currentProp.haveProperties) {
+				let childProp = this.getCurrentProperty(currentProp.obj, 1);
 
 				childProp.obj.description = utils.handleText(node.textContent);
 
-				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
+				this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
 			} else {
-				currentProp.obj.description = utils.handleText(node.textContent);
 
-				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+				if (currentProp.obj.type == jsonSchemaTypes.ARRAY && this.isObjectWithProperties(currentProp.obj.items.properties)) {
+					let childProp = this.getCurrentProperty(currentProp.obj.items, 1);
+
+					childProp.obj.description = utils.handleText(node.textContent);
+
+					this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
+				} else {
+					currentProp.obj.description = utils.handleText(node.textContent);
+
+					this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
+				}
+
 			}
-
+		} else {
+			this.workingJsonSchema.description = utils.handleText(node.textContent);
 		}
+
 
 	}
 
@@ -802,7 +811,7 @@ class BaseConverter extends Processor {
 
 		// if (refAttr !== undefined) {
 		// 	return this.handleElementReference(node, jsonSchema, xsd);
-		// } else 
+		// } else
 		if (this.parsingState.isTopLevelEntity()) {
 			return this.handleElementGlobal(node, jsonSchema, xsd);
 		} else {
@@ -953,17 +962,25 @@ class BaseConverter extends Processor {
 		var xtotvs = {}
 		var qtd = 0;
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
-		if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
-			var childProp = this.getCurrentProperty(prop.obj.items, 1);
 
-			qtd = childProp.obj.xtotvs.length
-
-			xtotvs = childProp.obj.xtotvs[qtd - 1];
-
-		} else {
-			qtd = prop.obj.xtotvs.length
-			xtotvs = prop.obj.xtotvs[qtd - 1];
+		if(prop){
+			if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
+				var childProp = this.getCurrentProperty(prop.obj.items, 1);
+	
+				qtd = childProp.obj.xtotvs.length
+	
+				xtotvs = childProp.obj.xtotvs[qtd - 1];
+	
+			} else {
+				qtd = prop.obj.xtotvs.length
+				xtotvs = prop.obj.xtotvs[qtd - 1];
+			}
 		}
+		else{
+			qtd = this.workingJsonSchema.xtotvs.length
+			xtotvs = this.workingJsonSchema.xtotvs[qtd - 1];
+		}
+		
 
 
 		xtotvs[field] = utils.handleText(node.textContent);
@@ -1232,7 +1249,7 @@ class BaseConverter extends Processor {
 		var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
 
 		if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
-			if (currentProp.name.startsWith((LISTOF).toLowerCase())) {
+			if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 				childProp.obj.maxLength = len;
@@ -1330,7 +1347,7 @@ class BaseConverter extends Processor {
 
 
 			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
-				if (currentProp.name.startsWith((LISTOF).toLowerCase())) {
+				if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp, xsd);
@@ -1364,39 +1381,9 @@ class BaseConverter extends Processor {
 
 	getCurrentProperty(schema, level) {
 		let properties = schema.properties;
+		let propNames = Object.keys(properties);
 
-		if (properties) {
-			let propNames = Object.keys(properties);
-
-			let currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - level]] || properties[propNames[0]]);
-			let propName = propNames[propNames.length - level] || propNames[0];
-
-			return {
-				obj: currentProp,
-				name: propName,
-				haveProperties: this.isObjectWithProperties(currentProp.properties)
-			};
-		}
-
-	}
-
-	readSubSchemas(subSchemas){
-        let schemaNames = Object.keys(subSchemas);
-        schemaNames = schemaNames[schemaNames.length - 1] || schemaNames[0];
-        let next = subSchemas[schemaNames].subSchemas
-        if(Object.keys(next).length > 0){
-            return  this.readSubSchemas(next);
-        }
-        else{
-            return subSchemas;
-        }
-    } 
-	getCurrentSchemaProperty(schema, level) {
-		let properties = this.readSubSchemas(schema.subSchemas);
-
-		if (properties) {
-			let propNames = Object.keys(properties);
-
+		if (propNames.length > 0) {
 			let currentProp = Object.assign(new JsonSchemaFile(), properties[propNames[propNames.length - level]] || properties[propNames[0]]);
 			let propName = propNames[propNames.length - level] || propNames[0];
 
