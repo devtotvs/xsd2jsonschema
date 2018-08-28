@@ -485,27 +485,39 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 
 		// 5.5.  Validation keywords for any instance type (Type moved up here from the rest of 5.5 below for output formatting)
 		if (!this.isEmpty(this.type)) {
-			if(this.type == jsonSchemaTypes.OBJECT && this.isEmpty(this.properties) && !this.$ref){
+			if (this.type == jsonSchemaTypes.OBJECT && this.isEmpty(this.properties) && !this.$ref) {
 				jsonSchema.type = jsonSchemaTypes.STRING;
-			}
-			else{
+			} else {
 				jsonSchema.type = this.type;
 			}
-			
+
 		}
 
 		// 5.1.  Validation keywords for numeric instances (number and integer)
+		let isFloatingPoint = false;
 		if (!this.isEmpty(this.multipleOf)) {
 			jsonSchema.multipleOf = this.multipleOf;
+			isFloatingPoint = !(Math.trunc(this.multipleOf) == this.multipleOf);
 		}
 		if (!this.isEmpty(this.minimum)) {
-			jsonSchema.minimum = this.minimum;
+			if (isFloatingPoint) {
+
+				jsonSchema.minimum = this.minimum * this.multipleOf;
+			} else {
+				jsonSchema.minimum = this.minimum;
+			}
 		}
 		if (!this.isEmpty(this.exclusiveMinimum) && this.exclusiveMinimum !== false) {
 			jsonSchema.exclusiveMinimum = this.exclusiveMinimum;
 		}
 		if (!this.isEmpty(this.maximum)) {
-			jsonSchema.maximum = this.maximum;
+
+			if (isFloatingPoint) {
+				jsonSchema.maximum = this.maximum * this.multipleOf;
+			} else {
+				jsonSchema.maximum = this.maximum;
+			}
+
 		}
 		if (!this.isEmpty(this.exclusiveMaximum) && this.exclusiveMaximum !== false) {
 			jsonSchema.exclusiveMaximum = this.exclusiveMaximum;
@@ -621,11 +633,11 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 			}, this);
 		}
 
-		if(!this.isEmpty(this.xtotvs)){
+		if (!this.isEmpty(this.xtotvs)) {
 			jsonSchema["x-totvs"] = this.xtotvs;
 		}
 
-		if(!this.isEmpty(this.info)){
+		if (!this.isEmpty(this.info)) {
 			jsonSchema["info"] = this.info;
 		}
 
@@ -666,7 +678,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 			}, this);
 		}
 
-		
+
 		return jsonSchema;
 	}
 
@@ -762,7 +774,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		if (customType == undefined) {
 			throw new Error('Required parameter "customType" is undefined');
 		}
-		const name = '@' + propertyName;
+		const name = utils.lowerCaseFirstLetter(propertyName);
 		if (minOccursAttr === XsdAttributeValues.REQUIRED) {
 			this.addRequired(name);
 		}

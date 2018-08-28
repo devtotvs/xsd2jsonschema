@@ -75,5 +75,13 @@ module.exports = {
 		text = text.replace(/\r/g, '');
 
 		return text;
+	},
+
+	lowerCaseFirstLetter: function(text) {
+		return text.charAt(0).toLowerCase() + text.slice(1);
+	},
+
+	upperCaseFirstLetter: function(text) {
+		return text.charAt(0).toUpperCase() + text.slice(1);
 	}
 }

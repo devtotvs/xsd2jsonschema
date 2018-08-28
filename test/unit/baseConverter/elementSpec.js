@@ -250,7 +250,7 @@ describe("BaseConverter <Element>", function () {
             readElement();
 
             bc[tagName](node, jsonSchema, xsd);
-            expect(Object.keys(bc.workingJsonSchema.properties)[0] == "Element1").toBeTruthy();
+            expect(Object.keys(bc.workingJsonSchema.properties)[0] == "element1").toBeTruthy();
         });
 
         //must be true because could have child elements
@@ -407,7 +407,7 @@ describe("BaseConverter <Element>", function () {
 
             let propNames = Object.keys(bc.workingJsonSchema.properties);
             let property = propNames[propNames.length - 1];
-            expect(property == "ListOfBankingInformation").toBeTruthy();
+            expect(property == "listOfBankingInformation").toBeTruthy();
         });
 
         // totdo Element sem type = object - no caso do LisOf, o items deve receber o type do element filho
@@ -438,7 +438,7 @@ describe("BaseConverter <Element>", function () {
             readListOfAnonymous();
 
             customType = bc.namespaceManager.getType(jsonSchemaTypes.INTEGER, jsonSchema, xsd).get$RefToSchema();
-            propertyName = "BankCode";
+            propertyName = "bankCode";
             minOccursAttr = 0;
             bc.handleElementLocalinSequence(propertyName, customType, minOccursAttr, undefined, false);
 
@@ -469,7 +469,7 @@ describe("BaseConverter <Element>", function () {
 
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
-            expect(property == "GovernmentalInformation").toBeTruthy();
+            expect(property == "governmentalInformation").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -494,7 +494,7 @@ describe("BaseConverter <Element>", function () {
 
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
-            expect(property == "ListOfGovernmentalInformation").toBeTruthy();
+            expect(property == "listOfGovernmentalInformation").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -522,7 +522,7 @@ describe("BaseConverter <Element>", function () {
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
             let property = Object.keys(mainProperty.properties)[0];;
-            expect(property == "BillingCustomerCode").toBeTruthy();
+            expect(property == "billingCustomerCode").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -550,7 +550,7 @@ describe("BaseConverter <Element>", function () {
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
             let property = Object.keys(mainProperty.properties)[0];
-            expect(property).toEqual("BillingCustomerCode1");
+            expect(property).toEqual("billingCustomerCode1");
         });     
 
         it("should pass because the type is array ", function () {
@@ -568,7 +568,7 @@ describe("BaseConverter <Element>", function () {
             
             
 
-            let property = jsonSchema.properties["ListOfContractParcelType"];
+            let property = jsonSchema.properties["listOfContractParcelType"];
             expect(property.items.type).toEqual(jsonSchemaTypes.OBJECT);
         });
 

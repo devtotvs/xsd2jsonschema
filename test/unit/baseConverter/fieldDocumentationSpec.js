@@ -3,6 +3,8 @@
 const XsdFile = require("xsd2jsonschema").XsdFile;
 const BaseConverter = require("xsd2jsonschema").BaseConverter;
 const JsonSchemaFile = require("xsd2jsonschema").JsonSchemaFile;
+//const utils = require("../../../src/utils");
+
 
 describe("BaseConverter <FieldDocumentation>", function () {
     var bc;
@@ -309,7 +311,7 @@ describe("BaseConverter <FieldDocumentation>", function () {
 
             node = getFirstChildNode(node, "Field");
             tagName = enterState(node);
-            bc.handleXTotvs(node, "Field");
+            bc.handleXTotvs(node, "field");
             
            // var xtotvs = property.xtotvs[0]["DATASUL"];
            expect(property.xtotvs[0].product).toEqual("DATASUL");

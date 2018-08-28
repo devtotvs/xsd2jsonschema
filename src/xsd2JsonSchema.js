@@ -10,6 +10,8 @@ const DefaultConversionVisitor = require("./visitors/defaultConversionVisitor");
 const BaseConversionVisitor = require("./visitors/baseConversionVisitor");
 const path = require("path");
 const fs = require("fs-extra");
+const utils = require('./utils');
+
 
 
 const xsdBaseDir_NAME = Symbol();
@@ -226,6 +228,7 @@ class Xsd2JsonSchema {
         let properties = {};
 
         let businessContentName = destinationSchema.info.title || jsonSchema.filename.slice(0, jsonSchema.filename.indexOf("_"));
+        businessContentName = utils.lowerCaseFirstLetter(businessContentName);
 
         properties[businessContentName + "s"] = {
             type: "object",
