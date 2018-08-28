@@ -242,25 +242,24 @@ class Xsd2JsonSchema {
             }
         }
 
-        propertiesTypes.map((x) => {
-            if (originSchema[x]) {
+        propertiesTypes.map((x) => {            
+            if (originSchema.definitions[x]) {
+                                
+                var propertyType = originSchema.definitions[x];
+                this.handleLisOf(propertyType);
 
-                if (!x.toUpperCase().startsWith("RETURN")) {
-
-                    this.handleLisOf(originSchema[x]);
-
-                    switch (x.toLowerCase()) {
-                        case "businesscontenttype":
-                            properties[businessContentName + "Info"] = originSchema[x];
-                            break;
-                        case "businesscontent":
-                            originSchema[x].$ref = originSchema[x].$ref.replace("BusinessContentType", businessContentName + "Info");
-                            properties[businessContentName + "s"].properties.items.items = originSchema[x];
-                            break;
-                        default:
-                            properties[x] = originSchema[x];
-                    }
+                switch (x.toLowerCase()) {
+                    case "businesscontenttype":
+                        properties[businessContentName + "Info"] = propertyType;
+                        break;
+                    case "businesscontent":
+                        propertyType.$ref = propertyType.$ref.replace("BusinessContentType", businessContentName + "Info");
+                        properties[businessContentName + "s"].properties.items.items = propertyType;
+                        break;
+                    default:
+                        properties[x] = propertyType;
                 }
+                
             }
         });
 
