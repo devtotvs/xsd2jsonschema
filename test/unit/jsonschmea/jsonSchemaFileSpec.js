@@ -130,13 +130,23 @@ describe('JsonSchemaFile Test -', function () {
 
         var schemaStr = jsonSchema.getJsonSchema();
         expect(schemaStr).toEqual({
-            'www.xsd2jsonschema.org': {
-                example: {
-                    unit: {
-                        test: {}
+            'definitions': {
+                'www.xsd2jsonschema.org': {
+                    'definitions': {
+                        example: {
+                            'definitions': {
+                                unit: {
+                                    'definitions': {
+
+                                        test: {}
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+
         });
     });
 
@@ -390,56 +400,67 @@ describe('JsonSchemaFile Test -', function () {
                     $ref: 'http://musicOfTheNight/unitTestSchema.json#/www.xsd2jsonschema.org/example/unit/test/everything'
                 }
             },
-            'www.xsd2jsonschema.org': {
-                example: {
-                    unit: {
-                        test: {
-                            everything: {
-                                description: 'something',
-                                default: {
-                                    something: {}
-                                },
-                                format: JsonSchemaFormats.URI,
-                                multipleOf: 2,
-                                maximum: 2,
-                                exclusiveMaximum: true,
-                                minimum: 2,
-                                exclusiveMinimum: true,
-                                maxLength: 2,
-                                minLength: 2,
-                                pattern: 'something',
-                                additionalItems: {},
-                                items: {},
-                                maxItems: 2,
-                                minItems: 2,
-                                uniqueItems: true,
-                                maxProperties: 2,
-                                minProperties: 2,
-                                required: ['something'],
-                                additionalProperties: true,
-                                properties: {
-                                    something: {}
-                                },
-                                patternProperties: {
-                                    something: {}
-                                },
-                                dependencies: {
-                                    something: {}
-                                },
-                                enum: ['something'],
-                                type: 'object',
-                                allOf: [{}],
-                                anyOf: [{}],
-                                oneOf: [{}],
-                                not: {},
-                                definitions: {
-                                    something: {}
+            'definitions': {
+                'www.xsd2jsonschema.org': {
+                    'definitions': {
+                        example: {
+                            'definitions': {
+                                unit: {
+                                    'definitions': {
+                                        test: {
+                                            'definitions': {
+                                                everything: {
+                                                    description: 'something',
+                                                    default: {
+                                                        something: {}
+                                                    },
+                                                    format: JsonSchemaFormats.URI,
+                                                    multipleOf: 2,
+                                                    maximum: 2,
+                                                    exclusiveMaximum: true,
+                                                    minimum: 2,
+                                                    exclusiveMinimum: true,
+                                                    maxLength: 2,
+                                                    minLength: 2,
+                                                    pattern: 'something',
+                                                    additionalItems: {},
+                                                    items: {},
+                                                    maxItems: 2,
+                                                    minItems: 2,
+                                                    uniqueItems: true,
+                                                    maxProperties: 2,
+                                                    minProperties: 2,
+                                                    required: ['something'],
+                                                    additionalProperties: true,
+                                                    properties: {
+                                                        something: {}
+                                                    },
+                                                    patternProperties: {
+                                                        something: {}
+                                                    },
+                                                    dependencies: {
+                                                        something: {}
+                                                    },
+                                                    enum: ['something'],
+                                                    type: 'object',
+                                                    allOf: [{}],
+                                                    anyOf: [{}],
+                                                    oneOf: [{}],
+                                                    not: {},
+                                                    definitions: {
+                                                        something: {}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
         });
     });
 
@@ -463,50 +484,60 @@ describe('JsonSchemaFile Test -', function () {
                     $ref: 'http://musicOfTheNight/unitTestSchema.json#/www.xsd2jsonschema.org/example/unit/test/everything'
                 }
             },
-            'www.xsd2jsonschema.org': {
-                example: {
-                    unit: {
-                        test: {
-                            everything: {
-                                description: 'something',
-                                default: {
-                                    something: {}
-                                },
-                                format: JsonSchemaFormats.URI,
-                                multipleOf: 2,
-                                maximum: 2,
-                                exclusiveMaximum: true,
-                                minimum: 2,
-                                exclusiveMinimum: true,
-                                maxLength: 2,
-                                minLength: 2,
-                                pattern: 'something',
-                                additionalItems: false,
-                                items: [{}],
-                                maxItems: 2,
-                                minItems: 2,
-                                uniqueItems: true,
-                                maxProperties: 2,
-                                minProperties: 2,
-                                required: ['something'],
-                                additionalProperties: true,
-                                properties: {
-                                    something: {}
-                                },
-                                patternProperties: {
-                                    something: {}
-                                },
-                                dependencies: {
-                                    dependency: ['something']
-                                },
-                                enum: ['something'],
-                                type: 'object',
-                                allOf: [{}],
-                                anyOf: [{}],
-                                oneOf: [{}],
-                                not: {},
-                                definitions: {
-                                    something: {}
+            'definitions': {
+                'www.xsd2jsonschema.org': {
+                    'definitions': {
+                        example: {
+                            'definitions': {
+                                unit: {
+                                    'definitions': {
+                                        test: {
+                                            'definitions': {
+                                                everything: {
+                                                    description: 'something',
+                                                    default: {
+                                                        something: {}
+                                                    },
+                                                    format: JsonSchemaFormats.URI,
+                                                    multipleOf: 2,
+                                                    maximum: 2,
+                                                    exclusiveMaximum: true,
+                                                    minimum: 2,
+                                                    exclusiveMinimum: true,
+                                                    maxLength: 2,
+                                                    minLength: 2,
+                                                    pattern: 'something',
+                                                    additionalItems: false,
+                                                    items: [{}],
+                                                    maxItems: 2,
+                                                    minItems: 2,
+                                                    uniqueItems: true,
+                                                    maxProperties: 2,
+                                                    minProperties: 2,
+                                                    required: ['something'],
+                                                    additionalProperties: true,
+                                                    properties: {
+                                                        something: {}
+                                                    },
+                                                    patternProperties: {
+                                                        something: {}
+                                                    },
+                                                    dependencies: {
+                                                        dependency: ['something']
+                                                    },
+                                                    enum: ['something'],
+                                                    type: 'object',
+                                                    allOf: [{}],
+                                                    anyOf: [{}],
+                                                    oneOf: [{}],
+                                                    not: {},
+                                                    definitions: {
+                                                        something: {}
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

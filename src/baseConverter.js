@@ -736,9 +736,14 @@ class BaseConverter extends Processor {
 
 				if (this.workingJsonSchema.type == jsonSchemaTypes.ARRAY) {
 					let propSchema = this.getCurrentProperty(jsonSchema, 2);
-
 					this.workingJsonSchema.items = customType.get$RefToSchema();
-					this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
+					if (propSchema) {
+					
+						this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
+					} else {
+						this.addProperty(jsonSchema, propertyName, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
+					}
+
 
 				} else {
 					this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);

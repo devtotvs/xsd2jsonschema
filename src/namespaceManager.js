@@ -162,11 +162,11 @@ const builtInTypeConverter_NAME = Symbol();
 			// Add the type type to the an anyOf in baseJsonSchema so it can be used directly for validation.
 			// TODO - Verificar impactos da remoção deste código
 			// Removido para não adicionar os types na tag "properties"
-			/*const baseId = new URI(baseJsonSchema.id);
+			const baseId = new URI(baseJsonSchema.id);
 			const typeId = new URI(type.ref);
 			if (baseId.filename() == typeId.filename()) {
 				baseJsonSchema.addRequiredAnyOfPropertyByReference(typeName, type);
-			}*/
+			}
 		}
 		return type;
 	}
