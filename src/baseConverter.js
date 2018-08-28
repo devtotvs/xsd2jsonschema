@@ -206,7 +206,7 @@ class BaseConverter extends Processor {
 		} else {
 			list = Object.assign([], this.workingJsonSchema.xtotvs);
 			list.push(obj);
-			this.workingJsonSchema.xtotvs = list;			
+			this.workingJsonSchema.xtotvs = list;
 		}
 
 
@@ -517,11 +517,11 @@ class BaseConverter extends Processor {
 				return false;
 				break;
 			case XsdElements.COMPLEX_TYPE:
-				// if (this.parsingState.isSchemaBeforeState()) {
-				this.workingJsonSchema.description = utils.handleText(node.textContent);
-				// } else {
-				//	this.handleElementDocumentation(node);
-				// }
+				if (this.parsingState.isSchemaBeforeState()) {
+					this.workingJsonSchema.description = utils.handleText(node.textContent);
+				} else {
+					this.handleElementDocumentation(node);
+				}
 				break;
 			default:
 				console.log(state.name);
@@ -617,12 +617,11 @@ class BaseConverter extends Processor {
 		var max;
 		if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase())) { //Se o elemento começa com ListOf, o maxItems dele deve ser ignorado. O que interessa é o maxItems que se encontra no seu elemento filho.
 			max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
-		}		
-		arraySchema.minItems = parseInt(min);
-		if(max === XsdAttributeValues.UNBOUNDED || max === undefined) {
-			arraySchema.maxItems = undefined
 		}
-		else {
+		arraySchema.minItems = parseInt(min);
+		if (max === XsdAttributeValues.UNBOUNDED || max === undefined) {
+			arraySchema.maxItems = undefined
+		} else {
 			arraySchema.maxItems = parseInt(max);
 		}
 		arraySchema.items = customType.get$RefToSchema();
@@ -970,24 +969,23 @@ class BaseConverter extends Processor {
 		var qtd = 0;
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if(prop){
+		if (prop) {
 			if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
 				var childProp = this.getCurrentProperty(prop.obj.items, 1);
-	
+
 				qtd = childProp.obj.xtotvs.length
-	
+
 				xtotvs = childProp.obj.xtotvs[qtd - 1];
-	
+
 			} else {
 				qtd = prop.obj.xtotvs.length
 				xtotvs = prop.obj.xtotvs[qtd - 1];
 			}
-		}
-		else{
+		} else {
 			qtd = this.workingJsonSchema.xtotvs.length
 			xtotvs = this.workingJsonSchema.xtotvs[qtd - 1];
 		}
-		
+
 
 
 		xtotvs[field] = utils.handleText(node.textContent);

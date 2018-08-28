@@ -38,8 +38,11 @@ describe("BaseConverter <Documentation>", function () {
                         </xs:restriction>
 				    </xs:simpleType>
                 </xs:element>
-                <xs:element name="ListOfBankingInformation" minOccurs="0" maxOccurs="1">
+                <xs:element name="ListOfBankingInformation" minOccurs="0" maxOccurs="1">                   
                     <xs:complexType>
+                        <xs:annotation>
+                            <xs:documentation>Lista de códigos</xs:documentation>
+                        </xs:annotation>
                         <xs:sequence>
                             <xs:element name="BankingInformation" maxOccurs="unbounded" minOccurs="0">                               
                                 <xs:complexType>
@@ -310,6 +313,26 @@ describe("BaseConverter <Documentation>", function () {
 
             let property = getLastProperty(bc.workingJsonSchema.properties["listOfBankingInformation"].items);
             expect(property.description).toEqual("Código do banco");
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            readElement(false, 3);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:annotation");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[3]/xs:complexType/xs:annotation/xs:documentation");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+           
+
+
+
+            let property = getLastProperty(bc.workingJsonSchema);
+            expect(property.description).toEqual("Lista de códigos");
         });
 
         it("should pass because descripiton is equal as the mock", function () {
