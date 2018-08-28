@@ -10,6 +10,7 @@ const Constants = require('../constants');
 const PropertyDefinable = require('../propertyDefinable');
 const jsonSchemaTypes = require('./jsonSchemaTypes');
 const XsdAttributeValues = require('../xmlschema/xsdAttributeValues');
+const math = require('mathjs');
 
 
 const properties = [
@@ -501,8 +502,9 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		}
 		if (!this.isEmpty(this.minimum)) {
 			if (isFloatingPoint) {
-
-				jsonSchema.minimum = this.minimum * this.multipleOf;
+				
+				jsonSchema.minimum = math.format(this.minimum * this.multipleOf, {precision: String(this.minimum).match(/\d/g).length});
+				
 			} else {
 				jsonSchema.minimum = this.minimum;
 			}
@@ -513,7 +515,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		if (!this.isEmpty(this.maximum)) {
 
 			if (isFloatingPoint) {
-				jsonSchema.maximum = this.maximum * this.multipleOf;
+				jsonSchema.maximum = math.format(this.maximum * this.multipleOf, {precision: String(this.maximum).match(/\d/g).length});;
 			} else {
 				jsonSchema.maximum = this.maximum;
 			}
