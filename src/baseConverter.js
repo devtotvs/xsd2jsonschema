@@ -1267,7 +1267,7 @@ class BaseConverter extends Processor {
 
 		var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
 
-		if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
@@ -1365,7 +1365,7 @@ class BaseConverter extends Processor {
 			let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
 
-			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
+			if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 				if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
@@ -1389,12 +1389,14 @@ class BaseConverter extends Processor {
 	}
 
 	handleRestrictionType(schema, typeName, property, xsd) {
-		typeName = this.namespaceManager.getType(typeName, schema, xsd).get$RefToSchema().type;
+		let restrictiontype = this.namespaceManager.getType(typeName, schema, xsd).get$RefToSchema();
 		if (property) {
-			property.obj.type = typeName;
+			property.obj.type = restrictiontype.type;
+			property.obj.format = restrictiontype.format;
 			this.addProperty(schema, property.name, property.obj, null);
 		} else {
-			schema.type = typeName;
+			schema.type = restrictiontype.type;
+			schema.format = restrictiontype.format;
 		}
 	}
 

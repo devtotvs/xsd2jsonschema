@@ -4,6 +4,7 @@ const XsdFile = require("xsd2jsonschema").XsdFile;
 const BaseConverter = require("xsd2jsonschema").BaseConverter;
 const JsonSchemaFile = require("xsd2jsonschema").JsonSchemaFile;
 const jsonSchemaTypes = require("xsd2jsonschema").JsonSchemaTypes;
+const jsonSchemaFormats = require("xsd2jsonschema").JsonSchemaFormats;
 
 describe("BaseConverter <Restriction>", function () {
     var bc;
@@ -42,6 +43,14 @@ describe("BaseConverter <Restriction>", function () {
                
             </xs:sequence>
         </xs:complexType>
+        <xs:simpleType name="tsData">		
+            <xs:restriction base="xs:date"/>
+        </xs:simpleType>
+        <xs:simpleType name="tspricetablenumber">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="15"/>			
+		</xs:restriction>
+	</xs:simpleType>
     </xs:schema>
     `;
 
@@ -241,7 +250,43 @@ describe("BaseConverter <Restriction>", function () {
             expect(property.multipleOf).toEqual(0.01);
         });
 
-       
+        it("should pass because descripiton is equal as the mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+                      
+            node = xsd.select1("//xs:schema/xs:simpleType/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+          
+           
+            expect(bc.workingJsonSchema.type).toEqual(jsonSchemaTypes.STRING);
+            expect(bc.workingJsonSchema.format).toEqual(jsonSchemaFormats.DATE);
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+                      
+            node = xsd.select1("//xs:schema/xs:simpleType[2]/xs:restriction/xs:maxLength");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+          
+           
+            expect(bc.workingJsonSchema.maxLength).toEqual(15);
+            
+        });
 
     });
 
