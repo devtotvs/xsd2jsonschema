@@ -611,6 +611,16 @@ class BaseConverter extends Processor {
 		targetSchema.oneOf.push(choiceSchema);
 	}
 
+	formatMaxItemsProperty(max) {
+		var maxItems;
+		if (max === XsdAttributeValues.UNBOUNDED || max === undefined) {
+			maxItems = undefined
+		} else {
+			maxItems = parseInt(max);
+		}
+		return maxItems;
+	}
+
 	addPropertyAsArray(targetSchema, propertyName, customType, minOccursAttr, maxOccursAttr) {
 		propertyName = utils.lowerCaseFirstLetter(propertyName);
 		var arraySchema = new JsonSchemaFile();
@@ -621,11 +631,7 @@ class BaseConverter extends Processor {
 			max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
 		}
 		arraySchema.minItems = parseInt(min);
-		if (max === XsdAttributeValues.UNBOUNDED || max === undefined) {
-			arraySchema.maxItems = undefined
-		} else {
-			arraySchema.maxItems = parseInt(max);
-		}
+		arraySchema.maxItems = this.formatMaxItemsProperty(max);		
 		arraySchema.items = customType.get$RefToSchema();
 
 		// Por definição, caso o retorno for 1 item, deve ser enviado um array de uma entidade e não uma entidade
@@ -725,7 +731,7 @@ class BaseConverter extends Processor {
 					// 	item = new JsonSchemaFile();
 					// }
 					//this.addProperty(item, propertyName, customType, minOccursAttr);
-
+					prop.obj.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
 					prop.obj.addItems(customType.get$RefToSchema());
 					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);
 
@@ -739,8 +745,8 @@ class BaseConverter extends Processor {
 				if (this.workingJsonSchema.type == jsonSchemaTypes.ARRAY) {
 					let propSchema = this.getCurrentProperty(jsonSchema, 2);
 					this.workingJsonSchema.items = customType.get$RefToSchema();
+					this.workingJsonSchema.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
 					if (propSchema) {
-
 						this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
 					} else {
 						this.addProperty(jsonSchema, propertyName, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
