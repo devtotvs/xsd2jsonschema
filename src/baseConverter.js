@@ -111,9 +111,9 @@ class BaseConverter extends Processor {
 			return false;
 		}else{
 			const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);		
-		}
-		super.process(node, jsonSchema, xsd);
-		return keepProcessing
+			super.process(node, jsonSchema, xsd);
+			return keepProcessing;
+		}		
 	}
 
 	whiteSpace(node, jsonSchema, xsd) {
