@@ -1433,9 +1433,9 @@ class BaseConverter extends Processor {
 		var minOccursAttr = XsdFile.getAttrValue(node, XsdAttributes.MIN_OCCURS);
 		var maxOccursAttr = XsdFile.getAttrValue(node, XsdAttributes.MAX_OCCURS);
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
-		if (isArray) {
-			throw new Error('sequence arrays need to be implemented!');
-		}
+		// if (isArray) {
+		// 	throw new Error('sequence arrays need to be implemented!');
+		// }
 		var isOptional = (minOccursAttr !== undefined && minOccursAttr == 0);
 		if (isOptional === true) {
 			const type = XsdFile.getTypeNode(node);
@@ -1456,6 +1456,17 @@ class BaseConverter extends Processor {
 				this.workingJsonSchema = choiceSchema;
 				break;
 			case XsdElements.COMPLEX_TYPE:
+				if (isArray) {
+					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
+					this.workingJsonSchema.minItems = minOccursAttr;
+
+					if (maxOccursAttr === XsdAttributeValues.UNBOUNDED || maxOccursAttr === undefined) {
+						this.workingJsonSchema.maxItems = undefined
+					} else {
+						this.workingJsonSchema.maxItems = parseInt(maxOccursAttr);
+					}
+					
+				}
 				break;
 			case XsdElements.EXTENSION:
 				break;
@@ -1538,17 +1549,17 @@ class BaseConverter extends Processor {
 			}
 			value = parseFloat(value);
 
-			if(currentProp.haveProperties){
+			if (currentProp.haveProperties) {
 				let childProp = this.getCurrentProperty(currentProp.obj, 1);
 				childProp.obj.maximum = value;
 				childProp.obj.minimum = -value;
 				this.addProperty(currentProp.obj, childProp.name, childProp.obj);
-			}else{
+			} else {
 				currentProp.obj.maximum = value;
 				currentProp.obj.minimum = -value;
 				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
 			}
-		
+
 		}
 
 		return true;
