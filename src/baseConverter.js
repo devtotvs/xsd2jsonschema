@@ -106,9 +106,21 @@ class BaseConverter extends Processor {
 			var qualifiedTypeName = new Qname(id);
 			this.workingJsonSchema.addAttributeProperty(qualifiedTypeName.getLocal(), this.createAttributeSchema(node, jsonSchema, xsd, qualifiedTypeName));
 		}
-		const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);
+		if(!this[XsdFile.getNodeName(node)]){
+			console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
+			return false;
+		}else{
+			const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);		
+		}
 		super.process(node, jsonSchema, xsd);
 		return keepProcessing
+	}
+
+	whiteSpace(node, jsonSchema, xsd) {
+		// TODO: Implementar.
+		// (TBD)
+
+		return false;
 	}
 
 	all(node, jsonSchema, xsd) {
@@ -461,7 +473,7 @@ class BaseConverter extends Processor {
 
 	handleNamedComplexType(node, jsonSchema, xsd) {
 		var nameAttr = XsdFile.getAttrValue(node, XsdAttributes.NAME);
-		nameAttr = utils.lowerCaseFirstLetter(nameAttr);
+		//nameAttr = utils.lowerCaseFirstLetter(nameAttr);
 		// TODO: id, mixed, abstract, block, final, defaultAttributesApply
 
 		var state = this.parsingState.getCurrentState();

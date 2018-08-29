@@ -151,8 +151,9 @@ const builtInTypeConverter_NAME = Symbol();
 		if (this.isWellKnownXmlNamespace(namespace)) {
 			return this.getBuiltInType(typeName);
 		}
+		//TODO - Caso coloque o type em camelCase aqui também deve estar
 		var type = this.namespaces[namespace].types[typeName];
-		if (type === undefined) {
+		if (type === undefined) {			
 			// Create the type, which will be filled out later as the XSD is processed, and add it to the namespace.
 			this.namespaces[namespace].types[typeName] = new JsonSchemaFile({
 				ref : baseJsonSchema.id + '#' + baseJsonSchema.getSubschemaStr() + '/' + typeName
