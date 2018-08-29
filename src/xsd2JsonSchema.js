@@ -142,7 +142,6 @@ class Xsd2JsonSchema {
     loadAllSchemas(uris, withIncludes) {
         uris.forEach(function (uri, index, array) {
             this.loadSchema(path.join(this.xsdBaseDir, uri), withIncludes);
-            //			this.loadSchema(uri);
         }, this);
         return this.xmlSchemas;
     }
@@ -165,10 +164,12 @@ class Xsd2JsonSchema {
 
     processSchemas(uris, withIncludes) {
         uris.forEach(function (uri, index, array) {
-            if (uri.startsWith(this.xsdBaseDir)) {
-                this.processSchema(uri, withIncludes);
-            } else {
-                this.processSchema(path.join(this.xsdBaseDir, uri), withIncludes);
+            if(uri.indexOf("totvsmsg.xsd") == -1){
+                if (uri.indexOf("./") == -1) {
+                    this.processSchema(uri, withIncludes);
+                } else {
+                    this.processSchema(path.join(this.xsdBaseDir, uri), withIncludes);
+                }
             }
         }, this);
     }

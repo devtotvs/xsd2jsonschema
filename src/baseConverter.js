@@ -106,9 +106,21 @@ class BaseConverter extends Processor {
 			var qualifiedTypeName = new Qname(id);
 			this.workingJsonSchema.addAttributeProperty(qualifiedTypeName.getLocal(), this.createAttributeSchema(node, jsonSchema, xsd, qualifiedTypeName));
 		}
-		const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);
-		super.process(node, jsonSchema, xsd);
-		return keepProcessing
+		if(!this[XsdFile.getNodeName(node)]){
+			console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
+			return false;
+		}else{
+			const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);		
+			super.process(node, jsonSchema, xsd);
+			return keepProcessing;
+		}		
+	}
+
+	whiteSpace(node, jsonSchema, xsd) {
+		// TODO: Implementar.
+		// (TBD)
+
+		return false;
 	}
 
 	all(node, jsonSchema, xsd) {
@@ -461,7 +473,7 @@ class BaseConverter extends Processor {
 
 	handleNamedComplexType(node, jsonSchema, xsd) {
 		var nameAttr = XsdFile.getAttrValue(node, XsdAttributes.NAME);
-		nameAttr = utils.lowerCaseFirstLetter(nameAttr);
+		//nameAttr = utils.lowerCaseFirstLetter(nameAttr);
 		// TODO: id, mixed, abstract, block, final, defaultAttributesApply
 
 		var state = this.parsingState.getCurrentState();
@@ -1273,7 +1285,7 @@ class BaseConverter extends Processor {
 
 		var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
 
-		if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
@@ -1371,7 +1383,7 @@ class BaseConverter extends Processor {
 			let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
 
-			if (currentProp.name && !this.parsingState.isSchemaBeforeState()) {
+			if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 				if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
@@ -1395,12 +1407,14 @@ class BaseConverter extends Processor {
 	}
 
 	handleRestrictionType(schema, typeName, property, xsd) {
-		typeName = this.namespaceManager.getType(typeName, schema, xsd).get$RefToSchema().type;
+		let restrictiontype = this.namespaceManager.getType(typeName, schema, xsd).get$RefToSchema();
 		if (property) {
-			property.obj.type = typeName;
+			property.obj.type = restrictiontype.type;
+			property.obj.format = restrictiontype.format;
 			this.addProperty(schema, property.name, property.obj, null);
 		} else {
-			schema.type = typeName;
+			schema.type = restrictiontype.type;
+			schema.format = restrictiontype.format;
 		}
 	}
 
@@ -1439,9 +1453,9 @@ class BaseConverter extends Processor {
 		var minOccursAttr = XsdFile.getAttrValue(node, XsdAttributes.MIN_OCCURS);
 		var maxOccursAttr = XsdFile.getAttrValue(node, XsdAttributes.MAX_OCCURS);
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED));
-		if (isArray) {
-			throw new Error('sequence arrays need to be implemented!');
-		}
+		// if (isArray) {
+		// 	throw new Error('sequence arrays need to be implemented!');
+		// }
 		var isOptional = (minOccursAttr !== undefined && minOccursAttr == 0);
 		if (isOptional === true) {
 			const type = XsdFile.getTypeNode(node);
@@ -1462,6 +1476,17 @@ class BaseConverter extends Processor {
 				this.workingJsonSchema = choiceSchema;
 				break;
 			case XsdElements.COMPLEX_TYPE:
+				if (isArray) {
+					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
+					this.workingJsonSchema.minItems = minOccursAttr;
+
+					if (maxOccursAttr === XsdAttributeValues.UNBOUNDED || maxOccursAttr === undefined) {
+						this.workingJsonSchema.maxItems = undefined
+					} else {
+						this.workingJsonSchema.maxItems = parseInt(maxOccursAttr);
+					}
+					
+				}
 				break;
 			case XsdElements.EXTENSION:
 				break;
@@ -1544,17 +1569,17 @@ class BaseConverter extends Processor {
 			}
 			value = parseFloat(value);
 
-			if(currentProp.haveProperties){
+			if (currentProp.haveProperties) {
 				let childProp = this.getCurrentProperty(currentProp.obj, 1);
 				childProp.obj.maximum = value;
 				childProp.obj.minimum = -value;
 				this.addProperty(currentProp.obj, childProp.name, childProp.obj);
-			}else{
+			} else {
 				currentProp.obj.maximum = value;
 				currentProp.obj.minimum = -value;
 				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
 			}
-		
+
 		}
 
 		return true;
