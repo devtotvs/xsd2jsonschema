@@ -779,7 +779,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 		if (customType == undefined) {
 			throw new Error('Required parameter "customType" is undefined');
 		}
-		const name = utils.lowerCaseFirstLetter(propertyName);
+		const name = propertyName;
 		if (minOccursAttr === XsdAttributeValues.REQUIRED) {
 			this.addRequired(name);
 		}

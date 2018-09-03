@@ -235,7 +235,7 @@ class Xsd2JsonSchema {
         let properties = {};
 
         let businessContentName = destinationSchema.info.title || jsonSchema.filename.slice(0, jsonSchema.filename.indexOf("_"));
-        businessContentName = utils.lowerCaseFirstLetter(businessContentName);
+        businessContentName = (businessContentName);
 
         properties[businessContentName + "s"] = {
             type: "object",

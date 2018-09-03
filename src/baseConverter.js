@@ -473,7 +473,6 @@ class BaseConverter extends Processor {
 
 	handleNamedComplexType(node, jsonSchema, xsd) {
 		var nameAttr = XsdFile.getAttrValue(node, XsdAttributes.NAME);
-		//nameAttr = utils.lowerCaseFirstLetter(nameAttr);
 		// TODO: id, mixed, abstract, block, final, defaultAttributesApply
 
 		var state = this.parsingState.getCurrentState();
@@ -608,7 +607,6 @@ class BaseConverter extends Processor {
 
 	addProperty(targetSchema, propertyName, customType, minOccursAttr) {
 		/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
-		propertyName = utils.lowerCaseFirstLetter(propertyName);
 		if (minOccursAttr === XsdAttributeValues.REQUIRED || minOccursAttr > 0) {
 			targetSchema.addRequired(propertyName);
 		}
@@ -616,7 +614,6 @@ class BaseConverter extends Processor {
 	}
 
 	addChoiceProperty(targetSchema, propertyName, customType, minOccursAttr) {
-		propertyName = utils.lowerCaseFirstLetter(propertyName);
 		var choiceSchema = new JsonSchemaFile();
 		//choiceSchema.additionalProperties = false;
 		this.addProperty(choiceSchema, propertyName, customType, minOccursAttr);
@@ -634,7 +631,6 @@ class BaseConverter extends Processor {
 	}
 
 	addPropertyAsArray(targetSchema, propertyName, customType, minOccursAttr, maxOccursAttr) {
-		propertyName = utils.lowerCaseFirstLetter(propertyName);
 		var arraySchema = new JsonSchemaFile();
 		arraySchema.type = jsonSchemaTypes.ARRAY;
 		var min = minOccursAttr === undefined ? 0 : minOccursAttr;
@@ -660,7 +656,6 @@ class BaseConverter extends Processor {
 	}
 
 	addChoicePropertyAsArray(targetSchema, propertyName, customType, minOccursAttr, maxOccursAttr) {
-		propertyName = utils.lowerCaseFirstLetter(propertyName);
 		var choiceSchema = new JsonSchemaFile();
 		//choiceSchema.additionalProperties = false;
 		this.addPropertyAsArray(choiceSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
