@@ -106,14 +106,14 @@ class BaseConverter extends Processor {
 			var qualifiedTypeName = new Qname(id);
 			this.workingJsonSchema.addAttributeProperty(qualifiedTypeName.getLocal(), this.createAttributeSchema(node, jsonSchema, xsd, qualifiedTypeName));
 		}
-		if(!this[XsdFile.getNodeName(node)]){
+		if (!this[XsdFile.getNodeName(node)]) {
 			console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
 			return false;
-		}else{
-			const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);		
+		} else {
+			const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);
 			super.process(node, jsonSchema, xsd);
 			return keepProcessing;
-		}		
+		}
 	}
 
 	whiteSpace(node, jsonSchema, xsd) {
@@ -643,7 +643,7 @@ class BaseConverter extends Processor {
 			max = maxOccursAttr === undefined ? undefined : maxOccursAttr;
 		}
 		arraySchema.minItems = parseInt(min);
-		arraySchema.maxItems = this.formatMaxItemsProperty(max);		
+		arraySchema.maxItems = this.formatMaxItemsProperty(max);
 		arraySchema.items = customType.get$RefToSchema();
 
 		// Por definição, caso o retorno for 1 item, deve ser enviado um array de uma entidade e não uma entidade
@@ -679,20 +679,24 @@ class BaseConverter extends Processor {
 			lookupName = typeAttr;
 		}
 		var propertyName = nameAttr; // name attribute is required for local element
-		var customType;
+		var type;
+		var customType = new JsonSchemaFile();
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED)) || propertyName.toLowerCase().startsWith((LISTOF).toLowerCase());
 		if (lookupName !== undefined) {
-			customType = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
-		} else {
-			// if (isArray) {
-			// 	//customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd);
-			// 	customType = new JsonSchemaFile();
-			// 	customType.type = jsonSchemaTypes.ARRAY;
-			// } else {
-			customType = new JsonSchemaFile();
-			customType.type = jsonSchemaTypes.OBJECT;
-			// }
+			type = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
+			customType.type = type.type;
+			customType.$ref = type.$ref;
 		}
+		// else {
+		// if (isArray) {
+		// 	//customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd);
+		// 	customType = new JsonSchemaFile();
+		// 	customType.type = jsonSchemaTypes.ARRAY;
+		// } else {
+		
+		
+		// }
+		// }
 
 
 		if (!customType.type) {
@@ -703,30 +707,29 @@ class BaseConverter extends Processor {
 
 		var state = this.parsingState.getCurrentState();
 
-		// switch (state.name) {
-		// 	case XsdElements.CHOICE:
-		// 		if (this.specialCaseIdentifier.isOptional(node.parentNode, xsd) || this.allChildrenAreOptional(node.parentNode)) {
-		// 			if (isArray) {
-		// 				this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
-		// 			} else {
-		// 				this.addProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
-		// 			}
-		// 		} else {
-		// 			if (isArray) {
-		// 				this.addChoicePropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
-		// 			} else {
-		// 				this.addChoiceProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
-		// 			}
-		// 		}
-		// 		break;
-		// 	case XsdElements.SEQUENCE:
-		// 	case XsdElements.ALL:
-		this.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray, jsonSchema)
-
-		// 		break;
-		// 	default:
-		// 		throw new Error('element() [local] called from within unexpected parsing state!');
-		// }
+		switch (state.name) {
+			case XsdElements.CHOICE:
+				if (this.specialCaseIdentifier.isOptional(node.parentNode, xsd) || this.allChildrenAreOptional(node.parentNode)) {
+					if (isArray) {
+						this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
+					} else {
+						this.addProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
+					}
+				} else {
+					if (isArray) {
+						this.addChoicePropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
+					} else {
+						this.addChoiceProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
+					}
+				}
+				break;
+			case XsdElements.SEQUENCE:
+			case XsdElements.ALL:
+				this.handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray, jsonSchema)
+				break;
+			default:
+				throw new Error('element() [local] called from within unexpected parsing state!');
+		}
 		return true;
 	}
 
@@ -774,7 +777,7 @@ class BaseConverter extends Processor {
 
 			if (!this.parsingState.isSchemaBeforeState()) {
 
-				if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
+				if (prop && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let item = {};
 					if (this.isObjectWithProperties(prop.obj.items.properties)) {
 						item = prop.obj.items;
@@ -1485,7 +1488,7 @@ class BaseConverter extends Processor {
 					} else {
 						this.workingJsonSchema.maxItems = parseInt(maxOccursAttr);
 					}
-					
+
 				}
 				break;
 			case XsdElements.EXTENSION:

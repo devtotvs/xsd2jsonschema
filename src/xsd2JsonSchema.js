@@ -147,19 +147,22 @@ class Xsd2JsonSchema {
     }
 
     processSchema(uri, withIncludes) {
-        var xsd = this.xmlSchemas[uri];
-        if (xsd.hasIncludes() && withIncludes) {
-            this.processSchemas(xsd.includeUris);
+        if(uri.indexOf("\\") > -1){
+            var xsd = this.xmlSchemas[uri];
+            if (withIncludes && xsd.hasIncludes()) {
+                this.processSchemas(xsd.includeUris, false);
+            }
+            if (this.jsonSchemas[uri] === undefined) {
+                var traversal = new DepthFirstTraversal();
+                this.jsonSchemas[uri] = new JsonSchemaFile({
+                    baseFilename: xsd.baseFilename,
+                    targetNamespace: xsd.targetNamespace,
+                    baseId: this.baseId
+                });
+                traversal.traverse(this.visitor, this.jsonSchemas[uri], xsd);
+            }
         }
-        if (this.jsonSchemas[uri] === undefined) {
-            var traversal = new DepthFirstTraversal();
-            this.jsonSchemas[uri] = new JsonSchemaFile({
-                baseFilename: xsd.baseFilename,
-                targetNamespace: xsd.targetNamespace,
-                baseId: this.baseId
-            });
-            traversal.traverse(this.visitor, this.jsonSchemas[uri], xsd);
-        }
+        
     }
 
     processSchemas(uris, withIncludes) {
@@ -208,6 +211,9 @@ class Xsd2JsonSchema {
         if (spacing == undefined) {
             space = '\t';
         };
+
+      
+       // const data = JSON.stringify(  jsonSchema.getJsonSchema(), null, space);
         const data = JSON.stringify(this.formatSchema(jsonSchema), null, space);
         const maskedFilename = (this.mask === undefined) ? jsonSchema.filename : jsonSchema.filename.replace(this.mask, '');
         fs.writeFileSync(path.join(dir, maskedFilename), data);

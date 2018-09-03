@@ -129,6 +129,12 @@ describe("BaseConverter <element>", function () {
         //ListOf element
         bc.handleElementLocal(node, jsonSchema, xsd);           
         //Child item element
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:complexType");
+        tagName = enterState(node);            
+
+        node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:complexType/xs:sequence");
+        tagName = enterState(node);            
+
         node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[" + index + "]/xs:complexType/xs:sequence/xs:element");
         tagName = enterState(node);                      
         bc.handleElementLocal(node, jsonSchema, xsd);   
