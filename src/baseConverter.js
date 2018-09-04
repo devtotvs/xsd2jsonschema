@@ -529,6 +529,7 @@ class BaseConverter extends Processor {
 			case XsdElements.RESTRICTION:
 				return false;
 				break;
+			case XsdElements.SIMPLE_TYPE:				
 			case XsdElements.COMPLEX_TYPE:
 				if (this.parsingState.isSchemaBeforeState()) {
 					this.workingJsonSchema.description = utils.handleText(node.textContent);
@@ -679,7 +680,11 @@ class BaseConverter extends Processor {
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED)) || propertyName.toLowerCase().startsWith((LISTOF).toLowerCase());
 		if (lookupName !== undefined) {
 			type = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
+			
+			//REfatorar
 			customType.type = type.type;
+			customType.format = type.format;
+			customType.pattern = type.pattern;
 			customType.$ref = type.$ref;
 		}
 		// else {
@@ -855,7 +860,7 @@ class BaseConverter extends Processor {
 
 		var current = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if (current.name && !this.parsingState.isSchemaBeforeState()) {
+		if (current && !this.parsingState.isSchemaBeforeState()) {
 			if (current.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(current.obj.items, 1);
 
@@ -893,15 +898,16 @@ class BaseConverter extends Processor {
 	}
 
 	handleEnumDescription(schema, valueEnum, descrEnum) {
+		if(descrEnum){
+			if (!schema.description) {
+				schema.description = valueEnum + " - " + descrEnum.trim();
+			} else {
 
-		if (!schema.description) {
-			schema.description = valueEnum.trim + " - " + descrEnum;
-		} else {
+				schema.description = schema.description + " / " + valueEnum + " - " + descrEnum.trim();
 
-			schema.description = schema.description + " / " + valueEnum + " - " + descrEnum;
-
-		}
-		schema.description = utils.handleText(schema.description);
+			}
+			schema.description = utils.handleText(schema.description);
+		}	
 	}
 
 
@@ -1085,7 +1091,7 @@ class BaseConverter extends Processor {
 
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if (prop.name && val) {
+		if (prop && val) {
 			val = parseFloat("1e-" + val);
 			if (prop.haveProperties) {
 				let childProp = this.getCurrentProperty(prop.obj, 1);
@@ -1560,7 +1566,7 @@ class BaseConverter extends Processor {
 
 		let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if (currentProp.name && valueAttr) {
+		if (currentProp && valueAttr) {
 			let value = ""
 			for (let i = 0; i < valueAttr; i++) {
 				value += 9;

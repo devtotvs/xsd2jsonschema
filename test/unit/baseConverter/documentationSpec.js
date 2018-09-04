@@ -82,6 +82,11 @@ describe("BaseConverter <Documentation>", function () {
                 </xs:element>
             </xs:sequence>
         </xs:complexType>
+        <xs:simpleType name="tsfuncmsgorder">
+            <xs:annotation>
+                <xs:documentation>Tipo</xs:documentation>
+            </xs:annotation>    
+         </xs:simpleType>
     </xs:schema>
     `;
 
@@ -395,6 +400,23 @@ describe("BaseConverter <Documentation>", function () {
 
            
             expect(bc.workingJsonSchema.description).toEqual("Preços");
+        });
+
+        it("should pass because descripiton is equal as the mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:simpleType/xs:annotation");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:simpleType/xs:annotation/xs:documentation");
+            tagName = enterState(node);
+
+            bc[tagName](node, jsonSchema, xsd);            
+            expect(bc.workingJsonSchema.description).toEqual("Tipo");
         });
 
     });

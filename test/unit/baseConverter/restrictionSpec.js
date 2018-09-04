@@ -47,10 +47,25 @@ describe("BaseConverter <Restriction>", function () {
             <xs:restriction base="xs:date"/>
         </xs:simpleType>
         <xs:simpleType name="tspricetablenumber">
-		<xs:restriction base="xs:string">
-			<xs:maxLength value="15"/>			
-		</xs:restriction>
-	</xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:maxLength value="15"/>			
+            </xs:restriction>
+        </xs:simpleType>
+        <xs:simpleType name="tsfuncmsgorder">
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="43"/>
+                <xs:enumeration value="2">
+					<xs:annotation>
+						<xs:documentation>Importa</xs:documentation>
+					</xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="3">
+					<xs:annotation>
+						<xs:documentation>Ordem</xs:documentation>
+					</xs:annotation>
+				</xs:enumeration>
+            </xs:restriction>
+        </xs:simpleType>
     </xs:schema>
     `;
 
@@ -299,6 +314,88 @@ describe("BaseConverter <Restriction>", function () {
             expect(bc.workingJsonSchema.maxLength).toEqual(15);
             
         });
+
+    });
+
+
+    describe("in enumaration state", function () {
+        it("should pass because description is valid", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:simpleType/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType/xs:restriction/xs:enumeration");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            let property = getLastProperty(bc.workingJsonSchema);
+
+            expect(property.description).toBeFalsy();
+        });
+
+        it("should pass because description is valid", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction/xs:enumeration");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction/xs:enumeration[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+            
+            let property = getLastProperty(bc.workingJsonSchema);
+
+            expect(property.description).toEqual("2 - Importa");
+        });
+
+        it("should pass because description is valid", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction/xs:enumeration");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+            
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction/xs:enumeration[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[3]/xs:restriction/xs:enumeration[3]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+            let property = getLastProperty(bc.workingJsonSchema);
+
+            expect(property.description).toEqual("2 - Importa / 3 - Ordem");
+        });
+
 
     });
 
