@@ -529,7 +529,7 @@ class BaseConverter extends Processor {
 			case XsdElements.RESTRICTION:
 				return false;
 				break;
-			case XsdElements.SIMPLE_TYPE:				
+			case XsdElements.SIMPLE_TYPE:
 			case XsdElements.COMPLEX_TYPE:
 				if (this.parsingState.isSchemaBeforeState()) {
 					this.workingJsonSchema.description = utils.handleText(node.textContent);
@@ -680,16 +680,16 @@ class BaseConverter extends Processor {
 		var isArray = (maxOccursAttr !== undefined && (maxOccursAttr > 1 || maxOccursAttr === XsdAttributeValues.UNBOUNDED)) || propertyName.toLowerCase().startsWith((LISTOF).toLowerCase());
 		if (lookupName !== undefined) {
 			type = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
-			
+
 			//REfatorar
-			this.namespaceManager.builtInTypeConverter.transformType(customType,type);
-			
-		}		
+			this.namespaceManager.builtInTypeConverter.transformType(customType, type);
+
+		}
 
 		if (!customType.type) {
 			customType.type = jsonSchemaTypes.OBJECT;
 		}
-		
+
 		var state = this.parsingState.getCurrentState();
 
 		switch (state.name) {
@@ -883,7 +883,7 @@ class BaseConverter extends Processor {
 	}
 
 	handleEnumDescription(schema, valueEnum, descrEnum) {
-		if(descrEnum){
+		if (descrEnum) {
 			if (!schema.description) {
 				schema.description = valueEnum + " - " + descrEnum.trim();
 			} else {
@@ -892,7 +892,7 @@ class BaseConverter extends Processor {
 
 			}
 			schema.description = utils.handleText(schema.description);
-		}	
+		}
 	}
 
 
@@ -1076,19 +1076,22 @@ class BaseConverter extends Processor {
 
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if (prop && val) {
+		if (val) {
 			val = parseFloat("1e-" + val);
-			if (prop.haveProperties) {
-				let childProp = this.getCurrentProperty(prop.obj, 1);
-				childProp.obj.multipleOf = val;
-				this.addProperty(prop.obj, childProp.name, childProp.obj);
+			if (prop) {				
+				if (prop.haveProperties) {
+					let childProp = this.getCurrentProperty(prop.obj, 1);
+					childProp.obj.multipleOf = val;
+					this.addProperty(prop.obj, childProp.name, childProp.obj);
+				} else {
+					prop.obj.multipleOf = val;
+					this.addProperty(this.workingJsonSchema, prop.name, prop.obj);
+				}
 			} else {
-				prop.obj.multipleOf = val;
-				this.addProperty(this.workingJsonSchema, prop.name, prop.obj);
+				this.workingJsonSchema.multipleOf = val;
 			}
-
-
 		}
+
 
 
 
@@ -1400,15 +1403,15 @@ class BaseConverter extends Processor {
 		if (property) {
 			// property.obj.type = restrictiontype.type;
 			// property.obj.format = restrictiontype.format;
-			this.namespaceManager.builtInTypeConverter.transformType(property.obj,restrictiontype);
+			this.namespaceManager.builtInTypeConverter.transformType(property.obj, restrictiontype);
 			this.addProperty(schema, property.name, property.obj, null);
-		} else {			
-			this.namespaceManager.builtInTypeConverter.transformType(schema,restrictiontype);
+		} else {
+			this.namespaceManager.builtInTypeConverter.transformType(schema, restrictiontype);
 		}
 	}
 
-	transformType(target, source){
-		
+	transformType(target, source) {
+
 	}
 
 	getCurrentProperty(schema, level) {
@@ -1555,25 +1558,34 @@ class BaseConverter extends Processor {
 
 		let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
 
-		if (currentProp && valueAttr) {
-			let value = ""
+		if (valueAttr) {
+			let value = "";
 			for (let i = 0; i < valueAttr; i++) {
 				value += 9;
 			}
-			value = parseFloat(value);
+			//Caso totalDigits maior que 15 deve-se truncar em 15 digitos para não quebrar o maximum/minimum
+			value = value.substr(0,15);
+			value = parseInt(value);
+			if (currentProp) {
 
-			if (currentProp.haveProperties) {
-				let childProp = this.getCurrentProperty(currentProp.obj, 1);
-				childProp.obj.maximum = value;
-				childProp.obj.minimum = -value;
-				this.addProperty(currentProp.obj, childProp.name, childProp.obj);
+
+				if (currentProp.haveProperties) {
+					let childProp = this.getCurrentProperty(currentProp.obj, 1);
+					childProp.obj.maximum = (!isNaN(childProp.obj.maximum)) ? childProp.obj.maximum : value;
+					childProp.obj.minimum = (!isNaN(childProp.obj.minimum)) ? childProp.obj.minimum : -value;
+					this.addProperty(currentProp.obj, childProp.name, childProp.obj);
+				} else {
+					currentProp.obj.maximum = (!isNaN(currentProp.obj.maximum)) ? currentProp.obj.maximum : value;
+					currentProp.obj.minimum = (!isNaN(currentProp.obj.minimum)) ? currentProp.obj.minimum : -value;
+					this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
+				}
 			} else {
-				currentProp.obj.maximum = value;
-				currentProp.obj.minimum = -value;
-				this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj);
+				this.workingJsonSchema.maximum = (!isNaN(this.workingJsonSchema.maximum)) ? this.workingJsonSchema.maximum : value;
+				this.workingJsonSchema.minimum = (!isNaN(this.workingJsonSchema.minimum)) ? this.workingJsonSchema.minimum : -value;
 			}
-
 		}
+
+
 
 		return true;
 	}

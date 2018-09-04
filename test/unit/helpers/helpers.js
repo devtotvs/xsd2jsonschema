@@ -35,10 +35,10 @@ beforeEach(function() {
         everything.description = 'something';
         everything.default = { 'something': {} };
         everything.format = JsonSchemaFormats.URI;
-        everything.multipleOf = 2;
-        everything.maximum = 2;
+        everything.multipleOf = 0.001;
+        everything.maximum = 99999999999999;
         everything.exclusiveMaximum = true;
-        everything.minimum = 2;
+        everything.minimum = -99999999999999;
         everything.exclusiveMinimum = true;
         everything.maxLength = 2;
         everything.minLength = 2;

@@ -71,6 +71,12 @@ describe("BaseConverter <Restriction>", function () {
                 <xs:totalDigits value="3"/>
             </xs:restriction>
         </xs:simpleType>
+        <xs:simpleType name="tstam17dec3">
+            <xs:restriction base="xs:decimal">
+                <xs:totalDigits value="17"/>
+                <xs:fractionDigits value="3"/>               
+            </xs:restriction>
+        </xs:simpleType>
     </xs:schema>
     `;
 
@@ -230,6 +236,30 @@ describe("BaseConverter <Restriction>", function () {
             expect(property.minimum).toEqual(-999999999999999);
         });
 
+        it("should pass because this state is implemented", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType[4]/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType[4]/xs:restriction/xs:totalDigits");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            expect(isNaN(bc.workingJsonSchema.maximum)).toBeFalsy();
+            expect(bc.workingJsonSchema.maximum).toEqual(999);
+            expect(isNaN(bc.workingJsonSchema.minimum)).toBeFalsy();
+            expect(bc.workingJsonSchema.minimum).toEqual(0);
+           
+        });
+
+
     });
 
     describe("in fractionDigits state", function () {
@@ -298,48 +328,30 @@ describe("BaseConverter <Restriction>", function () {
             expect(property.multipleOf).toEqual(0.01);
         });
 
-        it("should pass because descripiton is equal as the mock", function () {
-            bc.parsingState.exitState();
+        it("should pass because this state is implemented", function () {
             bc.parsingState.exitState();
             bc.parsingState.exitState();
 
             node = xsd.select1("//xs:schema/xs:simpleType");
             tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
+            bc[tagName](node, jsonSchema, xsd)
 
-                      
-            node = xsd.select1("//xs:schema/xs:simpleType/xs:restriction");
+            node = xsd.select1("//xs:schema/xs:simpleType[5]/xs:restriction");
             tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-          
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType[5]/xs:restriction/xs:fractionDigits");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            expect(bc.workingJsonSchema.multipleOf).toBeTruthy();
+            expect(bc.workingJsonSchema.multipleOf).toEqual(0.001);
            
-            expect(bc.workingJsonSchema.type).toEqual(jsonSchemaTypes.STRING);
-            expect(bc.workingJsonSchema.format).toEqual(jsonSchemaFormats.DATE);
         });
-
-        it("should pass because descripiton is equal as the mock", function () {
-            bc.parsingState.exitState();
-            bc.parsingState.exitState();
-            bc.parsingState.exitState();
-
-            node = xsd.select1("//xs:schema/xs:simpleType[2]");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-
-                      
-            node = xsd.select1("//xs:schema/xs:simpleType[2]/xs:restriction/xs:maxLength");
-            tagName = enterState(node);
-            bc[tagName](node, jsonSchema, xsd);
-          
-           
-            expect(bc.workingJsonSchema.maxLength).toEqual(15);
-            
-        });
-
     });
 
 
-    describe("in enumaration state", function () {
+    describe("in enumeration state", function () {
         it("should pass because description is valid", function () {
             bc.parsingState.exitState();
             bc.parsingState.exitState();
@@ -420,4 +432,46 @@ describe("BaseConverter <Restriction>", function () {
 
     });
 
+    describe("in date state", function () {
+        it("should pass because type is equal as the mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+                      
+            node = xsd.select1("//xs:schema/xs:simpleType/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+          
+           
+            expect(bc.workingJsonSchema.type).toEqual(jsonSchemaTypes.STRING);
+            expect(bc.workingJsonSchema.format).toEqual(jsonSchemaFormats.DATE);
+        });
+    });
+
+    describe("in maxLength state", function () {
+        it("should pass because maxLength is equal as the mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType[2]");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+
+                      
+            node = xsd.select1("//xs:schema/xs:simpleType[2]/xs:restriction/xs:maxLength");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd);
+          
+           
+            expect(bc.workingJsonSchema.maxLength).toEqual(15);
+            
+        });
+    });
+    
 });

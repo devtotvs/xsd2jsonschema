@@ -518,7 +518,7 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 			if (isFloatingPoint) {
 				//jsonSchema.maximum = math.multiply(this.maximum, this.multipleOf);
 				jsonSchema.maximum = math.multiply(math.bignumber(this.maximum), math.bignumber(this.multipleOf)).toString();
-				jsonSchema.maximum = parseFloat(jsonSchema.maximum);
+				jsonSchema.maximum = parseFloat(jsonSchema.maximum);				
 			} else {
 				jsonSchema.maximum = this.maximum;
 			}
