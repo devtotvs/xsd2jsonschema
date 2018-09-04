@@ -171,7 +171,7 @@ class Xsd2JsonSchema {
                     this.processSchema(path.join(this.xsdBaseDir, uri), withIncludes);
                 }
             }
-        }, this);
+        }, this);        
     }
 
     processAllSchemas(parms, withIncludes = true) {
@@ -182,8 +182,13 @@ class Xsd2JsonSchema {
             this.visitor = parms.visitor;
         }
         this.jsonSchemas = {};
-        this.loadAllSchemas(parms.xsdFilenames, withIncludes);
-        this.processSchemas(Object.keys(this.xmlSchemas), withIncludes);
+        parms.xsdFilenames.forEach(function (xsdFileName, index, array) {
+            this.loadAllSchemas([xsdFileName], withIncludes);
+            this.processSchemas([path.join(this.xsdBaseDir, xsdFileName)], withIncludes);
+            
+            //Limpa cache
+            this.visitor = new DefaultConversionVisitor();
+        }, this);        
         return this.jsonSchemas;
     }
 
