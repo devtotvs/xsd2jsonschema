@@ -83,7 +83,16 @@ describe("BaseConverter <Element>", function () {
                 </xs:element>                
             </xs:sequence>            
         </xs:complexType>
-        <xs:element name="BusinessContent" type="BusinessContentType" substitutionGroup="AbstractBusinessContent"/>
+        <xs:element name="BusinessContent">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="Name1" type="xs:string" minOccurs="1" maxOccurs="1">
+                    </xs:element>
+                    <xs:element name="Description" type="xs:string" minOccurs="1" maxOccurs="1">
+                    </xs:element>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
         <xs:complexType name="ListOfContractParcelType">
             <xs:sequence>
                 <xs:element name="ContractParcel" type="ContractParcelType" maxOccurs="unbounded" minOccurs="0"/>
@@ -250,7 +259,7 @@ describe("BaseConverter <Element>", function () {
             readElement();
 
             bc[tagName](node, jsonSchema, xsd);
-            expect(Object.keys(bc.workingJsonSchema.properties)[0] == "element1").toBeTruthy();
+            expect(Object.keys(bc.workingJsonSchema.properties)[0] == "Element1").toBeTruthy();
         });
 
         //must be true because could have child elements
@@ -407,7 +416,7 @@ describe("BaseConverter <Element>", function () {
 
             let propNames = Object.keys(bc.workingJsonSchema.properties);
             let property = propNames[propNames.length - 1];
-            expect(property == "listOfBankingInformation").toBeTruthy();
+            expect(property == "ListOfBankingInformation").toBeTruthy();
         });
 
         // totdo Element sem type = object - no caso do LisOf, o items deve receber o type do element filho
@@ -469,7 +478,7 @@ describe("BaseConverter <Element>", function () {
 
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
-            expect(property == "governmentalInformation").toBeTruthy();
+            expect(property == "GovernmentalInformation").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -494,7 +503,7 @@ describe("BaseConverter <Element>", function () {
 
             let properties = Object.keys(bc.workingJsonSchema.properties);
             let property = properties[properties.length - 1];
-            expect(property == "listOfGovernmentalInformation").toBeTruthy();
+            expect(property == "ListOfGovernmentalInformation").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -514,6 +523,12 @@ describe("BaseConverter <Element>", function () {
 
             readElement(9);
             bc[tagName](node, jsonSchema, xsd);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType/xs:sequence");
+            tagName = enterState(node);
 
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType/xs:sequence/xs:element");
             tagName = enterState(node);
@@ -522,7 +537,7 @@ describe("BaseConverter <Element>", function () {
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
             let property = Object.keys(mainProperty.properties)[0];;
-            expect(property == "billingCustomerCode").toBeTruthy();
+            expect(property == "BillingCustomerCode").toBeTruthy();
         });
 
         it("must pass because the property is correct ", function () {
@@ -543,6 +558,12 @@ describe("BaseConverter <Element>", function () {
             readElement(9);
             bc[tagName](node, jsonSchema, xsd);
 
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType");
+            tagName = enterState(node);
+
+            node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType/xs:sequence");
+            tagName = enterState(node);
+
             node = xsd.select1("//xs:schema/xs:complexType/xs:sequence/xs:element[9]/xs:complexType/xs:sequence/xs:element[2]");
             tagName = enterState(node);
             bc.handleElementLocal(node, jsonSchema, xsd);
@@ -550,7 +571,7 @@ describe("BaseConverter <Element>", function () {
             let mainProperty = getLastProperty(bc.workingJsonSchema);
 
             let property = Object.keys(mainProperty.properties)[0];
-            expect(property).toEqual("billingCustomerCode1");
+            expect(property).toEqual("BillingCustomerCode1");
         });     
 
         it("should pass because the type is array ", function () {
@@ -560,6 +581,9 @@ describe("BaseConverter <Element>", function () {
             tagName = enterState(node);
             bc[tagName](node, jsonSchema, xsd);
 
+            node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence");
+            tagName = enterState(node);   
+
             node = xsd.select1("//xs:schema/xs:complexType[2]/xs:sequence/xs:element");
             tagName = enterState(node);          
             //bc[tagName](node, jsonSchema, xsd);
@@ -568,7 +592,7 @@ describe("BaseConverter <Element>", function () {
             
             
 
-            let property = jsonSchema.properties["listOfContractParcelType"];
+            let property = jsonSchema.properties["ListOfContractParcelType"];
             expect(property.items.type).toEqual(jsonSchemaTypes.OBJECT);
         });
 
@@ -589,6 +613,37 @@ describe("BaseConverter <Element>", function () {
           
             expect(readSubSchemaName(jsonSchema.subSchemas)).toEqual("BusinessContent");
         });
+
+        it("should pass because was added properties", function () {
+            readElement();
+            bc[tagName](node, jsonSchema, xsd);
+           upStates(4);
+           node = xsd.select1("//xs:schema");
+           tagName = enterState(node);
+           bc[tagName](node, jsonSchema, xsd);
+           node = xsd.select1("//xs:schema/xs:element");
+           tagName = enterState(node);
+           bc[tagName](node, jsonSchema, xsd);
+
+           node = xsd.select1("//xs:schema/xs:element/xs:complexType");
+           tagName = enterState(node);
+
+           node = xsd.select1("//xs:schema/xs:element/xs:complexType/xs:sequence");
+           tagName = enterState(node);
+
+           node = xsd.select1("//xs:schema/xs:element/xs:complexType/xs:sequence/xs:element");
+           tagName = enterState(node);
+           bc[tagName](node, jsonSchema, xsd);
+         
+           
+           expect(Object.keys(bc.workingJsonSchema.properties).length).toEqual(1);
+           upStates(1);
+
+           node = xsd.select1("//xs:schema/xs:element/xs:complexType/xs:sequence/xs:element[2]");
+           tagName = enterState(node);
+           bc[tagName](node, jsonSchema, xsd);
+           expect(Object.keys(bc.workingJsonSchema.properties).length).toEqual(2);
+       });
 
         
     });
