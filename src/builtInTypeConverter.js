@@ -485,7 +485,7 @@ class BuiltInTypeConverter {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
 		jsonSchema.format = JSON_SCHEMA_FORMATS.INT32;
 
-		jsonSchema.minium = -32768;
+		jsonSchema.minimum = -32768;
 		jsonSchema.maximum = 32767;
 		return true;
 	}
@@ -500,14 +500,14 @@ class BuiltInTypeConverter {
 	// 3.4.20 nonNegativeInteger: http://www.w3.org/TR/xmlschema11-2/#nonNegativeInteger
 	nonNegativeInteger(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = 0;
+		jsonSchema.minimum = 0;
 		return true;
 	}
 
 	// 3.4.21 unsignedLong: http://www.w3.org/TR/xmlschema11-2/#unsignedLong
 	unsignedLong(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = 0;
+		jsonSchema.minimum = 0;
 		jsonSchema.maximum = 18446744073709551615;
 		return true;
 	}
@@ -515,7 +515,7 @@ class BuiltInTypeConverter {
 	// 3.4.22 unsignedInt: http://www.w3.org/TR/xmlschema11-2/#unsignedInt
 	unsignedInt(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = 0;
+		jsonSchema.minimum = 0;
 		jsonSchema.maximum = 4294967295;
 		return true;
 	}
@@ -523,7 +523,7 @@ class BuiltInTypeConverter {
 	// 3.4.23 unsignedShort: http://www.w3.org/TR/xmlschema11-2/#unsignedShort
 	unsignedShort(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = 0;
+		jsonSchema.minimum = 0;
 		jsonSchema.maximum = 65535;
 		return true;
 	}
@@ -531,7 +531,7 @@ class BuiltInTypeConverter {
 	// 3.4.24 unsignedByte: http://www.w3.org/TR/xmlschema11-2/#unsignedByte
 	unsignedByte(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = 0;
+		jsonSchema.minimum = 0;
 		jsonSchema.maximum = 255;
 		return true;
 	}
@@ -539,7 +539,7 @@ class BuiltInTypeConverter {
 	// 3.4.25 positiveInteger: http://www.w3.org/TR/xmlschema11-2/#positiveInteger
 	positiveInteger(node, jsonSchema, xsd) {
 		jsonSchema.type = JSON_SCHEMA_TYPES.INTEGER;
-		jsonSchema.minium = 0;
+		jsonSchema.minimum = 0;
 		jsonSchema.maximum = 4294967295;
 		jsonSchema.exclusiveMinimum = true;
 		return true;
@@ -566,6 +566,17 @@ class BuiltInTypeConverter {
 		jsonSchema.type = JSON_SCHEMA_TYPES.STRING;
 		jsonSchema.format = JSON_SCHEMA_FORMATS.DATE_TIME;
 		return true;
+	}
+
+	transformType(target, source){
+		target.type = source.type;
+		target.format = source.format;
+		target.pattern = source.pattern;
+		target.minimum = source.minimum;
+		target.maximum = source.maximum;
+		target.exclusiveMinimum = source.exclusiveMinimum;
+		target.exclusiveMaximum = source.exclusiveMaximum;
+		target.$ref = source.$ref;
 	}
 }
 

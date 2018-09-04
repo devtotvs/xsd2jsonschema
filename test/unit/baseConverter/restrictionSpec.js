@@ -66,6 +66,11 @@ describe("BaseConverter <Restriction>", function () {
 				</xs:enumeration>
             </xs:restriction>
         </xs:simpleType>
+        <xs:simpleType name="tsperiodnum">
+            <xs:restriction base="xs:nonNegativeInteger">
+                <xs:totalDigits value="3"/>
+            </xs:restriction>
+        </xs:simpleType>
     </xs:schema>
     `;
 
@@ -155,6 +160,22 @@ describe("BaseConverter <Restriction>", function () {
             let property = getLastProperty(bc.workingJsonSchema);
 
             expect(property.type).toEqual(jsonSchemaTypes.NUMBER);
+        });
+
+        it("should pass because type is equals mock", function () {
+            bc.parsingState.exitState();
+            bc.parsingState.exitState();
+
+            node = xsd.select1("//xs:schema/xs:simpleType");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            node = xsd.select1("//xs:schema/xs:simpleType[4]/xs:restriction");
+            tagName = enterState(node);
+            bc[tagName](node, jsonSchema, xsd)
+
+            expect(bc.workingJsonSchema.type).toEqual(jsonSchemaTypes.INTEGER);
+            expect(bc.workingJsonSchema.minimum).toEqual(0);
         });
 
     });

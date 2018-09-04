@@ -682,29 +682,14 @@ class BaseConverter extends Processor {
 			type = this.namespaceManager.getType(lookupName, jsonSchema, xsd).get$RefToSchema();
 			
 			//REfatorar
-			customType.type = type.type;
-			customType.format = type.format;
-			customType.pattern = type.pattern;
-			customType.$ref = type.$ref;
-		}
-		// else {
-		// if (isArray) {
-		// 	//customType = this.namespaceManager.getType(propertyName, jsonSchema, xsd);
-		// 	customType = new JsonSchemaFile();
-		// 	customType.type = jsonSchemaTypes.ARRAY;
-		// } else {
-		
-		
-		// }
-		// }
-
+			this.namespaceManager.builtInTypeConverter.transformType(customType,type);
+			
+		}		
 
 		if (!customType.type) {
 			customType.type = jsonSchemaTypes.OBJECT;
 		}
-
-
-
+		
 		var state = this.parsingState.getCurrentState();
 
 		switch (state.name) {
@@ -1413,13 +1398,17 @@ class BaseConverter extends Processor {
 	handleRestrictionType(schema, typeName, property, xsd) {
 		let restrictiontype = this.namespaceManager.getType(typeName, schema, xsd).get$RefToSchema();
 		if (property) {
-			property.obj.type = restrictiontype.type;
-			property.obj.format = restrictiontype.format;
+			// property.obj.type = restrictiontype.type;
+			// property.obj.format = restrictiontype.format;
+			this.namespaceManager.builtInTypeConverter.transformType(property.obj,restrictiontype);
 			this.addProperty(schema, property.name, property.obj, null);
-		} else {
-			schema.type = restrictiontype.type;
-			schema.format = restrictiontype.format;
+		} else {			
+			this.namespaceManager.builtInTypeConverter.transformType(schema,restrictiontype);
 		}
+	}
+
+	transformType(target, source){
+		
 	}
 
 	getCurrentProperty(schema, level) {
