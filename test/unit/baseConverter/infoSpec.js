@@ -44,7 +44,8 @@ describe("BaseConverter <MessageDocumentation>", function () {
 					<Description></Description>
 					<Adapter></Adapter>					
 				</ProductInformation>
-			</MessageDocumentation>
+            </MessageDocumentation>
+            <MessageDocumentation></MessageDocumentation>
 		</xs:appinfo>
 	</xs:annotation>
     </xs:schema>
@@ -99,24 +100,22 @@ describe("BaseConverter <MessageDocumentation>", function () {
 
         node = xsd.select1("//xs:schema/xs:annotation/xs:appinfo");
         tagName = enterState(node);
-        bc[tagName](node, jsonSchema, xsd);
-
-        node = xsd.select1("//xs:schema/xs:annotation/xs:appinfo");
-        tagName = enterState(node);
-        bc[tagName](node, jsonSchema, xsd);
-
+        bc[tagName](node, jsonSchema, xsd);   
+        
         node = getFirstChildNode(node, "MessageDocumentation");
         tagName = enterState(node);
-        bc[tagName](node, jsonSchema, xsd);
-
+        bc[tagName](node, jsonSchema, xsd);    
+    });
+   
+    describe("in appInfo state with duplicated MessageDocumentation tag", function() {
+        it("should create property '_warningConversorAuto' inside 'info'", function() {            
+            var conversionWarningAuto = jsonSchema.info._warningConversorAuto;
+            expect(conversionWarningAuto).toBeTruthy();
+        });
     });
 
-    afterEach(function () {});
-
-    describe("in MessageDocumentation state", function () {
-
+    describe("in MessageDocumentation state", function () {      
         it("should pass because this state is implemented", function () {
-
             expect(Object.keys(jsonSchema.info).length > 0).toBeTruthy();
         });
 

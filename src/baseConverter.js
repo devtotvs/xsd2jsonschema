@@ -170,13 +170,17 @@ class BaseConverter extends Processor {
 	}
 
 	appinfo(node, jsonSchema, xsd) {
-		// TODO: source
-		// (TBD)
+			var messageDocCounter = 0;
+			for(var childNodeIndex in node.childNodes) {
+				if (node.childNodes[childNodeIndex].localName == "MessageDocumentation") {
+					messageDocCounter++;
+				}
+			}		
 
-		//var prop = this.getCurrentProperty(this.workingJsonSchema, 1)
-		//prop.obj.xtotvs = { "name": "teste"};
-		//this.addProperty(this.workingJsonSchema,  prop.name,prop.obj, null);
-		//	this.workingJsonSchema.description = node.toString();
+			if(messageDocCounter >= 2){
+				jsonSchema.hasMultipleMessageInfo = true;				
+			}		
+
 		return true;
 	}
 
@@ -185,7 +189,6 @@ class BaseConverter extends Processor {
 		var productAttr = XsdFile.getAttrValue(node, XsdAttributes.PRODUCT);
 		var prop = this.getCurrentProperty(this.workingJsonSchema, 1);
 		var obj = new XTotvs();
-		//obj[productAttr] = new XTotvs();
 
 		var list = [];
 		obj.product = productAttr;
@@ -240,15 +243,13 @@ class BaseConverter extends Processor {
 	}
 
 	MessageDocumentation(node, jsonSchema, xsd) {
-		// if (this.parsingState.isSchemaBeforeState()) {
 		jsonSchema.info = new InfoTotvs();
-
-
 		let messageInfo = this.handleMessageName(jsonSchema.filename);
 		jsonSchema.info.xTitle = messageInfo.title;
 		jsonSchema.info.xVersion = messageInfo.version;
-		// }
-
+		if(jsonSchema.hasMultipleMessageInfo){
+			jsonSchema.info._warningConversorAuto = "A tag MessageDocumentation está duplicada no XML. O valor de 'info' pode ter sido gerado incorretamente";
+		}
 		return true;
 	}
 
