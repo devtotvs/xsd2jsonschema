@@ -147,7 +147,8 @@ class Xsd2JsonSchema {
     }
 
     processSchema(uri, withIncludes) {
-        if(uri.indexOf("\\") > -1){
+        if(uri.indexOf("\\") > -1)
+            {
             var xsd = this.xmlSchemas[uri];
             if (withIncludes && xsd.hasIncludes()) {
                 this.processSchemas(xsd.includeUris, false);
@@ -160,6 +161,10 @@ class Xsd2JsonSchema {
                     baseId: this.baseId
                 });
                 traversal.traverse(this.visitor, this.jsonSchemas[uri], xsd);
+            }else{
+                this.visitor.processor.namespaceManager.addNamespace("");//Cria namespace padrão
+                this.visitor.processor.namespaceManager.mergeTypeReferences("",this.jsonSchemas[uri].subSchemas);//efetua merge com os tipos do subschema.
+                //this.visitor.processor.namespaceManager["teste"] = this.jsonSchemas[uri];
             }
         }
         
@@ -186,11 +191,17 @@ class Xsd2JsonSchema {
         }
         this.jsonSchemas = {};
         parms.xsdFilenames.forEach(function (xsdFileName, index, array) {
+            try{
             this.loadAllSchemas([xsdFileName], withIncludes);
-            this.processSchemas([path.join(this.xsdBaseDir, xsdFileName)], withIncludes);
-            
-            //Limpa cache
-            this.visitor = new DefaultConversionVisitor();
+            this.processSchemas([path.join(this.xsdBaseDir, xsdFileName)], withIncludes);            
+            }catch(error){
+                console.log("------------------------------------------------------------------------------------------------------------------------");
+                console.error("Erro ao converter o arquivo '" + xsdFileName + "'.\n" + error.message + "\n" + error.stack);
+                console.log("------------------------------------------------------------------------------------------------------------------------");
+            }finally{
+                //Limpa cache
+                this.visitor = new DefaultConversionVisitor();
+            }
         }, this);        
         return this.jsonSchemas;
     }

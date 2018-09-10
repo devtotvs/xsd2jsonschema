@@ -107,8 +107,11 @@ class BaseConverter extends Processor {
 			this.workingJsonSchema.addAttributeProperty(qualifiedTypeName.getLocal(), this.createAttributeSchema(node, jsonSchema, xsd, qualifiedTypeName));
 		}
 		if (!this[XsdFile.getNodeName(node)]) {
-			console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
-			return false;
+			//console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
+			throw { 
+					message: "Metodo nao implementado:" + XsdFile.getNodeName(node), 
+					stack: ""
+				  };			
 		} else {
 			const keepProcessing = this[XsdFile.getNodeName(node)](node, jsonSchema, xsd);
 			super.process(node, jsonSchema, xsd);
@@ -539,7 +542,7 @@ class BaseConverter extends Processor {
 				}
 				break;
 			default:
-				console.log(state.name);
+				//console.log(state.name);
 		}
 
 
@@ -842,39 +845,35 @@ class BaseConverter extends Processor {
 
 	enumeration(node, jsonSchema, xsd) {
 		var val = XsdFile.getValueAttr(node);
-		// TODO: id, fixed
+		//DefaultValues
+		var parentElementObj = this.workingJsonSchema;
+		var elementObj = this.workingJsonSchema;
+		var elementProperty = undefined;
 
 		var current = this.getCurrentProperty(this.workingJsonSchema, 1);
-
-		if (current && !this.parsingState.isSchemaBeforeState()) {
+		if (current && !this.parsingState.isSchemaBeforeState()) {			
 			if (current.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
-				var childProp = this.getCurrentProperty(current.obj.items, 1);
-
-				this.handleEnumDescription(childProp.obj, val, node.textContent);
-				this.handleEnum(current.obj.items, val, childProp);
+				elementProperty = this.getCurrentProperty(current.obj.items, 1);
+				parentElementObj = current.obj.items;
 			} else {
+				parentElementObj.type = "string";
+				
 				if (current.haveProperties) {
-					var childProp = this.getCurrentProperty(current.obj, 1);
-
-					this.handleEnumDescription(childProp.obj, val, node.textContent);
-					this.handleEnum(current.obj, val, childProp);
+					elementProperty = this.getCurrentProperty(current.obj, 1);	
 				} else {
-					this.handleEnumDescription(current.obj, val, node.textContent);
-					this.handleEnum(this.workingJsonSchema, val, current);
+					elementProperty = current;
 				}
-
 			}
-		} else {
-			this.handleEnumDescription(this.workingJsonSchema, val, node.textContent);
-			this.handleEnum(this.workingJsonSchema, val);
-		}
+			elementObj = elementProperty.obj;
+		}	
 
+		this.handleEnumDescription(elementObj, val, node.textContent);
+		this.handleEnum(parentElementObj, val, elementProperty);
 
 		return true;
 	}
 
 	handleEnum(schema, value, property) {
-
 		if (property) {
 			property.obj.addEnum(value);
 			this.addProperty(schema, property.name, property.obj, null);
@@ -968,8 +967,17 @@ class BaseConverter extends Processor {
 	}
 
 	//Length x-totvs
+	Lenght(node, jsonSchema, xsd) {
+		this.handleXTotvs(node, "Length");
+	}
+
+	//Length x-totvs
 	Length(node, jsonSchema, xsd) {
 		this.handleXTotvs(node, "Length");
+	}
+	
+	InternalIdName(node, jsonSchema, xsd){
+		//TODO - Verificar implementação desta tag.
 	}
 
 	//Length x-totvs

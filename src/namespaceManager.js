@@ -191,6 +191,10 @@ const builtInTypeConverter_NAME = Symbol();
 		baseJsonSchema.addRequiredAnyOfPropertyByReference(refName, type);
 	}
 
+	mergeTypeReferences(namespaceName, subSchemaList) {		
+		this.namespaces[namespaceName].types = Object.assign(this.namespaces[namespaceName].types,subSchemaList);
+	}
+
 	/**
 	 * This method returns the requested global attribute.  If the attribute exists in the global attribute
 	 * namesapce the attribute is return.  If the attribute does not exist it is created and then returned.

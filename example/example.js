@@ -19,26 +19,38 @@ const ajv = new Ajv({
 const action = process.argv[2];
 
 // Options for example
-const options = {
+var options = {
 	mask: /_\d{4}-\d{2}-\d{2}/,
 	outputDir: "example/generated_jsonschema",
 	baseId: "http://api.totvs.com.br/schema/",
-	xsdBaseDir: "example\\schema",
+	xsdBaseDir: "example\\schema/Event/",
 };
 
-const xsdFilenames = [
+var xsdFilenames = [
 		//"ExampleTypes_2016-01-01.xsd"
 		//"commons_1_000.xsd"
 		//"CustomerVendor_2_005.xsd",
-		"SalesCharge_1_000.xsd"
+		"AccountantAccount_2_002.xsd",
+		"AccountantAccount_2_003.xsd"
+		//"/Event/Order_3_006.xsd"
+		//SalesCharge_1_000.xsd"
 	];
 
 const converter = new Xsd2JsonSchema(options);
+if (action === "convertFolder") {
+	options.xsdBaseDir = process.argv[3];
+	converter.xsdBaseDir = options.xsdBaseDir;
+	xsdFilenames = readFiles(options.xsdBaseDir);
 
-if (action === "convert") {
 	converter.processAllSchemas( {
 		xsdFilenames: xsdFilenames
-	}, false);
+	}, true);
+	converter.writeFiles();
+	converter.dump();
+} if (action === "convert") {
+	converter.processAllSchemas( {
+		xsdFilenames: xsdFilenames
+	}, true);
 	converter.writeFiles();
 	converter.dump();
 } else if (action === "xml-usage") {
@@ -101,3 +113,12 @@ function loadFile(path) {
 	const json = JSON.parse(buf);
 	return json;
 }
+
+function readFiles(dirname) {
+	try{
+		return fs.readdirSync(dirname);
+	}catch(error) {
+		console.log("Erro ao ler pasta de schemas: " + dirname);
+		console.error(error);	
+	}
+  }
