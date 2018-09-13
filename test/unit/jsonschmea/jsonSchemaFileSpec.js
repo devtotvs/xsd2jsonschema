@@ -84,8 +84,8 @@ describe('JsonSchemaFile Test -', function () {
             targetNamespace: xsd.targetNamespace
         });
         expect(jsonSchemaPrimary.filename).toBe('optionalChoice.json');
-        expect(jsonSchemaPrimary.id).toBe('optionalChoice.json');
-        expect(jsonSchemaPrimary.$schema).toEqual('http://json-schema.org/draft-04/schema#');
+        expect(jsonSchemaPrimary.id).toBe('musicOfTheNight\\optionalChoice.json');
+        expect(jsonSchemaPrimary.$schema).toEqual('musicOfTheNight\\optionalChoice.json#');
         expect(jsonSchemaPrimary.targetNamespace).toEqual('http://www.xsd2jsonschema.org/example');
         expect(jsonSchemaPrimary.title).toMatch('This JSON Schema file was generated from optionalChoice.xsd on.*\\.  For more information please see http://www.xsd2jsonschema.org');
         expect(jsonSchemaPrimary.type).toEqual(JsonSchemaTypes.OBJECT);
@@ -390,8 +390,9 @@ describe('JsonSchemaFile Test -', function () {
     it('should return a POJO of this jsonSchema', function () {
         const pojo = fullJsonSchema.getJsonSchema();
         expect(pojo).toEqual({
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            id: 'http://musicOfTheNight/unitTestSchema.json',
+            
+            $schema: 'http:\\musicOfTheNight\\unitTestSchema.json#',
+            id: 'http:\\musicOfTheNight\\unitTestSchema.json',
             title: 'A nice test',
             type: JsonSchemaTypes.OBJECT,
             required: ['everything'],
@@ -474,8 +475,8 @@ describe('JsonSchemaFile Test -', function () {
         }
         const pojo = fullJsonSchema.getJsonSchema();
         expect(pojo).toEqual({
-            $schema: 'http://json-schema.org/draft-04/schema#',
-            id: 'http://musicOfTheNight/unitTestSchema.json',
+            $schema: 'http:\\musicOfTheNight\\unitTestSchema.json#',
+            id: 'http:\\musicOfTheNight\\unitTestSchema.json',
             title: 'A nice test',
             type: JsonSchemaTypes.OBJECT,
             required: ['everything'],

@@ -156,7 +156,7 @@ const builtInTypeConverter_NAME = Symbol();
 		if (type === undefined) {			
 			// Create the type, which will be filled out later as the XSD is processed, and add it to the namespace.
 			this.namespaces[namespace].types[typeName] = new JsonSchemaFile({
-				ref : baseJsonSchema.id + '#' + baseJsonSchema.getSubschemaStr() + '/' + typeName
+				ref : baseJsonSchema.id + '#/definitions' + baseJsonSchema.getSubschemaStr() + '/' + typeName
 			});
 			type = this.namespaces[namespace].types[typeName];
 

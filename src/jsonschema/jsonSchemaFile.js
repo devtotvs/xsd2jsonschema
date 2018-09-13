@@ -153,11 +153,16 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 
 		if (options !== undefined) {
 			if (options.baseFilename !== undefined) {
-				const baseFilename = path.parse(options.baseFilename).name;
+				var fileFullPath = path.parse(options.baseFilename);
+				const baseFilename = fileFullPath.name;
+
+				//Propriedades customizadas
+				this.dir = fileFullPath.dir.indexOf("types") > -1?"/types":"";
+
 				this.filename = baseFilename + '.json';
-				this.id = new URI(options.baseId).filename(this.filename).toString();
+				this.id = new URI(path.join(path.join(options.baseId, this.dir),this.filename)).toString();
 				this.targetNamespace = options.targetNamespace;
-				this.$schema = 'http://json-schema.org/draft-04/schema#';
+				this.$schema = this.id + '#';
 				this.title = `This JSON Schema file was generated from ${options.baseFilename} on ${new Date()}.  For more information please see http://www.xsd2jsonschema.org`;
 				this.type = jsonSchemaTypes.OBJECT;
 			}
@@ -614,6 +619,13 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 					jsonSchema.items[index] = item.getJsonSchema();
 				}, this);
 			} else {
+				if (!this.items["getJsonSchema"]) {
+					//console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
+					throw { 
+							message: "Metodo nao implementado:" + XsdFile.getNodeName(node), 
+							stack: ""
+						  };			
+				}
 				jsonSchema.items = this.items.getJsonSchema();
 			}
 		}

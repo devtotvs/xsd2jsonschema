@@ -155,12 +155,13 @@ class Xsd2JsonSchema {
             }
             if (this.jsonSchemas[uri] === undefined) {
                 var traversal = new DepthFirstTraversal();
-                this.jsonSchemas[uri] = new JsonSchemaFile({
+                var jsonSchemaFile = new JsonSchemaFile({
                     baseFilename: xsd.baseFilename,
                     targetNamespace: xsd.targetNamespace,
                     baseId: this.baseId
                 });
-                traversal.traverse(this.visitor, this.jsonSchemas[uri], xsd);
+                traversal.traverse(this.visitor, jsonSchemaFile, xsd);
+                this.jsonSchemas[uri] =jsonSchemaFile;
             }else{
                 this.visitor.processor.namespaceManager.addNamespace("");//Cria namespace padrão
                 this.visitor.processor.namespaceManager.mergeTypeReferences("",this.jsonSchemas[uri].subSchemas);//efetua merge com os tipos do subschema.
@@ -215,27 +216,67 @@ class Xsd2JsonSchema {
      * default value is '\t'.  This is used as the last parameter to JSON.stringify().
      * @returns {void}
      */
-    writeFile(jsonSchema, directory, spacing) {
-        var dir = directory;
-        var space = spacing
+    writeFile(jsonSchema, directory, spacing, subtype) {        
         if (jsonSchema == undefined) {
             throw new Error('The parameter jsonSchema is required');
-        }
-        if (directory == undefined) {
-            dir = '.';
-        }
+        }        
+        
+        var space = spacing;
         if (spacing == undefined) {
             space = '\t';
         };
 
+        var dir = directory;
+        if (directory == undefined) {
+            dir = '.';
+        }
+        if(jsonSchema.dir)
+        {
+            dir = dir + jsonSchema.dir;
+        }
+
+        try {
+            fs.ensureDirSync(dir);
+        } catch (err) {
+            debug(err);
+        }
       
        // const data = JSON.stringify(  jsonSchema.getJsonSchema(), null, space);
-        const data = JSON.stringify(this.formatSchema(jsonSchema), null, space);
+        const data = JSON.stringify(this.formatSchema(jsonSchema, subtype), null, space);
         const maskedFilename = (this.mask === undefined) ? jsonSchema.filename : jsonSchema.filename.replace(this.mask, '');
         fs.writeFileSync(path.join(dir, maskedFilename), data);
     }
 
-    formatSchema(jsonSchema) {
+    formatSchema(jsonSchema, subtype) {
+        let originSchema = jsonSchema.getJsonSchema();
+        
+        let destinationSchema = { 
+            $schema: originSchema.$schema,           
+            info: {
+                "x-totvs":{}
+            },
+            definitions: {}
+        };        
+       
+        if(originSchema.info){
+            destinationSchema.info = originSchema.info;
+        }
+        destinationSchema.definitions = originSchema.definitions;
+
+        if(originSchema.properties.BusinessContent){
+            destinationSchema.info["x-totvs"].transactionDefinition = 
+            {
+                "subType": subtype,
+                "businessContentType": originSchema.properties.BusinessContent,
+                "returnContentType": originSchema.properties.ReturnContent,
+            };
+        }
+        
+        return destinationSchema;
+    }
+
+
+    /*formatSchema(jsonSchema) {
         let originSchema = jsonSchema.getJsonSchema();
         let propertiesTypes = Object.keys(originSchema.properties);
         let destinationSchema = {
@@ -292,7 +333,7 @@ class Xsd2JsonSchema {
         destinationSchema.components.schemas = properties;
 
         return destinationSchema;
-    }
+    }*/
 
     handleLisOf(obj){
         if(obj.properties){
@@ -317,14 +358,9 @@ class Xsd2JsonSchema {
        
         
     }
-    writeFiles() {
-        try {
-            fs.ensureDirSync(this.outputDir);
-        } catch (err) {
-            debug(err);
-        }
+    writeFiles(subtype) {       
         Object.keys(this.jsonSchemas).forEach(function (uri, index, array) {
-            this.writeFile(this.jsonSchemas[uri], this.outputDir, '  ');
+            this.writeFile(this.jsonSchemas[uri], this.outputDir, '  ',subtype);
         }, this);
     }
 

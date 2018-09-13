@@ -172,6 +172,10 @@ class ParsingState {
 			debug(i + ') ' + this.states[i].name + schema);
 		}
 	}
+
+	getCurrentLevel(){
+		return (this.states.filter(function(o) { return o.name == "element" }).length - 1);
+	}
 }
 
 module.exports = ParsingState;

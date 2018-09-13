@@ -22,18 +22,23 @@ const action = process.argv[2];
 var options = {
 	mask: /_\d{4}-\d{2}-\d{2}/,
 	outputDir: "example/generated_jsonschema",
-	baseId: "http://api.totvs.com.br/schema/",
-	xsdBaseDir: "example\\schema/Event/",
+	baseId: "https://raw.githubusercontent.com/totvs/ttalk-standard-message/master/jsonschema/schemas/",
+	xsdBaseDir: "example/schema/requests/",
 };
 
 var xsdFilenames = [
 		//"ExampleTypes_2016-01-01.xsd"
 		//"commons_1_000.xsd"
-		//"CustomerVendor_2_005.xsd",
-		"AccountantAccount_2_002.xsd",
-		"AccountantAccount_2_003.xsd"
+		//"CustomerVendor_2_004.xsd"
+		
+		//"Bank_1_000.xsd",
+		//"AccountantAccount_2_002.xsd",
+		//"AccountantAccount_2_003.xsd",
 		//"/Event/Order_3_006.xsd"
-		//SalesCharge_1_000.xsd"
+		//"SalesCharge_1_000.xsd"
+
+		"FinancingTrading_1_000.xsd"
+		//"RuralMovement_1_000.xsd"
 	];
 
 const converter = new Xsd2JsonSchema(options);
@@ -45,13 +50,13 @@ if (action === "convertFolder") {
 	converter.processAllSchemas( {
 		xsdFilenames: xsdFilenames
 	}, true);
-	converter.writeFiles();
+	converter.writeFiles(process.argv[4]);
 	converter.dump();
 } if (action === "convert") {
 	converter.processAllSchemas( {
 		xsdFilenames: xsdFilenames
-	}, true);
-	converter.writeFiles();
+	}, false);
+	converter.writeFiles("event");
 	converter.dump();
 } else if (action === "xml-usage") {
 	const visitor = new XmlUsageVisitor();

@@ -568,7 +568,7 @@ class BuiltInTypeConverter {
 		return true;
 	}
 
-	transformType(target, source){
+	transformType(target, source, originalJsonSchema){
 		target.type = source.type;
 		target.format = source.format;
 		target.pattern = source.pattern;
@@ -577,6 +577,11 @@ class BuiltInTypeConverter {
 		target.exclusiveMinimum = source.exclusiveMinimum;
 		target.exclusiveMaximum = source.exclusiveMaximum;
 		target.$ref = source.$ref;
+
+		if(target.$ref && originalJsonSchema)
+		{
+			target.$ref = target.$ref.toString().replace(originalJsonSchema.id,"");
+		}
 	}
 }
 
