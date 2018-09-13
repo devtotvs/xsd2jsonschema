@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:include schemaLocation="../totvsmsg.xsd"/>
+	<xs:include schemaLocation="../types/ListOfInternalId_1_000.xsd"/>
+	<xs:annotation>
+		<xs:appinfo>
+			<MessageDocumentation>
+				<Name>ProductionOrder</Name>
+				<Description>Mensagem para Integração de Ordens de produção</Description>
+			</MessageDocumentation>
+		</xs:appinfo>
+	</xs:annotation>
+	<xs:complexType name="BusinessContentType">
+		<xs:sequence>
+			<xs:element name="ListOfLocalType" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="LocalItemType" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="GridCode" maxOccurs="1" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Código da gride</xs:documentation>
+											<xs:appinfo>
+												<FieldDocumentation product="DATASUL">
+													<Field>clien_financ.cdn_repres</Field>
+													<Required>sim</Required>
+													<Type>integer</Type>
+													<Length>7</Length>
+												</FieldDocumentation>
+												<FieldDocumentation product="RM">
+													<Field>RM.cdn_repres</Field>
+													<Required>sim</Required>
+													<Type>integer</Type>
+													<Length>7</Length>
+												</FieldDocumentation>
+											</xs:appinfo>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:string">
+												<xs:maxLength value="15"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
+									<xs:element name="GridSequence" maxOccurs="1" minOccurs="0">
+										<xs:annotation>
+											<xs:documentation>Grid Sequence</xs:documentation>
+											<xs:appinfo>
+												<FieldDocumentation product="DATASUL">
+													<Field>clien_financ.cdn_repres</Field>
+													<Required>sim</Required>
+													<Type>integer</Type>
+													<Length>7</Length>
+												</FieldDocumentation>
+												<FieldDocumentation product="RM">
+													<Field>RM.cdn_repres</Field>
+													<Required>sim</Required>
+													<Type>integer</Type>
+													<Length>7</Length>
+												</FieldDocumentation>
+											</xs:appinfo>
+										</xs:annotation>
+										<xs:simpleType>
+											<xs:restriction base="xs:integer">
+												<xs:totalDigits value="10"/>
+											</xs:restriction>
+										</xs:simpleType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ListOfGlobalType">
+		<xs:sequence>
+			<xs:element name="GlobalItemType" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="GridCode" maxOccurs="1" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Código da gride</xs:documentation>
+								<xs:appinfo>
+									<FieldDocumentation product="DATASUL">
+										<Field>clien_financ.cdn_repres</Field>
+										<Required>sim</Required>
+										<Type>integer</Type>
+										<Length>7</Length>
+									</FieldDocumentation>
+									<FieldDocumentation product="RM">
+										<Field>RM.cdn_repres</Field>
+										<Required>sim</Required>
+										<Type>integer</Type>
+										<Length>7</Length>
+									</FieldDocumentation>
+								</xs:appinfo>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:maxLength value="15"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="GridSequence" maxOccurs="1" minOccurs="0">
+							<xs:annotation>
+								<xs:documentation>Grid Sequence</xs:documentation>
+								<xs:appinfo>
+									<FieldDocumentation product="DATASUL">
+										<Field>clien_financ.cdn_repres</Field>
+										<Required>sim</Required>
+										<Type>integer</Type>
+										<Length>7</Length>
+									</FieldDocumentation>
+									<FieldDocumentation product="RM">
+										<Field>RM.cdn_repres</Field>
+										<Required>sim</Required>
+										<Type>integer</Type>
+										<Length>7</Length>
+									</FieldDocumentation>
+								</xs:appinfo>
+							</xs:annotation>
+							<xs:simpleType>
+								<xs:restriction base="xs:integer">
+									<xs:totalDigits value="10"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ReturnContentType">
+		<xs:sequence>
+			<xs:element name="ListOfInternalId" type="ListOfInternalIdType" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="BusinessContent" type="BusinessContentType" substitutionGroup="AbstractBusinessContent"/>
+	<xs:element name="ReturnContent" type="ReturnContentType" substitutionGroup="AbstractReturnContent"/>
+</xs:schema>

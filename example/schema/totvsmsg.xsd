@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:complexType name="TOTVSMessageType">
+		<xs:sequence>
+			<xs:element name="MessageInformation" type="MessageInformationType">
+			</xs:element>
+			<xs:choice minOccurs="1">
+				<xs:element name="BusinessMessage" type="BusinessMessageType">
+				</xs:element>
+				<xs:element name="ResponseMessage" type="ResponseMessageType"></xs:element>
+				<xs:element name="ReceiptMessage" type="ReceiptMessageType"></xs:element>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	
+    <xs:element name="TOTVSMessage" type="TOTVSMessageType"></xs:element>
+	
+	<xs:simpleType name="UUIDType">
+		<xs:restriction base="xs:string">
+	        <xs:pattern value="\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"></xs:pattern>
+		</xs:restriction>
+    </xs:simpleType>
+
+	<xs:complexType name="MessageInformationType">
+		<xs:annotation>
+			<xs:documentation>
+				Bloco com informações sobre a origem da mensagem.
+			</xs:documentation>
+		</xs:annotation>
+
+		<xs:sequence>
+			<xs:element name="UUID" type="UUIDType" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Define um identificador universal para esta
+						mensagem. Duas mensagens não podem ter o mesmo
+						UUID e este valor permanece sempre o mesmo, seja
+						no aplicativo que gera a mensagem, seja no que
+						recebe.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Type" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Identifica o tipo de mensagem: a. Business
+						Message: Mensagem “real”, sobre um evento
+						ocorrido (quando for de saída) ou de atualização
+						do produto (quando entrada). Pode ser de dois
+						subtipos (ver atributos da tag BusinessMessage):
+						i. Transaction: Mensagem utilizada para fins de
+						replicação de dados que contém um evento
+						ocorrido no sistema (upsert ou delete). Se
+						recebido, resulta na execução da operação sobre
+						na base de dados. Se Enviado, significa que o
+						sistema de origem está notificando esta
+						operação. Transactions refletem a atividade de
+						uma aplicação (CrUD) tendem a ser utilizadas de
+						forma assíncrona. ii. Request: Mensagem
+						utilizada para solicitar a execução de um
+						procedimento. Este procedimento pode ser uma
+						consulta (getOrders, countCustomers), cálculo
+						(calculateTaxes) ou atualização do banco de
+						dados (updateAverageCost). Requests promovem o
+						compartilhamento de serviços e tendem a ser
+						utilizados de forma síncrona. b. Receipt: Quando
+						a mensagem for recebida de forma assíncrona, o
+						produto devolve um recibo com status de
+						recebimento e com o UUID de rastreabilidade da
+						mensagem dentro do produto que recebeu c.
+						Response: Mensagem retornada pelo processamento
+						da Business Message. Pode trazer apenas o status
+						(OK ou não), a lista de erros (se houver) ou
+						informações relevantes (como número de pedido
+						gerado, por exemplo). Pode ser devolvida na
+						chamada de uma business message (quando
+						síncrono) ou enviada de forma assíncrona.
+					</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="BusinessMessage"></xs:enumeration>
+						<xs:enumeration value="Response"></xs:enumeration>
+						<xs:enumeration value="Receipt"></xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Transaction" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Identifica o nome da transação que esta mensagem
+						contém. Exemplo: Branch.
+					</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="collapse"></xs:whiteSpace>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ContextName" type="xs:string" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Campo opcional que identifica o(s) contexto(s) associado(s)
+						a transação. O contexto pode ser o módulo que gerou a 
+						mensagem, pode identificar a integração entre aplicativos,
+						enfim, pode ser qualquer informação que permita delimitar
+						a mensagem, de modo a orientar o roteamento da mensagem
+						ou o recebimento.
+						Exemplos: Financeiro, Datasul CRM, Manufatura, APS-Logix, etc.						
+					</xs:documentation>
+				</xs:annotation>				
+			</xs:element>
+			<xs:element name="StandardVersion" minOccurs="1" maxOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:pattern value="\d+.\d+"></xs:pattern>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="SourceApplication" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Identifica, dentre os aplicativos integrados,
+						qual instância gerou a mensagem.
+					</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:whiteSpace value="collapse"></xs:whiteSpace>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="CompanyId" type="xs:string" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Representa o id da empresa do usuário que enviou a mensagem.</xs:documentation>
+				</xs:annotation></xs:element>
+			<xs:element name="BranchId" type="xs:string" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Representa o id do estabelecimento do usuário que enviou a mensagem.</xs:documentation>
+				</xs:annotation></xs:element>
+			<xs:element name="UserId" type="xs:string" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Representa o id do usuário que enviou a mensagem. </xs:documentation>
+				</xs:annotation></xs:element>
+				<xs:element name="Enterprise" type="xs:string" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Representa, para o Protheus, o valor da empresa no sistema </xs:documentation>
+				</xs:annotation></xs:element>
+				<xs:element name="BusinessUnit" type="xs:string" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Representa, para o Protheus, o valor da unidade de negócios </xs:documentation>
+				</xs:annotation></xs:element>
+			<xs:element name="CompanySharingMode"  minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Indica o modo de compartilhamento no nível da Empresa. C para Compartilhada e E para Exclusiva.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="C"></xs:enumeration>
+						<xs:enumeration value="E"></xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="BusinessUnitySharingMode"  minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Indica o modo de compartilhamento no nível da Unidade de Negócio. C para Compartilhada e E para Exclusiva.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="C"></xs:enumeration>
+						<xs:enumeration value="E"></xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="BranchSharingMode"  minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Indica o modo de compartilhamento no nível da Filial. C para Compartilhada e E para Exclusiva.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="C"></xs:enumeration>
+						<xs:enumeration value="E"></xs:enumeration>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="Product" maxOccurs="1" minOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Define qual o produto que originou esta
+						mensagem. Não confundir o produto com a
+						instância (atributo de TOTVSMessage).
+					</xs:documentation>
+				</xs:annotation>
+
+				<xs:complexType>
+					<xs:attribute name="name" type="xs:string" use="required">
+						<xs:annotation>
+							<xs:documentation>
+								Nome do Produto.
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+					<xs:attribute name="version" type="xs:string" use="optional">
+						<xs:annotation>
+							<xs:documentation>
+								Versão do Produto
+							</xs:documentation>
+						</xs:annotation>
+					</xs:attribute>
+				</xs:complexType>
+			</xs:element>
+
+
+
+			<xs:element name="GeneratedOn" type="xs:dateTime" minOccurs="1" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>
+						Registra a data e hora em que a mensagem foi
+						gerada. Observe que este campo é do tipo
+						datetime e que é sugerido que se acrescente a
+						identificação do fuso horário. Caso a informação
+						de fuso não esteja presente, os sistemas
+						entenderão o horário como GMT-0.
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+
+			<xs:element name="DeliveryType" minOccurs="0" maxOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Forma de entrega da mensagem que foi gerada. Será definida por quem entrega a mensagem.</xs:documentation>
+				</xs:annotation>
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Sync"></xs:enumeration>
+						<xs:enumeration value="Async"></xs:enumeration>
+						<xs:enumeration value="sync"></xs:enumeration>
+						<xs:enumeration value="async"></xs:enumeration>						
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+
+
+		</xs:sequence>
+		<xs:attribute name="version" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="\d+.\d+.\d+"></xs:pattern>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		
+	</xs:complexType>
+
+	<xs:complexType name="BusinessMessageType">
+        <xs:sequence>
+        	<xs:choice minOccurs="1">
+        		<xs:element name="BusinessEvent">
+        			<xs:complexType>
+        				<xs:sequence>
+        					<xs:element name="Entity" type="xs:string"
+        						minOccurs="1" maxOccurs="1">
+        						<xs:annotation>
+        							<xs:documentation>
+        								Nome da entidade que gerou o
+        								evento.
+        							</xs:documentation>
+        						</xs:annotation>
+        					</xs:element>
+        					<xs:element name="Event" minOccurs="1"  maxOccurs="1" type="EventType">
+        						<xs:annotation>
+        							<xs:documentation>
+        								Evento ocorrido.
+        							</xs:documentation>
+        						</xs:annotation>
+
+        					</xs:element>
+        					<xs:element name="Identification"
+        						minOccurs="1">
+        						<xs:complexType>
+        							<xs:sequence>
+        								<xs:element name="key"
+        									maxOccurs="unbounded">
+        									<xs:annotation>
+        										<xs:documentation>
+        											Campos da chave
+        											primária da
+        											transação. Atributo
+        											Name define o nome
+        											do campo, enquanto
+        											que o conteúdo do
+        											elemento representa
+        											o valor do campo.
+        										</xs:documentation>
+        									</xs:annotation>
+        									<xs:complexType>
+        										<xs:simpleContent>
+        											<xs:extension
+        												base="xs:string">
+        												<xs:attribute
+        													name="name" type="xs:string" use="required" />
+        											</xs:extension>
+        										</xs:simpleContent>
+        									</xs:complexType>
+        								</xs:element>
+        							</xs:sequence>
+        						</xs:complexType>
+        					</xs:element>
+        				</xs:sequence>
+        			</xs:complexType>
+        		</xs:element>
+        		<xs:element name="BusinessRequest">
+        			<xs:complexType>
+        				<xs:sequence>
+        					<xs:element name="Operation"
+        						type="xs:string" minOccurs="1">
+        					</xs:element>
+        				</xs:sequence>
+        			</xs:complexType>
+        		</xs:element>
+        	</xs:choice>
+
+        	<xs:element ref="AbstractBusinessContent" minOccurs="1" maxOccurs="1"></xs:element>
+
+        </xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ResponseMessageType">
+		<xs:sequence>
+			<xs:element name="ReceivedMessage"
+				type="ReceivedMessageType" minOccurs="1">
+			</xs:element>
+			<xs:element name="ProcessingInformation" minOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ProcessedOn"
+							type="xs:dateTime" minOccurs="1">
+						</xs:element>
+						<xs:element name="Status" minOccurs="1">
+							<xs:simpleType>
+								<xs:restriction base="xs:string">
+									<xs:enumeration value="OK"></xs:enumeration>
+									<xs:enumeration value="ERROR"></xs:enumeration>
+									<xs:enumeration value="ok"></xs:enumeration>
+									<xs:enumeration value="error"></xs:enumeration>									
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:element>
+						<xs:element name="ListOfMessages"
+							minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="Message"
+										minOccurs="1" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:simpleContent>
+												<xs:extension
+													base="xs:string">
+													<xs:attribute
+														name="type" use="required">
+														<xs:simpleType>
+															<xs:restriction
+																base="xs:string">
+																<xs:enumeration
+																	value="ERROR">
+																</xs:enumeration>
+																<xs:enumeration
+																	value="WARNING">
+																</xs:enumeration>
+																<xs:enumeration
+																	value="INFORMATION">
+																</xs:enumeration>
+																<xs:enumeration
+																	value="error">
+																</xs:enumeration>
+																<xs:enumeration
+																	value="warning">
+																</xs:enumeration>
+																<xs:enumeration
+																	value="information">
+																</xs:enumeration>																
+															</xs:restriction>
+														</xs:simpleType>
+													</xs:attribute>
+													<xs:attribute
+														name="code" type="xs:string" use="required">
+													</xs:attribute>
+												</xs:extension>
+											</xs:simpleContent>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element ref="AbstractReturnContent" minOccurs="0"></xs:element>
+
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ReceiptMessageType">
+    	<xs:sequence>
+    		<xs:element name="ReceivedMessage" minOccurs="1" type="ReceivedMessageType"></xs:element>
+    		<xs:element name="ReceiptData" minOccurs="1">
+    			<xs:complexType>
+    				<xs:sequence>
+    					<xs:element name="ReceivedOn"
+    						type="xs:dateTime" minOccurs="1">
+    					</xs:element>
+    				</xs:sequence>
+    			</xs:complexType></xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="ReceivedMessageType">
+    	<xs:all>
+    		<xs:element minOccurs="1" name="SentBy" type="xs:string"></xs:element>
+    		<xs:element minOccurs="1" name="UUID" type="UUIDType"></xs:element>
+       		<xs:element name="Event" type="EventType" minOccurs="0"></xs:element>
+   
+    		<xs:element minOccurs="0" name="MessageContent"
+    			type="xs:string">
+    		</xs:element>
+    	</xs:all>
+    </xs:complexType>
+    
+
+    <xs:element name="AbstractBusinessContent" abstract="true"></xs:element>
+    <xs:element name="AbstractReturnContent"   abstract="true"></xs:element>
+
+    <xs:complexType name="TOTVSBatchType">
+    	<xs:sequence>
+    		<xs:element name="Created">
+    			<xs:complexType>
+    				<xs:attribute name="by" type="xs:string">
+                        <xs:annotation>
+                        	<xs:documentation>Definição da aplicação que criou o pacote de mensagens. Ver tag SourceApplication em TOTVSMessage/MessageInformation.</xs:documentation>
+                        </xs:annotation>
+    				</xs:attribute>
+    				<xs:attribute name="on"
+    					type="xs:dateTime">
+                        <xs:annotation>
+                        	<xs:documentation>Informação sobre a data em que o pacote foi montado.</xs:documentation>
+                        </xs:annotation>
+    				</xs:attribute>
+    			</xs:complexType></xs:element>
+    		<xs:element name="MessagePayload">
+    			<xs:complexType>
+    				<xs:sequence>
+    					<xs:element name="Message"
+    						type="xs:string" minOccurs="0" maxOccurs="unbounded">
+    					</xs:element>
+    				</xs:sequence>
+    			</xs:complexType></xs:element>
+    	</xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="TOTVSBatch" type="TOTVSBatchType"></xs:element>
+
+    <xs:simpleType name="EventType">
+        <xs:annotation>
+        	<xs:documentation>Evento associado a mensagem. Em um envio, identifica o evento. Em um retorno, identifica o evento gerador que originou aquela mensagem de resposta.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+    		<xs:enumeration value="upsert"></xs:enumeration>
+    		<xs:enumeration value="delete"></xs:enumeration>
+    	</xs:restriction>
+    </xs:simpleType>
+</xs:schema>

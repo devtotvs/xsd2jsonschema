@@ -95,6 +95,8 @@ out
 coverage
 package-lock.json
 
-example/schema/*
+example/schema/events
+example/schema/requests
+example/schema/types
 example/schema/ExampleTypes_2016-01-01.xsd
 
