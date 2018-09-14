@@ -57,6 +57,10 @@ const properties = [
 	'info'
 ]
 
+function myTrim(x) {
+    return x.replace(/^\/+|\/+$/gm,'');
+}
+
 /**
  * JSON Schema file operations.  This is based on the JSON Schema meta-schema located at http://json-schema.org/draft-04/schema#.  
  * 
@@ -65,6 +69,7 @@ const properties = [
  */
 
 class JsonSchemaFileV4 extends PropertyDefinable {
+	
 	/**
 	 * 
 	 * @param {Object} options - And object used to override default options.
@@ -160,8 +165,15 @@ class JsonSchemaFileV4 extends PropertyDefinable {
 				this.dir = fileFullPath.dir.indexOf("types") > -1?"/types":"";
 
 				this.filename = baseFilename + '.json';
-				this.id = new URI(path.join(path.join(options.baseId, this.dir),this.filename)).toString();
-				this.targetNamespace = options.targetNamespace;
+				this.id = [options.baseId,this.dir,this.filename].map((s) =>s.replace(/^\/+|\/+$/gm,'')).filter((x)=> x && x !== "").join('/');
+				if(options.targetNamespace){
+					console.log('***********************  WARNING - Namespace  ****************************');
+					console.log('File: ' + baseFilename);					
+					console.log('Arquivo possui namespace customizado!');
+					console.log('*************************************************************************');				
+				}
+				this.targetNamespace = "";
+				//this.targetNamespace = options.targetNamespace;
 				this.$schema = this.id + '#';
 				this.title = `This JSON Schema file was generated from ${options.baseFilename} on ${new Date()}.  For more information please see http://www.xsd2jsonschema.org`;
 				this.type = jsonSchemaTypes.OBJECT;

@@ -126,6 +126,18 @@ class BaseConverter extends Processor {
 		return false;
 	}
 
+	Request(node, jsonSchema, xsd) {
+		// Tag ignorada
+		// Esta tag Request existe erroneamente na documentação da mensagem TWSImportExport_1_000
+		return false;
+	}
+	
+	Request(node, jsonSchema, xsd) {
+		// Tag ignorada
+		// Esta tag Request existe erroneamente na documentação da mensagem TWSImportExport_1_000
+		return false;
+	}
+	
 	all(node, jsonSchema, xsd) {
 		// TODO: id, minOccurs, maxOccurs
 		// (TBD)
@@ -190,19 +202,19 @@ class BaseConverter extends Processor {
 	FieldDocumentation(node, jsonSchema, xsd) {
 
 		var productAttr = XsdFile.getAttrValue(node, XsdAttributes.PRODUCT);
-		var prop = this.getCurrentPropertyAut(this.workingJsonSchema);
+		var prop = this.getCurrentPropertyAut(jsonSchema);
 
-		/*if(prop){
-			if(prop.name === prop.parentProp.name){
-				prop = prop.parentProp;
-			}
-		}*/
+		//Caso seja uma lista, a tag X-Totvs existe no Type e não no Item.
+		if(prop.level === prop.parentProp.level){
+			prop = prop.parentProp;
+		}
 
 		var obj = new XTotvs();
 
 		var list = [];
 		obj.product = productAttr;
-		if (prop) {
+		//Verifica se encontrou a Prop e se esta prop não é um workingSchema, pois se for tem que adicionar em subSchemas e não em properties
+		if (prop && prop.level > 0) {
 			if (prop.name && prop.name.toLowerCase().startsWith(LISTOF.toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
 				var childProp = this.getCurrentProperty(prop.obj.items, 1);
 
@@ -214,7 +226,7 @@ class BaseConverter extends Processor {
 				this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
 
 			} else {
-				if (prop.haveProperties) {
+				/*if (prop.haveProperties) {
 					var childProp = this.getCurrentProperty(prop.obj, 1);
 
 					list = Object.assign([], childProp.obj.xtotvs);
@@ -223,12 +235,12 @@ class BaseConverter extends Processor {
 					childProp.obj.xtotvs = list;
 
 					this.addProperty(prop.obj, childProp.name, childProp.obj, null);
-				} else {
+				} else {*/
 					list = Object.assign([], prop.obj.xtotvs);
 					list.push(obj);
 					prop.obj.xtotvs = list;
 					this.addProperty(prop.parent, prop.name, prop.obj, null);
-				}
+				//}
 			}
 		} else {
 			if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
@@ -513,6 +525,7 @@ class BaseConverter extends Processor {
 				jsonSchema.addSubSchema(nameAttr, this.workingJsonSchema);
 				if (nameAttr.toLowerCase().startsWith(LISTOF.toLowerCase())) {
 					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
+					this.workingJsonSchema.items = this.getNewItems();
 				} else {
 					this.workingJsonSchema.type = jsonSchemaTypes.OBJECT;
 				}
@@ -657,10 +670,19 @@ class BaseConverter extends Processor {
 	}
 
 	addProperty(targetSchema, propertyName, customType, minOccursAttr) {
+		if (!targetSchema["addRequired"]) {
+			//console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
+			throw { 
+					message: "Metodo propertyName nao implementado: " + propertyName, 
+					stack: ""
+				  };			
+		}
+
 		/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
 		if (minOccursAttr === XsdAttributeValues.REQUIRED || minOccursAttr > 0) {
 			targetSchema.addRequired(propertyName);
 		}
+		
 		targetSchema.setProperty(propertyName, customType);
 	}
 
@@ -681,6 +703,14 @@ class BaseConverter extends Processor {
 		return maxItems;
 	}
 
+	getNewItems(){
+		var result = new JsonSchemaFile();		
+		result.isAutomaticItem = true;
+		result.type = jsonSchemaTypes.OBJECT;
+		
+		return result;
+	}
+
 	addPropertyAsArray(targetSchema, propertyName, customType, minOccursAttr, maxOccursAttr) {
 		var arraySchema = new JsonSchemaFile();
 		arraySchema.type = jsonSchemaTypes.ARRAY;
@@ -691,7 +721,11 @@ class BaseConverter extends Processor {
 		}
 		arraySchema.minItems = parseInt(min);
 		arraySchema.maxItems = this.formatMaxItemsProperty(max);
-		arraySchema.items = customType.get$RefToSchema();
+		if(customType.ref == undefined && customType.$ref == undefined){
+			arraySchema.items = this.getNewItems();			 
+		}else{
+			arraySchema.items = customType.get$RefToSchema();
+		}
 
 		// Por definição, caso o retorno for 1 item, deve ser enviado um array de uma entidade e não uma entidade
 		//if (min > 0) {
@@ -769,83 +803,62 @@ class BaseConverter extends Processor {
 	}
 
 	handleElementLocalinSequence(propertyName, customType, minOccursAttr, maxOccursAttr, isArray, jsonSchema) {
-		let prop = this.getCurrentPropertyAut(this.workingJsonSchema,this.parsingState.getCurrentLevel());		
-
-		//OLD - Nao Funciona...
-		//let prop = this.getCurrentProperty(this.workingJsonSchema,1);
+		let prop = this.getCurrentPropertyAut(jsonSchema,this.parsingState.getCurrentLevel());		
 
 		if (isArray) {
-			if (!this.parsingState.isSchemaBeforeState() && prop) {
-				if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase()) && prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
-					// var item = {};
-					// if (this.isObjectWithProperties(prop.obj.items.properties)) {
-					// 	item = prop.obj.items;
-					// } else {
-					// 	item = new JsonSchemaFile();
-					// }
-					//this.addProperty(item, propertyName, customType, minOccursAttr);
-					
-					//OLD - Nao Funciona...
-					/*prop.obj.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
-					prop.obj.addItems(customType.get$RefToSchema());
-					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);*/
-
-					//Manipula o parent, que é o elemento e não o "Tipo do Item"
-					var elementListOf = prop.obj;
-					var parentListOf = prop.parent;					
-					elementListOf.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
-					elementListOf.addItems(customType.get$RefToSchema());
-					if(!parentListOf)
-						var t= "";
-					this.addProperty(parentListOf, prop.name, elementListOf, minOccursAttr);
-				} else {
-					this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
+			if (!propertyName.toLowerCase().startsWith((LISTOF).toLowerCase()) && prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {					
+				if(prop.obj.type !== jsonSchemaTypes.ARRAY){
+					prop = prop.parentProp;
+				}
+				//Manipula o parent, que é o elemento e não o "Tipo do Item"
+				var elementListOf = prop.obj;
+				var parentListOf = prop.parent;					
+				elementListOf.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
+				elementListOf.addItems(customType.get$RefToSchema());
+				
+				if(!parentListOf){
+					throw new Exception("Não encontrou o parentListOf. Property:" + propertyName);
 				}
 
+				this.updateElementInSchema(jsonSchema, parentListOf, elementListOf, prop.name, minOccursAttr);
+				
 			} else {
+				this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
+			}
+		} else {			
+			if (prop && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
+				var elementTypeListOf = prop.obj;
+				var elementListOf = prop.parent;
+				var parentListOf = prop.parentProp.parent;	
+				
+				if(!parentListOf){
+					throw new Exception("Não encontrou o parentListOf. Property:" + propertyName);
+				}
 
-				if (this.workingJsonSchema.type == jsonSchemaTypes.ARRAY) {
-					let propSchema = this.getCurrentProperty(jsonSchema, 2);
-					this.workingJsonSchema.items = customType.get$RefToSchema();
-					this.workingJsonSchema.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
-					if (propSchema) {
-						this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
-					} else {
-						this.addProperty(jsonSchema, propertyName, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
-					}
-				}else {
-					this.addPropertyAsArray(this.workingJsonSchema, propertyName, customType, minOccursAttr, maxOccursAttr);
-				}
+				this.addProperty(elementTypeListOf, propertyName, customType, minOccursAttr);
+				elementListOf.addItems(elementTypeListOf);
+
+				this.updateElementInSchema(jsonSchema, parentListOf, elementListOf, prop.name, minOccursAttr);
+				
+			} else if (prop){
+				this.addProperty(prop.obj, propertyName, customType, minOccursAttr);
+			}else
+			{
+				throw new Exception("Não deveria entrar aqui. Property:" + propertyName);
+				//this.addProperty(this.workingJsonSchema.items, propertyName, customType, minOccursAttr);
 			}
-		} else {
-			if (!this.parsingState.isSchemaBeforeState()) {				
-				if (prop && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
-					//OLD - Nao Funciona...
-					/*let item = {};
-					if (this.isObjectWithProperties(prop.obj.items.properties)) {
-						item = prop.obj.items;
-					} else {
-						item = new JsonSchemaFile();
-					}
-					this.addProperty(item, propertyName, customType, minOccursAttr);
-					prop.obj.addItems(item);
-					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr);
-					*/
-					var elementTypeListOf = prop.obj;
-					var elementListOf = prop.parent;
-					var parentListOf = prop.parentProp.parent;	
-					this.addProperty(elementTypeListOf, propertyName, customType, minOccursAttr);
-					elementListOf.addItems(elementTypeListOf);
-					this.addProperty(parentListOf, prop.name, elementListOf, minOccursAttr);
-				} else if (prop){
-					this.addProperty(prop.obj, propertyName, customType, minOccursAttr);
-				}else
-				{
-					this.addProperty(this.workingJsonSchema.items, propertyName, customType, minOccursAttr);
-				}
-			}else {
-				this.addProperty(this.workingJsonSchema, propertyName, customType, minOccursAttr);
+		}
+	}
+
+	updateElementInSchema(jsonSchema, parent, current, propertyName, minOccurs){
+		if(parent === jsonSchema){
+			parent.addSubSchema(propertyName, current);
+			/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
+			if (minOccurs!== undefined && (minOccurs === XsdAttributeValues.REQUIRED || minOccurs > 0)) {
+				parent.addRequired(propertyName);
 			}
+		}else{
+			this.addProperty(parent, propertyName, current);
 		}
 	}
 
@@ -981,7 +994,12 @@ class BaseConverter extends Processor {
 			case XsdElements.SIMPLE_TYPE:
 				throw new Error('extension() needs to be impemented within simpleType!');
 			default:
-				throw new Error('extension() called from within unexpected parsing state!');
+			console.log('***********************  WARNING - Tag Extension  ****************************');
+			console.log('File: ' + xsd.baseFilename);
+			console.log('Parent Element: ' + this.getCurrentPropertyAut(jsonSchema).name);
+			console.log('XSDs com atributos devem ser convertidos manualmente, analisando qual seu novo formato correto, conforme sua particularidade!');
+			console.log('*************************************************************************');				
+			return false;
 		}
 		return true;
 	}
@@ -995,17 +1013,17 @@ class BaseConverter extends Processor {
 
 	//Field x-totvs
 	Field(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "Field");
+		this.handleXTotvs(node, "Field", jsonSchema);
 	}
 
 	//Required x-totvs
 	Required(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "Required");
+		this.handleXTotvs(node, "Required", jsonSchema);
 	}
 
 	//Type x-totvs
 	Type(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "Type");
+		this.handleXTotvs(node, "Type", jsonSchema);
 	}
 
 	//Description x-totvs
@@ -1022,21 +1040,21 @@ class BaseConverter extends Processor {
 				this.handleProductInformationItems(node, jsonSchema, "note");
 				break;
 			case XsdElements.FIELD_DOCUMENTATION:
-				this.handleXTotvs(node, "note");
+				this.handleXTotvs(node, "note", jsonSchema);
 				break;
 			default:
-				this.handleXTotvs(node, field);
+				this.handleXTotvs(node, field, jsonSchema);
 		}
 	}
 
 	//Length x-totvs
 	Lenght(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "Length");
+		this.handleXTotvs(node, "Length", jsonSchema);
 	}
 
 	//Length x-totvs
 	Length(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "Length");
+		this.handleXTotvs(node, "Length", jsonSchema);
 	}
 	
 	InternalIdName(node, jsonSchema, xsd){
@@ -1045,19 +1063,24 @@ class BaseConverter extends Processor {
 
 	//Length x-totvs
 	Blabla(node, jsonSchema, xsd) {
-		this.handleXTotvs(node, "blabla");
+		this.handleXTotvs(node, "blabla", jsonSchema);
 	}
 
 	
 
 
-	handleXTotvs(node, field) {
+	handleXTotvs(node, field,jsonSchema) {
 
 		// if (this.parsingState.inFieldDocumentation()) {
 		var xtotvs = {}
 		var qtd = 0;
-		var prop = this.getCurrentPropertyAut(this.workingJsonSchema);
-				
+		var prop = this.getCurrentPropertyAut(jsonSchema);
+		
+		//Caso seja uma lista, a tag X-Totvs existe no Type e não no Item.
+		if(prop.level === prop.parentProp.level){
+			prop = prop.parentProp;
+		}
+
 		if (prop) {
 			/*if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
 				var childProp = this.getCurrentProperty(prop.obj.items, 1);
@@ -1361,10 +1384,13 @@ class BaseConverter extends Processor {
 		var len = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
 
-		var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
+		//var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
+		var currentProp = this.getCurrentPropertyAut(jsonSchema)
 
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
-			if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
+			currentProp.obj.maxLength = len;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);
+			/*if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 				childProp.obj.maxLength = len;
@@ -1379,15 +1405,15 @@ class BaseConverter extends Processor {
 					currentProp.obj.maxLength = len;
 					this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
 				}
-			}
+			}*/
 		} else {			
-			if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
+			/*if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
 				childProp = this.getCurrentProperty(this.workingJsonSchema.items, 1);
 				childProp.maxLength = len;	
 				this.addProperty(this.workingJsonSchema.items, childProp.name, childProp.obj, null);		
-			}else{
+			}else{*/
 				this.workingJsonSchema.maxLength = len;
-			}		
+			//}		
 		}
 
 		return true;
@@ -1508,15 +1534,15 @@ class BaseConverter extends Processor {
 
 	}
 
-	getCurrentPropertyAut(rootElement,currentLevel){		
-		var result = this.getCurrentProp(rootElement);
+	getCurrentPropertyAut(schemaJsonFile,currentLevel){		
+		var result = this.getSchemaProp(schemaJsonFile);
 		
 		if(result)
 		{
 			result = this.doGetCurrentProperty(result);
 		}
 		
-		if(currentLevel && result){
+		if(currentLevel !== undefined && result){
 			while(result.level > currentLevel){
 				result = result.parentProp;
 			}
@@ -1533,6 +1559,34 @@ class BaseConverter extends Processor {
 		return currentProperty;
 	}
 
+	getSchemaProp(schemaJsonFile){
+		let schemas = schemaJsonFile.subSchemas;
+		let schemaNames = Object.keys(schemas);
+
+		var rootProperty = {
+			obj: schemaJsonFile,				
+			parent: undefined,
+			parentProp: undefined,
+			level: -1,
+			name: "",
+			haveProperties: true
+		};
+
+		if (schemaNames.length > 0) {
+			let currentProperty = Object.assign(new JsonSchemaFile(), schemas[schemaNames[schemaNames.length - 1]] || schemas[schemaNames[0]]);
+			let propName = schemaNames[schemaNames.length - 1] || schemaNames[0];
+
+			return {
+				obj: currentProperty,				
+				parent: schemaJsonFile,
+				parentProp: rootProperty,
+				level: rootProperty.level+1,
+				name: propName,
+				haveProperties: this.isObjectWithProperties(currentProperty.properties) || currentProperty.type === jsonSchemaTypes.ARRAY || ( currentProperty.items && this.isObjectWithProperties(currentProperty.items.properties))
+			};
+		}
+	}
+
 	getCurrentProp(rootElement, rootProperty) 
 	{
 		if(!rootProperty)
@@ -1541,7 +1595,7 @@ class BaseConverter extends Processor {
 				obj: rootElement,				
 				parent: undefined,
 				parentProp: undefined,
-				level: 0,
+				level: -1,
 				name: "",
 				haveProperties: this.isObjectWithProperties(rootElement.properties) || ( rootElement.items && this.isObjectWithProperties(rootElement.items.properties))
 			}
@@ -1553,7 +1607,7 @@ class BaseConverter extends Processor {
 		if(rootElement.type === jsonSchemaTypes.ARRAY || (rootElement.items && this.isObjectWithProperties(rootElement.items.properties)))
 		{
 			//item = rootElement.items;
-			var increment = rootProperty.name.toLowerCase().startsWith((LISTOF).toLowerCase());
+			var increment = rootProperty.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && !rootElement.items.isAutomaticItem;
 			return {
 				obj: rootElement.items,				
 				parent: rootElement,
@@ -1643,7 +1697,8 @@ class BaseConverter extends Processor {
 			case XsdElements.COMPLEX_TYPE:
 				if (isArray) {
 					this.workingJsonSchema.type = jsonSchemaTypes.ARRAY;
-					this.workingJsonSchema.minItems = minOccursAttr;
+					this.workingJsonSchema.minItems = parseInt(minOccursAttr);
+					this.workingJsonSchema.items = this.getNewItems();
 
 					if (maxOccursAttr === XsdAttributeValues.UNBOUNDED || maxOccursAttr === undefined) {
 						this.workingJsonSchema.maxItems = undefined
@@ -1668,8 +1723,13 @@ class BaseConverter extends Processor {
 					this.workingJsonSchema.anyOf.push(emptySchema);
 					this.parsingState.pushSchema(this.workingJsonSchema);
 					this.workingJsonSchema = optionalSequenceSchema;
-				} else {
-					throw new Error('Required nested sequences need to be implemented!');
+				} else {					
+					console.log('***********************  WARNING - Sequence  ****************************');
+					console.log('File: ' + xsd.baseFilename);
+					console.log('Parent Element: ' + this.getCurrentPropertyAut(jsonSchema).name);
+					console.log('Existe sequence internamente a outro sequence!');
+					console.log('Como comportamento padrão, esta tag foi somente ignorada.');
+					console.log('*************************************************************************');				
 				}
 				break;
 			default:

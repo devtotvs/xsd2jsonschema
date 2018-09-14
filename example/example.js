@@ -33,12 +33,21 @@ var xsdFilenames = [
 		
 		//"Bank_1_000.xsd",
 		//"AccountantAccount_2_002.xsd",
-		//"AccountantAccount_2_003.xsd",
-		//"/Event/Order_3_006.xsd"
+		//"AccountantAccount_2_003.xsd",		
 		//"SalesCharge_1_000.xsd"
 
-		"FinancingTrading_1_000.xsd"
-		//"RuralMovement_1_000.xsd"
+		//"Item_3_008.xsd","Order_3_006.xsd", "CustomerVendor_2_006.xsd", "Project_2_000.xsd", "Financing_1_002.xsd", "Invoice_3_013.xsd"
+
+		"DeleteBranch_1_000.xsd"
+
+		//"TaxGroup_1_000.xsd"
+		//"Order_3_006.xsd",
+		
+		//"EquipmentsCost_1_000.xsd",//Tag Sequence internamente a outra tag Sequence (no meio do type)		
+		//"RuralMovement_1_000.xsd", //tipos aninhados
+		//"DeliverySchedule_1_000.xsd" //Array sendo definido com o sequence tendo "maxOccurs" ao invés do Element
+
+		//"FinancingTrading_1_000.xsd", //ListOf que não é array
 	];
 
 const converter = new Xsd2JsonSchema(options);
