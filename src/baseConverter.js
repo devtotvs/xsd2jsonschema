@@ -921,30 +921,19 @@ class BaseConverter extends Processor {
 
 	enumeration(node, jsonSchema, xsd) {
 		var val = XsdFile.getValueAttr(node);
-		//DefaultValues
-		var parentElementObj = this.workingJsonSchema;
-		var elementObj = this.workingJsonSchema;
-		var elementProperty = undefined;
 
-		var current = this.getCurrentProperty(this.workingJsonSchema, 1);
-		if (current && !this.parsingState.isSchemaBeforeState()) {			
-			if (current.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
-				elementProperty = this.getCurrentProperty(current.obj.items, 1);
-				parentElementObj = current.obj.items;
-			} else {
-				parentElementObj.type = "string";
-				
-				if (current.haveProperties) {
-					elementProperty = this.getCurrentProperty(current.obj, 1);	
-				} else {
-					elementProperty = current;
-				}
-			}
-			elementObj = elementProperty.obj;
-		}	
+		var prop = this.getCurrentPropertyAut(jsonSchema);
 
-		this.handleEnumDescription(elementObj, val, node.textContent);
-		this.handleEnum(parentElementObj, val, elementProperty);
+		//Manipula o elemento enumerable e o pai.
+		var elementEnumerable = prop.obj;
+		var parentElement = prop.parent;					
+		
+		//Altera o tipo base para string, independente do que seja.
+		let restrictiontype = this.namespaceManager.getType("xs:string", jsonSchema, xsd).get$RefToSchema();
+		this.namespaceManager.builtInTypeConverter.transformType(elementEnumerable, restrictiontype);
+		
+		this.handleEnumDescription(elementEnumerable, val, node.textContent);
+		this.handleEnum(parentElement, val, prop);
 
 		return true;
 	}
