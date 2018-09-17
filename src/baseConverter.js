@@ -1341,8 +1341,16 @@ class BaseConverter extends Processor {
 		// TODO: id, fixed
 		var len = XsdFile.getNumberValueAttr(node);
 
-		this.workingJsonSchema.maxLength = len;
-		this.workingJsonSchema.minLength = len;
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
+		
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
+			currentProp.obj.maxLength = len;
+			currentProp.obj.minLength = len;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+		} else {
+			this.workingJsonSchema.maxLength = len;
+			this.workingJsonSchema.minLength = len;
+		}
 		return true;
 	}
 
@@ -1355,9 +1363,16 @@ class BaseConverter extends Processor {
 	maxExclusive(node, jsonSchema, xsd) {
 		var val = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
 
-		this.workingJsonSchema.maximum = val;
-		this.workingJsonSchema.exlusiveMaximum = true;
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
+			currentProp.obj.maximum = val;
+			currentProp.obj.exlusiveMaximum = true;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+		} else {			
+			this.workingJsonSchema.maximum = val;
+		}
+		
 		return true;
 	}
 
@@ -1365,7 +1380,15 @@ class BaseConverter extends Processor {
 		var val = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
 
-		this.workingJsonSchema.maximum = val; // inclusive is the JSON Schema default
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
+
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
+			currentProp.obj.maximum = val;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+		} else {			
+			this.workingJsonSchema.maximum = val;
+		}
+
 		return true;
 	}
 
@@ -1373,36 +1396,13 @@ class BaseConverter extends Processor {
 		var len = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
 
-		//var currentProp = this.getCurrentProperty(this.workingJsonSchema, 1)
-		var currentProp = this.getCurrentPropertyAut(jsonSchema)
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
 
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.maxLength = len;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);
-			/*if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
-				var childProp = this.getCurrentProperty(currentProp.obj.items, 1)
-
-				childProp.obj.maxLength = len;
-				this.addProperty(currentProp.obj.items, childProp.name, childProp.obj, null);
-			} else {
-				if (currentProp.haveProperties) {
-					var childProp = this.getCurrentProperty(currentProp.obj, 1)
-
-					childProp.obj.maxLength = len;
-					this.addProperty(currentProp.obj, childProp.name, childProp.obj, null);
-				} else {
-					currentProp.obj.maxLength = len;
-					this.addProperty(this.workingJsonSchema, currentProp.name, currentProp.obj, null);
-				}
-			}*/
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
 		} else {			
-			/*if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
-				childProp = this.getCurrentProperty(this.workingJsonSchema.items, 1);
-				childProp.maxLength = len;	
-				this.addProperty(this.workingJsonSchema.items, childProp.name, childProp.obj, null);		
-			}else{*/
-				this.workingJsonSchema.maxLength = len;
-			//}		
+			this.workingJsonSchema.maxLength = len;
 		}
 
 		return true;
@@ -1412,24 +1412,47 @@ class BaseConverter extends Processor {
 		var val = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
 
-		this.workingJsonSchema.minimum = val;
-		this.workingJsonSchema.exclusiveMinimum = true;
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
+
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
+			currentProp.obj.minimum = val;
+			currentProp.obj.exclusiveMinimum = true;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+		} else {			
+			this.workingJsonSchema.minimum = val;
+			this.workingJsonSchema.exclusiveMinimum = true;
+		}
+		
 		return true;
 	}
 
 	minInclusive(node, jsonSchema, xsd) {
 		var val = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
 
-		this.workingJsonSchema.minimum = val; // inclusive is the JSON Schema default
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
+			currentProp.obj.minimum = val;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+		} else {			
+			this.workingJsonSchema.minimum = val;
+		}
+
 		return true;
 	}
 
 	minLength(node, jsonSchema, xsd) {
 		var len = XsdFile.getNumberValueAttr(node);
 		// TODO: id, fixed
+		var currentProp = this.getCurrentPropertyAut(jsonSchema);
 
-		this.workingJsonSchema.minLength = len;
+		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
+			currentProp.obj.minLength = len;
+			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+		} else {			
+			this.workingJsonSchema.minLength = len;
+		} 
+
 		return true;
 	}
 
