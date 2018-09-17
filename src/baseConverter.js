@@ -205,7 +205,7 @@ class BaseConverter extends Processor {
 		var prop = this.getCurrentPropertyAut(jsonSchema);
 
 		//Caso seja uma lista, a tag X-Totvs existe no Type e não no Item.
-		if(prop.level === prop.parentProp.level){
+		if(prop.isItems){
 			prop = prop.parentProp;
 		}
 
@@ -225,22 +225,11 @@ class BaseConverter extends Processor {
 
 				this.addProperty(prop.obj.items, childProp.name, childProp.obj, null);
 
-			} else {
-				/*if (prop.haveProperties) {
-					var childProp = this.getCurrentProperty(prop.obj, 1);
-
-					list = Object.assign([], childProp.obj.xtotvs);
-
-					list.push(obj);
-					childProp.obj.xtotvs = list;
-
-					this.addProperty(prop.obj, childProp.name, childProp.obj, null);
-				} else {*/
-					list = Object.assign([], prop.obj.xtotvs);
-					list.push(obj);
-					prop.obj.xtotvs = list;
-					this.addProperty(prop.parent, prop.name, prop.obj, null);
-				//}
+			} else {				
+				list = Object.assign([], prop.obj.xtotvs);
+				list.push(obj);
+				prop.obj.xtotvs = list;
+				this.addProperty(prop.parent, prop.name, prop.obj, null);
 			}
 		} else {
 			if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
@@ -257,10 +246,6 @@ class BaseConverter extends Processor {
 				this.workingJsonSchema.xtotvs = list;
 			}
 		}
-
-
-		// }
-
 
 		return true;
 	}
@@ -669,6 +654,22 @@ class BaseConverter extends Processor {
 		return true;
 	}
 
+	updateElementInSchema(jsonSchema, parent, current, propertyName, minOccurs, isArrayItems){
+		if(parent === jsonSchema){
+			parent.addSubSchema(propertyName, current);
+			/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
+			if (minOccurs!== undefined && (minOccurs === XsdAttributeValues.REQUIRED || minOccurs > 0)) {
+				parent.addRequired(propertyName);
+			}
+		}else{
+			if(isArrayItems){
+				parent.addItems(current);
+			}else{
+				this.addProperty(parent, propertyName, current);
+			}
+		}
+	}
+
 	addProperty(targetSchema, propertyName, customType, minOccursAttr) {
 		if (!targetSchema["addRequired"]) {
 			//console.log("Metodo nao implementado:" + XsdFile.getNodeName(node));
@@ -820,8 +821,7 @@ class BaseConverter extends Processor {
 					throw new Exception("Não encontrou o parentListOf. Property:" + propertyName);
 				}
 
-				this.updateElementInSchema(jsonSchema, parentListOf, elementListOf, prop.name, minOccursAttr);
-				
+				this.updateElementInSchema(jsonSchema, parentListOf, elementListOf, prop.name, minOccursAttr);				
 			} else {
 				this.addPropertyAsArray(prop.obj, propertyName, customType, minOccursAttr, maxOccursAttr);
 			}
@@ -847,18 +847,6 @@ class BaseConverter extends Processor {
 				throw new Exception("Não deveria entrar aqui. Property:" + propertyName);
 				//this.addProperty(this.workingJsonSchema.items, propertyName, customType, minOccursAttr);
 			}
-		}
-	}
-
-	updateElementInSchema(jsonSchema, parent, current, propertyName, minOccurs){
-		if(parent === jsonSchema){
-			parent.addSubSchema(propertyName, current);
-			/* Para a Totvs quando 	não houver minOccurs é para considerar como não obrigatório*/
-			if (minOccurs!== undefined && (minOccurs === XsdAttributeValues.REQUIRED || minOccurs > 0)) {
-				parent.addRequired(propertyName);
-			}
-		}else{
-			this.addProperty(parent, propertyName, current);
 		}
 	}
 
@@ -1066,36 +1054,25 @@ class BaseConverter extends Processor {
 		var prop = this.getCurrentPropertyAut(jsonSchema);
 		
 		//Caso seja uma lista, a tag X-Totvs existe no Type e não no Item.
-		if(prop.level === prop.parentProp.level){
+		if(prop.isItems){
 			prop = prop.parentProp;
 		}
 
 		if (prop) {
-			/*if (prop.name && prop.name.toLowerCase().startsWith((LISTOF).toLowerCase()) && this.isObjectWithProperties(prop.obj.items.properties)) {
-				var childProp = this.getCurrentProperty(prop.obj.items, 1);
-
-				qtd = childProp.obj.xtotvs.length;
-				xtotvs = childProp.obj.xtotvs[qtd - 1];
-
-			} else {
+			if(prop.level>0){
 				qtd = prop.obj.xtotvs.length;
 				xtotvs = prop.obj.xtotvs[qtd - 1];
-			}
-		} else {
-			if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
-				prop = this.getCurrentProperty(this.workingJsonSchema.items, 1)
-				qtd = prop.obj.xtotvs.length;
-				xtotvs = prop.obj.xtotvs[qtd - 1];
+				if(!xtotvs){
+					throw new Error("Erro ao parsear a tag X-Totvs! Tag:" + node.toString());
+				}
 			}else{
 				qtd = this.workingJsonSchema.xtotvs.length;
 				xtotvs = this.workingJsonSchema.xtotvs[qtd - 1];
-			}*/
+				if(!xtotvs){
+					throw new Error("Erro ao parsear a tag X-Totvs! Tag:" + node.toString());
+				}
+			}
 			
-			//Consideando que o novo método obteve a propriedade correta, somente utiliza a mesma
-			qtd = prop.obj.xtotvs.length;
-			xtotvs = prop.obj.xtotvs[qtd - 1];
-			if(!xtotvs)
-				var x = "";
 			xtotvs[field] = utils.handleText(node.textContent);
 		}else{
 			throw new Error("Erro ao parsear a tag X-Totvs! Tag:" + node.toString());
@@ -1346,7 +1323,8 @@ class BaseConverter extends Processor {
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.maxLength = len;
 			currentProp.obj.minLength = len;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);
 		} else {
 			this.workingJsonSchema.maxLength = len;
 			this.workingJsonSchema.minLength = len;
@@ -1368,7 +1346,7 @@ class BaseConverter extends Processor {
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.maximum = val;
 			currentProp.obj.exlusiveMaximum = true;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);
 		} else {			
 			this.workingJsonSchema.maximum = val;
 		}
@@ -1384,7 +1362,7 @@ class BaseConverter extends Processor {
 
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.maximum = val;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);			
 		} else {			
 			this.workingJsonSchema.maximum = val;
 		}
@@ -1400,7 +1378,8 @@ class BaseConverter extends Processor {
 
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.maxLength = len;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);
 		} else {			
 			this.workingJsonSchema.maxLength = len;
 		}
@@ -1417,7 +1396,7 @@ class BaseConverter extends Processor {
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.minimum = val;
 			currentProp.obj.exclusiveMinimum = true;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);			
 		} else {			
 			this.workingJsonSchema.minimum = val;
 			this.workingJsonSchema.exclusiveMinimum = true;
@@ -1433,7 +1412,7 @@ class BaseConverter extends Processor {
 
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.minimum = val;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);	
 		} else {			
 			this.workingJsonSchema.minimum = val;
 		}
@@ -1448,7 +1427,7 @@ class BaseConverter extends Processor {
 
 		if (currentProp && !this.parsingState.isSchemaBeforeState()) {
 			currentProp.obj.minLength = len;
-			this.addProperty(currentProp.parent, currentProp.name, currentProp.obj, null);			
+			this.updateElementInSchema(jsonSchema, currentProp.parent, currentProp.obj, currentProp.name, undefined, currentProp.isItems);		
 		} else {			
 			this.workingJsonSchema.minLength = len;
 		} 
@@ -1500,10 +1479,17 @@ class BaseConverter extends Processor {
 			this.workingJsonSchema = this.workingJsonSchema.extend(this.namespaceManager.getType(baseTypeName, jsonSchema, xsd));
 			return true;
 		} else {
-			let currentProp = this.getCurrentProperty(this.workingJsonSchema, 1);
+			let currentProp = this.getCurrentPropertyAut(jsonSchema);
 
 			if (currentProp && !this.parsingState.isSchemaBeforeState()) {
-				if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
+
+				if(currentProp.isItems){
+					this.handleRestrictionType(currentProp.parent, baseAttr, null, xsd);
+				}
+				else{
+					this.handleRestrictionType(currentProp.parent, baseAttr, currentProp, xsd);
+				}
+				/*if (currentProp.name.toLowerCase().startsWith((LISTOF).toLowerCase())) {
 					let childProp = this.getCurrentProperty(currentProp.obj.items, 1)
 
 					this.handleRestrictionType(currentProp.obj.items, baseAttr, childProp, xsd);
@@ -1516,7 +1502,7 @@ class BaseConverter extends Processor {
 						this.handleRestrictionType(this.workingJsonSchema, baseAttr, currentProp, xsd);
 					}
 
-				}
+				}*/
 			} else {
 				if(this.workingJsonSchema.items.properties && Object.keys(this.workingJsonSchema.items.properties).length > 0){
 					currentProp = this.getCurrentProperty(this.workingJsonSchema.items, 1);					
@@ -1626,6 +1612,7 @@ class BaseConverter extends Processor {
 				parentProp: rootProperty,
 				level: rootProperty.level + increment,
 				name: rootProperty.name,
+				isItems: true,
 				haveProperties: this.isObjectWithProperties(rootElement.items.properties) || rootElement.items.type === jsonSchemaTypes.ARRAY
 			}
 		}
@@ -1643,6 +1630,7 @@ class BaseConverter extends Processor {
 				parentProp: rootProperty,
 				level: rootProperty.level+1,
 				name: propName,
+				isItems: false,
 				haveProperties: this.isObjectWithProperties(currentProp.properties) || currentProp.type === jsonSchemaTypes.ARRAY || ( currentProp.items && this.isObjectWithProperties(currentProp.items.properties))
 			};
 		}
