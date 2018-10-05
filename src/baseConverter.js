@@ -737,7 +737,7 @@ class BaseConverter extends Processor {
 					//this.addProperty(item, propertyName, customType, minOccursAttr);
 					prop.obj.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
 					prop.obj.addItems(customType.get$RefToSchema());
-					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr, maxOccursAttr);
+					this.addProperty(this.workingJsonSchema, prop.name, prop.obj, minOccursAttr);
 
 
 				} else {
@@ -751,9 +751,9 @@ class BaseConverter extends Processor {
 					this.workingJsonSchema.items = customType.get$RefToSchema();
 					this.workingJsonSchema.maxItems = this.formatMaxItemsProperty(maxOccursAttr);
 					if (propSchema) {
-						this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
+						this.addProperty(jsonSchema, propSchema.name, this.workingJsonSchema, minOccursAttr);
 					} else {
-						this.addProperty(jsonSchema, propertyName, this.workingJsonSchema, minOccursAttr, maxOccursAttr);
+						this.addProperty(jsonSchema, propertyName, this.workingJsonSchema, minOccursAttr);
 					}
 
 
